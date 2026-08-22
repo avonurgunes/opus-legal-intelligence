@@ -233,7 +233,8 @@ KURALLAR:
 - Yeni hukuki politika icat etme.
 - Geçmiş Opus metnini körü körüne kopyalama; mevcut sözleşmeye uyarla.
 - Mevcut hüküm varsa action=REPLACE_PARAGRAPH ve anchor_text sözleşmeden birebir kısa bir parça olsun.
-- Koruyucu hüküm tamamen eksikse uygun mevcut madde ardından eklenebiliyorsa APPEND_AFTER; güvenilir anchor yoksa APPEND_END.
+- Koruyucu hüküm tamamen eksikse NOT_FOUND diye bırakma: mutlaka yeni hüküm üret. Sözleşmede konu bakımından en uygun mevcut maddeyi anchor seç ve APPEND_AFTER kullan. APPEND_END yalnız gerçekten uygun bölüm bulunamıyorsa son çaredir.
+- Eksik hükmün ekleneceği yeri konu bütünlüğüne göre seç: ücret/ödeme hükümleri ücret bölümüne; mali hak/telif hükümleri mali haklar bölümüne; fesih/cezai şart hükümleri ilgili fesih/ceza bölümüne; vergi/damga vergisi diğer hükümler/vergi bölümüne.
 - replacement_text sadece sözleşmeye girecek nihai madde/paragraf metni olsun.
 - Pazarlık gücü sadece sertlik düzeyini belirler.
 - Yanıt yalnız geçerli JSON.
@@ -288,7 +289,7 @@ st.markdown("""
 <div class="opus-hero">
   <div class="opus-kicker">OPUS • PRIVATE COUNSEL SYSTEM</div>
   <h1 style="margin:.2rem 0 .35rem 0">OPUS LEGAL INTELLIGENCE</h1>
-  <div style="color:#aaa59b">Contract intelligence • Negotiation strategy • Revision memory</div>
+  <div style="color:#aaa59b">Contract intelligence • Negotiation strategy • Revision memory • Word redline</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -399,7 +400,7 @@ if result:
     if uploaded and uploaded.name.lower().endswith(".docx"):
         st.divider()
         st.header("Word Revizyon Motoru")
-        st.caption("Seçtiğin bulgular için OLI önce Opus Revision Library'yi kullanarak metin önerir. Sen metni değiştirebilir, sonra Word'e işletebilirsin.")
+        st.caption("OLI mevcut hükümleri revize eder; eksik koruyucu hükümleri uygun bölüme ekler. Word biçimi mümkün olduğunca korunur ve değişiklik yazarı Av. Onur Güneş olarak işlenir.")
 
         if st.button("✍️ Revizyon Metinlerini Hazırla", use_container_width=True):
             if not selectable:
@@ -438,7 +439,7 @@ if result:
                     revised_bytes, applied, skipped = apply_revisions_to_docx(
                         st.session_state["original_bytes"],
                         edited,
-                        author="Opus Legal Intelligence"
+                        author="Av. Onur Güneş"
                     )
                     st.session_state["revised_docx"] = revised_bytes
                     st.session_state["applied_revisions"] = applied
@@ -469,4 +470,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Rule Library:** {len(RULES)} kontrol noktası")
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
 
-st.caption("OLI v0.3 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI v0.4 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")

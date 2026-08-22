@@ -19,13 +19,31 @@ def _set_space_preserve(node):
     node.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
 
 
-def _tracked_run(tag: str, text: str, change_id: int, author: str):
+def _first_run_properties(paragraph):
+    """Copy the first visible run formatting so inserted text inherits font/size/etc."""
+    for r in paragraph._p.findall(qn("w:r")):
+        rPr = r.find(qn("w:rPr"))
+        if rPr is not None:
+            return deepcopy(rPr)
+    # Also inspect tracked runs if the source already contains redlines.
+    for change_tag in ("w:ins", "w:del"):
+        for change in paragraph._p.findall(qn(change_tag)):
+            for r in change.findall(qn("w:r")):
+                rPr = r.find(qn("w:rPr"))
+                if rPr is not None:
+                    return deepcopy(rPr)
+    return None
+
+
+def _tracked_run(tag: str, text: str, change_id: int, author: str, rPr=None):
     change = OxmlElement(tag)
     change.set(qn("w:id"), str(change_id))
     change.set(qn("w:author"), author)
     change.set(qn("w:date"), datetime.now(timezone.utc).isoformat())
 
     r = OxmlElement("w:r")
+    if rPr is not None:
+        r.append(deepcopy(rPr))
     t_tag = "w:delText" if tag == "w:del" else "w:t"
     t = OxmlElement(t_tag)
     _set_space_preserve(t)
@@ -44,35 +62,44 @@ def _clear_paragraph_content(paragraph):
 
 def replace_paragraph_tracked(paragraph, new_text: str, change_id: int, author: str):
     old_text = paragraph.text
+    rPr = _first_run_properties(paragraph)
     _clear_paragraph_content(paragraph)
     p = paragraph._p
     if old_text:
-        p.append(_tracked_run("w:del", old_text, change_id, author))
+        p.append(_tracked_run("w:del", old_text, change_id, author, rPr))
         change_id += 1
-    p.append(_tracked_run("w:ins", new_text, change_id, author))
+    p.append(_tracked_run("w:ins", new_text, change_id, author, rPr))
     return change_id + 1
 
 
 def insert_after_tracked(paragraph, new_text: str, change_id: int, author: str):
     new_p = OxmlElement("w:p")
-    # Preserve paragraph style/numbering where sensible.
     pPr = paragraph._p.find(qn("w:pPr"))
     if pPr is not None:
         new_p.append(deepcopy(pPr))
-    new_p.append(_tracked_run("w:ins", new_text, change_id, author))
+    rPr = _first_run_properties(paragraph)
+    new_p.append(_tracked_run("w:ins", new_text, change_id, author, rPr))
     paragraph._p.addnext(new_p)
     return change_id + 1
 
 
 def append_end_tracked(doc, new_text: str, change_id: int, author: str):
+    # Last meaningful paragraph is the formatting donor.
+    donor = next((p for p in reversed(doc.paragraphs) if p.text.strip()), None)
     p = doc.add_paragraph()
+    if donor is not None:
+        pPr = donor._p.find(qn("w:pPr"))
+        if pPr is not None:
+            p._p.insert(0, deepcopy(pPr))
+        rPr = _first_run_properties(donor)
+    else:
+        rPr = None
     _clear_paragraph_content(p)
-    p._p.append(_tracked_run("w:ins", new_text, change_id, author))
+    p._p.append(_tracked_run("w:ins", new_text, change_id, author, rPr))
     return change_id + 1
 
 
 def _all_paragraphs(doc):
-    # Main document paragraphs plus table-cell paragraphs.
     items = list(doc.paragraphs)
     for table in doc.tables:
         for row in table.rows:
@@ -87,14 +114,11 @@ def find_best_paragraph(doc, anchor_text: str):
         return None, 0.0
 
     paragraphs = _all_paragraphs(doc)
-
-    # Exact/contains first.
     for p in paragraphs:
         txt = _norm(p.text)
         if anchor in txt or (txt and txt in anchor and len(txt) > 25):
             return p, 1.0
 
-    # Fuzzy fallback.
     best_p, best_score = None, 0.0
     for p in paragraphs:
         txt = _norm(p.text)
@@ -109,12 +133,11 @@ def find_best_paragraph(doc, anchor_text: str):
 def apply_revisions_to_docx(
     original_bytes: bytes,
     revisions: list[dict],
-    author: str = "Opus Legal Intelligence",
+    author: str = "Av. Onur Güneş",
 ):
     doc = Document(BytesIO(original_bytes))
     change_id = 1000
-    applied = []
-    skipped = []
+    applied, skipped = [], []
 
     for rev in revisions:
         action = (rev.get("action") or "REPLACE_PARAGRAPH").upper()
@@ -144,5 +167,4 @@ def apply_revisions_to_docx(
 
     bio = BytesIO()
     doc.save(bio)
-    bio.seek(0)
     return bio.getvalue(), applied, skipped
