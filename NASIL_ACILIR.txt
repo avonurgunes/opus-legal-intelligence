@@ -1,0 +1,11 @@
+OPUS LEGAL INTELLIGENCE v0.1 — WINDOWS
+
+1) Bu klasoru bilgisayariniza cikarin.
+2) OLI_AC.bat dosyasina cift tiklayin.
+3) Ilk acilista gerekli paketler otomatik kurulur; sonraki acilislar daha hizlidir.
+4) Tarayici otomatik olarak http://localhost:8501 adresinde acilir.
+
+NOT:
+- Bilgisayarda Python 3.11+ kurulu olmalidir.
+- Python yoksa OLI_AC.bat bunu size soyleyecektir.
+- Bu surum yerel prototiptir ve henuz AI sozlesme analizi yapmaz.
