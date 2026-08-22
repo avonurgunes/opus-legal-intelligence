@@ -1,0 +1,192 @@
+{
+  "library_id": "OLI_REVISION_LIBRARY",
+  "version": "0.1",
+  "profile": "ACTOR_TV_MAINSTREAM",
+  "purpose": "OLI'nin revizyon önerisini sıfırdan yazmak yerine Opus'un doğrulanmış revizyon yaklaşımı ve geçmiş revize metinleri üzerinden üretmesi.",
+  "engine_rules": [
+    "Geçmişte revize edilmemiş bir hüküm, Opus tarafından kabul edilmiş sayılmaz.",
+    "Revision Library, Rule Library'nin hukuki değerlendirmesini değiştirmez; yalnızca önerilen metnin nasıl yazılacağını besler.",
+    "Mevcut sözleşmenin taraf tanımları, proje adı, madde numarası, terminolojisi ve dil yapısı mümkün olduğunca korunur.",
+    "Kaynak revizyon birebir kopyalanmaz; mevcut hükme uyarlanır.",
+    "Pazarlık gücü hukuki riski değiştirmez; revizyonun sertlik seviyesini etkileyebilir.",
+    "Gerçek revize dosyalardan çıkarılan örnekler ile kullanıcı tarafından açıkça onaylanan standartlar ayrı provenance alanlarında tutulur."
+  ],
+  "revision_modes": {
+    "MINIMUM": "En kritik korumayı ekle; pazarlık alanını minimum kullan.",
+    "STANDARD": "Opus'un normal revizyon pozisyonu.",
+    "STRONG": "Pazarlık gücü yüksek oyuncu için daha koruyucu revizyon."
+  },
+  "entries": [
+    {
+      "rule_id": "OLI-TV-004",
+      "title": "Yeniden çekim",
+      "instruction": "Tam bölümün veya rolün esaslı biçimde yeniden icrası isteniyorsa ek ücret mekanizması getir.",
+      "preferred_drafting": "Yeniden çekimin kapsamını ayır: teknik/ufak tekrar ile bölümün veya rolün yeniden icrası aynı kabul edilmesin; esaslı tekrar ayrıca ücretlendirilsin.",
+      "mode": {
+        "MINIMUM": "Tam bölüm tekrarında ek ücret.",
+        "STANDARD": "Esaslı yeniden çekim/tam bölüm tekrarında ek oyunculuk ücreti.",
+        "STRONG": "Oyuncunun kusuru dışındaki esaslı tekrarların tamamı ayrıca ücretlendirilir."
+      },
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-005",
+      "title": "Fiziksel görünüm",
+      "instruction": "Sınırsız görünüm kontrolünü 'esaslı değişiklik' standardına daralt ve oyuncu onayına bağla.",
+      "preferred_drafting": "Saç, kilo, yüz, stil ve benzeri fiziksel özelliklerde esaslı değişiklik oyuncunun önceden yazılı onayına tabi olsun.",
+      "mode": {
+        "MINIMUM": "Esaslı değişiklikler için onay.",
+        "STANDARD": "Esaslı fiziksel değişiklik + sağlık güvenliği + yazılı onay.",
+        "STRONG": "Rol gereği değişiklikler dahi önceden mutabakat ve sağlık sınırı içinde."
+      },
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-006",
+      "title": "Tanıtım / PR",
+      "instruction": "Tanıtım katılımını oyuncunun program uygunluğu ile sınırla; şehir dışı/yurt dışı giderleri Yapımcıya yükle.",
+      "preferred_drafting": "OYUNCU'nun program uygunluğu gözetilir; ulaşım, konaklama, transfer ve gerekli seyahat giderleri YAPIMCI tarafından karşılanır.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-008",
+      "title": "Kişisel / siyasi açıklamalar",
+      "instruction": "Tercihen çıkar; çıkarılamıyorsa proje, gizlilik ve doğrudan itibar zararı ile sınırlı dar bir hükme dönüştür.",
+      "preferred_drafting": "Oyuncunun genel kişisel/siyasi ifade alanını yasaklayan hüküm yerine yalnız proje gizliliği ve somut sözleşmesel yükümlülük ihlalini düzenle.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-017",
+      "title": "Oyuncu cezai şartı",
+      "instruction": "Cezai şartı mümkün olduğunca düşür; örneğin Yapımcı 10 bölüm isterse Opus karşı teklifi 2 bölüm seviyesinden açabilir.",
+      "preferred_drafting": "Her bir ihlal başına tekrarlanan ve sınırsız zarar talepleriyle birleşen cezai şartı daralt; cezayı esaslı ihlal/fesih haliyle ilişkilendir.",
+      "mode": {
+        "MINIMUM": "Tekrarlanan ceza ve sınırsız yan talepleri kaldır.",
+        "STANDARD": "Cezayı yaklaşık 2 bölüm ücreti seviyesine çek.",
+        "STRONG": "Cezai şartı kaldır; mümkün değilse yalnız kasıt/ağır ihlal ve düşük üst sınır."
+      },
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "source_note": "Revize NKBI sözleşmesinde 2 (iki) kat Oyunculuk Bedeli formülasyonu görülmektedir.",
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-018",
+      "title": "Ajans sorumluluğu",
+      "instruction": "AJANS oyuncunun edimlerini garanti etmesin; azami gayret standardı kullan. Mali sorumluluk yalnız AJANS'ın kendi ihlalinden doğan fesihle ve o tarihe kadar aldığı bedelle sınırlandırılsın.",
+      "preferred_drafting": "AJANS, OYUNCU'nun yükümlülüklerini yerine getirmesi için azami gayret sarf eder. AJANS'ın mali sorumluluğu, yalnız kendi ihlalinden kaynaklanan fesih halinde ve fesih tarihine kadar bu proje kapsamında tahsil ettiği komisyon/bedel ile sınırlıdır.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "source_note": "MOTTO revize dosyasında 'azami gayret' ve o zamana kadar elde edilen kendi komisyonu ile bağlantılı sorumluluk dili kullanılmıştır.",
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-022",
+      "title": "Yapımın askıya alınması",
+      "instruction": "Oyuncunun ücretsiz fakat projeye bağlı bırakıldığı askı hükmünü revize et.",
+      "preferred_drafting": "Askının sebebi ve azami süresi belirli olsun; oyuncunun ücret ve başka projelerde çalışma durumu açıkça düzenlensin.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-023",
+      "title": "Yapım yarıda kalırsa",
+      "instruction": "Gerçekleştirilen çalışmanın karşılığını koru.",
+      "preferred_drafting": "Yapımın durması, sona ermesi veya bölümün yayınlanmaması, OYUNCU'nun fiilen gerçekleştirdiği çalışmalar bakımından ücret hakkını ortadan kaldırmaz.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-024",
+      "title": "Ürün yerleştirme",
+      "instruction": "Pasif görünüm ile aktif kullanım/senaryo entegrasyonunu ayır.",
+      "preferred_drafting": "OYUNCU'nun aktif ürün/marka kullanımı, marka mesajı vermesi veya senaryo entegrasyonu ayrıca mutabakat ve ek ücrete tabi olsun.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-025",
+      "title": "Üçüncü kişi reklamı",
+      "instruction": "Proje tanıtımı dışındaki marka reklam kullanımını ayrı izne bağla.",
+      "preferred_drafting": "OYUNCU'nun adı, görüntüsü ve sesi Dizi'nin tanıtımı dışında üçüncü kişi/marka reklamında ancak önceden yazılı onay ve ayrıca belirlenecek ücret karşılığında kullanılabilir.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-027",
+      "title": "Meslek birliği telifleri",
+      "instruction": "Meslek birliklerinden doğacak telifleri geniş mali hak devrinin dışında tut.",
+      "preferred_drafting": "OYUNCU'nun ilgili meslek birlikleri ve mevzuat kapsamında doğmuş/doğacak telif ve benzeri hakları işbu devir kapsamında değildir.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-029",
+      "title": "Ödeme vadesi",
+      "instruction": "Yayın +90 gibi vadeleri mümkünse yayın +30 veya yayın +45'e indir.",
+      "preferred_drafting": "Oyunculuk bedeli, ilgili bölümün ilk yayın tarihini takip eden en geç 30/45 gün içinde ödenir.",
+      "mode": {
+        "MINIMUM": "Yayın +45",
+        "STANDARD": "Yayın +30 veya +45",
+        "STRONG": "Yayın +10/+30 veya çekim/yayın bağımsız daha erken kesin vade."
+      },
+      "provenance": [
+        "USER_CONFIRMED_STANDARD"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-030",
+      "title": "Yayınlanmayan bölüm",
+      "instruction": "Çekimi tamamlanan bölümün ücretini yayın şartından bağımsız koru.",
+      "preferred_drafting": "OYUNCU'nun çekimlerini tamamladığı bölümün herhangi bir nedenle yayınlanmaması, söz konusu bölüme ilişkin Oyunculuk Bedeli'ne hak kazanmasını engellemez.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "rule_id": "OLI-TV-STAMP",
+      "title": "Damga vergisi",
+      "instruction": "Damga vergisinin tamamı Yapımcı tarafından ödensin.",
+      "preferred_drafting": "İşbu Sözleşmenin imzalanması sebebi ile doğacak damga vergisi de dâhil olmak üzere her türlü vergi ve diğer giderler YAPIMCI tarafından karşılanacaktır.",
+      "provenance": [
+        "USER_CONFIRMED_STANDARD",
+        "PAIRED_CONTRACT_REVISION"
+      ],
+      "confidence": "HIGH"
+    }
+  ]
+}
