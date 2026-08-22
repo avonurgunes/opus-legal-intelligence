@@ -21,12 +21,10 @@ def _set_space_preserve(node):
 
 
 def _first_run_properties(paragraph):
-    """Copy the first visible run formatting so inserted text inherits font/size/etc."""
     for r in paragraph._p.findall(qn("w:r")):
         rPr = r.find(qn("w:rPr"))
         if rPr is not None:
             return deepcopy(rPr)
-    # Also inspect tracked runs if the source already contains redlines.
     for change_tag in ("w:ins", "w:del"):
         for change in paragraph._p.findall(qn(change_tag)):
             for r in change.findall(qn("w:r")):
@@ -36,12 +34,40 @@ def _first_run_properties(paragraph):
     return None
 
 
+def _body_run_properties(paragraph):
+    """Inherit font/size etc. but never force newly drafted body text to bold."""
+    rPr = _first_run_properties(paragraph)
+    if rPr is None:
+        return None
+    for tag in ("w:b", "w:bCs"):
+        el = rPr.find(qn(tag))
+        if el is not None:
+            rPr.remove(el)
+    return rPr
+
+
+def _word_timestamp():
+    # Word commonly displays the literal revision clock from w:date.  Use Istanbul
+    # wall-clock time without an offset to avoid the previous 3-hour UTC shift.
+    return datetime.now(ZoneInfo("Europe/Istanbul")).replace(tzinfo=None).isoformat(timespec="seconds")
+
+
+def _plain_run(text: str, rPr=None):
+    r = OxmlElement("w:r")
+    if rPr is not None:
+        r.append(deepcopy(rPr))
+    t = OxmlElement("w:t")
+    _set_space_preserve(t)
+    t.text = text
+    r.append(t)
+    return r
+
+
 def _tracked_run(tag: str, text: str, change_id: int, author: str, rPr=None):
     change = OxmlElement(tag)
     change.set(qn("w:id"), str(change_id))
     change.set(qn("w:author"), author)
-    change.set(qn("w:date"), datetime.now(ZoneInfo("Europe/Istanbul")).isoformat())
-
+    change.set(qn("w:date"), _word_timestamp())
     r = OxmlElement("w:r")
     if rPr is not None:
         r.append(deepcopy(rPr))
@@ -61,16 +87,38 @@ def _clear_paragraph_content(paragraph):
             p.remove(child)
 
 
+def _tokens(text: str):
+    # Keep whitespace attached as tokens so Word redline remains readable.
+    return re.findall(r"\s+|[\wÇĞİÖŞÜçğıöşü]+|[^\w\s]", text or "", flags=re.UNICODE)
+
+
 def replace_paragraph_tracked(paragraph, new_text: str, change_id: int, author: str):
+    """Minimal redline: preserve equal text, track only changed fragments."""
     old_text = paragraph.text
-    rPr = _first_run_properties(paragraph)
+    rPr = _body_run_properties(paragraph)
+    old_tokens, new_tokens = _tokens(old_text), _tokens(new_text)
+    sm = SequenceMatcher(None, old_tokens, new_tokens, autojunk=False)
     _clear_paragraph_content(paragraph)
     p = paragraph._p
-    if old_text:
-        p.append(_tracked_run("w:del", old_text, change_id, author, rPr))
-        change_id += 1
-    p.append(_tracked_run("w:ins", new_text, change_id, author, rPr))
-    return change_id + 1
+
+    for op, i1, i2, j1, j2 in sm.get_opcodes():
+        old_piece = "".join(old_tokens[i1:i2])
+        new_piece = "".join(new_tokens[j1:j2])
+        if op == "equal":
+            if new_piece:
+                p.append(_plain_run(new_piece, rPr))
+        elif op == "delete":
+            if old_piece:
+                p.append(_tracked_run("w:del", old_piece, change_id, author, rPr)); change_id += 1
+        elif op == "insert":
+            if new_piece:
+                p.append(_tracked_run("w:ins", new_piece, change_id, author, rPr)); change_id += 1
+        elif op == "replace":
+            if old_piece:
+                p.append(_tracked_run("w:del", old_piece, change_id, author, rPr)); change_id += 1
+            if new_piece:
+                p.append(_tracked_run("w:ins", new_piece, change_id, author, rPr)); change_id += 1
+    return change_id
 
 
 def insert_after_tracked(paragraph, new_text: str, change_id: int, author: str):
@@ -78,21 +126,20 @@ def insert_after_tracked(paragraph, new_text: str, change_id: int, author: str):
     pPr = paragraph._p.find(qn("w:pPr"))
     if pPr is not None:
         new_p.append(deepcopy(pPr))
-    rPr = _first_run_properties(paragraph)
+    rPr = _body_run_properties(paragraph)
     new_p.append(_tracked_run("w:ins", new_text, change_id, author, rPr))
     paragraph._p.addnext(new_p)
     return change_id + 1
 
 
 def append_end_tracked(doc, new_text: str, change_id: int, author: str):
-    # Last meaningful paragraph is the formatting donor.
     donor = next((p for p in reversed(doc.paragraphs) if p.text.strip()), None)
     p = doc.add_paragraph()
     if donor is not None:
         pPr = donor._p.find(qn("w:pPr"))
         if pPr is not None:
             p._p.insert(0, deepcopy(pPr))
-        rPr = _first_run_properties(donor)
+        rPr = _body_run_properties(donor)
     else:
         rPr = None
     _clear_paragraph_content(p)
@@ -113,13 +160,11 @@ def find_best_paragraph(doc, anchor_text: str):
     anchor = _norm(anchor_text)
     if not anchor:
         return None, 0.0
-
     paragraphs = _all_paragraphs(doc)
     for p in paragraphs:
         txt = _norm(p.text)
         if anchor in txt or (txt and txt in anchor and len(txt) > 25):
             return p, 1.0
-
     best_p, best_score = None, 0.0
     for p in paragraphs:
         txt = _norm(p.text)
@@ -131,12 +176,9 @@ def find_best_paragraph(doc, anchor_text: str):
     return best_p, best_score
 
 
-
 def highlight_placeholders(doc):
-    """Highlight fillable blanks/placeholders yellow without guessing their values."""
     patterns = [
-        re.compile(r"[…]{3,}"),
-        re.compile(r"\.{5,}"),
+        re.compile(r"[…]{3,}"), re.compile(r"\.{5,}"),
         re.compile(r"\[\s*(?:[A-ZÇĞİÖŞÜ0-9 _/-]{0,40})\s*\]"),
         re.compile(r"\bGG[./-]AA[./-]YYYY\b", re.I),
     ]
@@ -144,93 +186,43 @@ def highlight_placeholders(doc):
     for p in _all_paragraphs(doc):
         for run in list(p.runs):
             txt = run.text or ""
-            if not txt:
-                continue
             spans = []
             for pat in patterns:
                 spans.extend((m.start(), m.end()) for m in pat.finditer(txt))
             if not spans:
                 continue
-            # Merge spans.
-            spans.sort()
-            merged = []
+            spans.sort(); merged=[]
             for s,e in spans:
-                if merged and s <= merged[-1][1]:
-                    merged[-1] = (merged[-1][0], max(merged[-1][1], e))
-                else:
-                    merged.append((s,e))
-            # Rebuild this run as multiple runs while copying formatting.
-            parent = run._r.getparent()
-            idx = parent.index(run._r)
-            rPr = run._r.find(qn("w:rPr"))
-            parent.remove(run._r)
-            cursor = 0
-            pieces = []
+                if merged and s <= merged[-1][1]: merged[-1]=(merged[-1][0],max(merged[-1][1],e))
+                else: merged.append((s,e))
+            parent=run._r.getparent(); idx=parent.index(run._r); rPr=run._r.find(qn("w:rPr")); parent.remove(run._r)
+            cursor=0; pieces=[]
             for s,e in merged:
-                if s > cursor:
-                    pieces.append((txt[cursor:s], False))
-                pieces.append((txt[s:e], True))
-                cursor = e
-            if cursor < len(txt):
-                pieces.append((txt[cursor:], False))
-            for text_piece, hi in pieces:
-                nr = OxmlElement("w:r")
-                if rPr is not None:
-                    nr.append(deepcopy(rPr))
+                if s>cursor: pieces.append((txt[cursor:s],False))
+                pieces.append((txt[s:e],True)); cursor=e
+            if cursor<len(txt): pieces.append((txt[cursor:],False))
+            for piece,hi in pieces:
+                nr=OxmlElement("w:r")
+                if rPr is not None: nr.append(deepcopy(rPr))
                 if hi:
-                    nrPr = nr.find(qn("w:rPr"))
-                    if nrPr is None:
-                        nrPr = OxmlElement("w:rPr")
-                        nr.insert(0, nrPr)
-                    hl = OxmlElement("w:highlight")
-                    hl.set(qn("w:val"), "yellow")
-                    nrPr.append(hl)
-                    count += 1
-                t = OxmlElement("w:t")
-                _set_space_preserve(t)
-                t.text = text_piece
-                nr.append(t)
-                parent.insert(idx, nr)
-                idx += 1
+                    nrPr=nr.find(qn("w:rPr"))
+                    if nrPr is None: nrPr=OxmlElement("w:rPr"); nr.insert(0,nrPr)
+                    hl=OxmlElement("w:highlight"); hl.set(qn("w:val"),"yellow"); nrPr.append(hl); count+=1
+                t=OxmlElement("w:t"); _set_space_preserve(t); t.text=piece; nr.append(t); parent.insert(idx,nr); idx+=1
     return count
 
 
-def apply_revisions_to_docx(
-    original_bytes: bytes,
-    revisions: list[dict],
-    author: str = "Av. Onur Güneş",
-):
-    doc = Document(BytesIO(original_bytes))
-    change_id = 1000
-    applied, skipped = [], []
-
+def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author: str = "Av. Onur Güneş"):
+    doc=Document(BytesIO(original_bytes)); change_id=1000; applied=[]; skipped=[]
     for rev in revisions:
-        action = (rev.get("action") or "REPLACE_PARAGRAPH").upper()
-        new_text = (rev.get("replacement_text") or "").strip()
-        anchor = (rev.get("anchor_text") or "").strip()
-
-        if not new_text:
-            skipped.append({**rev, "reason": "Boş revizyon metni"})
-            continue
-
-        if action == "APPEND_END":
-            change_id = append_end_tracked(doc, new_text, change_id, author)
-            applied.append({**rev, "match_score": 1.0})
-            continue
-
-        paragraph, score = find_best_paragraph(doc, anchor)
-        if paragraph is None or score < 0.42:
-            skipped.append({**rev, "reason": f"Anchor bulunamadı (eşleşme {score:.2f})"})
-            continue
-
-        if action == "APPEND_AFTER":
-            change_id = insert_after_tracked(paragraph, new_text, change_id, author)
-        else:
-            change_id = replace_paragraph_tracked(paragraph, new_text, change_id, author)
-
-        applied.append({**rev, "match_score": score})
-
-    placeholder_count = highlight_placeholders(doc)
-    bio = BytesIO()
-    doc.save(bio)
-    return bio.getvalue(), applied, skipped, placeholder_count
+        action=(rev.get("action") or "REPLACE_PARAGRAPH").upper(); new_text=(rev.get("replacement_text") or "").strip(); anchor=(rev.get("anchor_text") or "").strip()
+        if not new_text: skipped.append({**rev,"reason":"Boş revizyon metni"}); continue
+        if action=="APPEND_END":
+            change_id=append_end_tracked(doc,new_text,change_id,author); applied.append({**rev,"match_score":1.0}); continue
+        paragraph,score=find_best_paragraph(doc,anchor)
+        if paragraph is None or score<0.42: skipped.append({**rev,"reason":f"Anchor bulunamadı (eşleşme {score:.2f})"}); continue
+        if action=="APPEND_AFTER": change_id=insert_after_tracked(paragraph,new_text,change_id,author)
+        else: change_id=replace_paragraph_tracked(paragraph,new_text,change_id,author)
+        applied.append({**rev,"match_score":score})
+    placeholder_count=highlight_placeholders(doc); bio=BytesIO(); doc.save(bio)
+    return bio.getvalue(),applied,skipped,placeholder_count

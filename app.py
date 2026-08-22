@@ -24,6 +24,9 @@ RULES = json.loads(Path(__file__).with_name("rules.json").read_text(encoding="ut
 REVISION_LIBRARY = json.loads(
     Path(__file__).with_name("revision_library.json").read_text(encoding="utf-8")
 )
+CLAUSE_BANK = json.loads(
+    Path(__file__).with_name("clause_bank.json").read_text(encoding="utf-8")
+)
 
 POWER_GUIDANCE = {
     "Düşük": "Sadece kritik konuları masaya taşı; ikincil risklerde pazarlık sermayesini koru.",
@@ -217,23 +220,34 @@ def revision_context_for(rule_id: str):
     return None
 
 
+def clause_bank_for(rule_id: str):
+    return [e for e in CLAUSE_BANK.get("entries", []) if e.get("rule_id") == rule_id]
+
+
 def build_revision_drafts(contract_text, selected_findings, negotiation_power):
     lib_parts = []
+    bank_parts = []
     for f in selected_findings:
         entry = revision_context_for(f.get("rule_id"))
         if entry:
             lib_parts.append(json.dumps(entry, ensure_ascii=False))
+        for bank_entry in clause_bank_for(f.get("rule_id")):
+            bank_parts.append(json.dumps(bank_entry, ensure_ascii=False))
 
     system = """Sen OLI Revision Engine'sin.
 Görevin sözleşmedeki seçilmiş bulgular için OPUS tarzında uygulanabilir revizyon metni üretmektir.
 
 ÖNCELİK:
-1) Varsa REVISION LIBRARY'deki doğrulanmış Opus kalıbı.
-2) Rule Library'deki standardın özü.
-3) Mevcut sözleşmenin terminolojisi, taraf tanımları, proje adı ve madde dili.
+1) Varsa MADDE BANKASI'ndaki Av. Onur Güneş tarafından gözden geçirilmiş hazır cümle.
+2) Varsa REVISION LIBRARY'deki doğrulanmış Opus yaklaşımı.
+3) Rule Library'deki standardın özü.
+4) Mevcut sözleşmenin terminolojisi, taraf tanımları, proje adı ve madde dili.
 
 KURALLAR:
 - Yeni hukuki politika icat etme.
+- MADDE BANKASI'nda uygun cümle varsa esas metin olarak onu kullan; yalnız sözleşmenin tanımlarına, proje adına, madde numarasına ve mevcut cümlenin gramerine uyacak kadar değiştir.
+- Madde Bankası metnini gereksiz yere uzatma, yeni şartlar ekleme veya daha ayrıntılı hale getirme.
+- Mevcut hüküm kısmen uygunsa paragrafı baştan yazmak yerine mümkün olan en küçük kelime/cümlecik değişikliğiyle Madde Bankası standardını mevcut cümleye yedir.
 - Geçmiş Opus metnini körü körüne kopyalama; mevcut sözleşmeye uyarla.
 - Mevcut hüküm varsa action=REPLACE_PARAGRAPH ve anchor_text sözleşmeden birebir kısa bir parça olsun.
 - Koruyucu hüküm tamamen eksikse NOT_FOUND diye bırakma: mutlaka yeni hüküm üret. Sözleşmede konu bakımından en uygun mevcut maddeyi anchor seç ve APPEND_AFTER kullan. APPEND_END yalnız gerçekten uygun bölüm bulunamıyorsa son çaredir.
@@ -263,6 +277,9 @@ REVİZYON MODU: {mode}
 
 SEÇİLMİŞ BULGULAR:
 {json.dumps(selected_findings, ensure_ascii=False, indent=2)}
+
+MADDE BANKASI:
+{chr(10).join(bank_parts) if bank_parts else "Bu kurallar için onaylı hazır madde yok."}
 
 REVISION LIBRARY:
 {chr(10).join(lib_parts) if lib_parts else "Bu kurallar için özel geçmiş kalıp yok."}
@@ -569,5 +586,6 @@ st.divider()
 with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Rule Library:** {len(RULES)} kontrol noktası")
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
+    st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI v0.4.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI v0.5 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")

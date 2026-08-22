@@ -1,0 +1,95 @@
+{
+  "version": "0.1-user-reviewed",
+  "entries": [
+    {
+      "id": "MB-001",
+      "title": "Yeniden çekim",
+      "rule_id": "OLI-TV-004",
+      "clause": "YAPIMCI tarafından talep edilen yeniden çekimin, Bölüm veya Bölümler’in yeniden çekilmesi niteliğinde olması ve OYUNCU’nun Rol’ünü tam olarak yeniden icra etmesi halinde OYUNCU, işbu sözleşmenin [ÜCRET MADDESİ] maddesinde belirlenen Oyunculuk bedelinin tamamı kadar ücrete ayrıca hak kazanmış olacaktır."
+    },
+    {
+      "id": "MB-002",
+      "title": "Tanıtım / PR",
+      "rule_id": "OLI-TV-006",
+      "clause": "OYUNCU, programının uygunluğu doğrultusunda ve tüm masraflar YAPIMCI’ya ait olacak şekilde DİZİ’nin tanıtımına ve PR amaçlı etkinliklere katılacaktır."
+    },
+    {
+      "id": "MB-003",
+      "title": "Ajansın tekeffülü / azami gayret",
+      "rule_id": "OLI-TV-018",
+      "clause": "AJANS, OYUNCU’nun işbu Sözleşme kapsamındaki yükümlülüklerini tam ve zamanında yerine getirmesi için azami gayret sarf edeceğini ve bunun için gerekli çalışmayı yapacağını kabul eder."
+    },
+    {
+      "id": "MB-004",
+      "title": "Ajans mali sorumluluğu",
+      "rule_id": "OLI-TV-018",
+      "clause": "AJANS yalnızca kendi ihlalinden kaynaklanan bir sebeple sözleşmenin feshi halinde fesih tarihine kadar işbu proje kapsamında elde ettiği kendi komisyon bedelini Yapımcı'ya iade eder."
+    },
+    {
+      "id": "MB-005",
+      "title": "Meslek birliği telifleri",
+      "rule_id": "OLI-TV-027",
+      "clause": "YAPIMCI’nın meslek birliklerinden elde edilecek telif bedelleri hariç olmak üzere devraldığı mali haklar üzerindeki yetkileri saklıdır."
+    },
+    {
+      "id": "MB-006",
+      "title": "Damga vergisi",
+      "rule_id": "OLI-TV-STAMP",
+      "clause": "İşbu Sözleşmenin imzalanması sebebi ile doğacak damga vergisinin tamamı YAPIMCI tarafından karşılanacaktır."
+    },
+    {
+      "id": "MB-007",
+      "title": "Damga vergisi - kısa alternatif",
+      "rule_id": "OLI-TV-STAMP",
+      "clause": "İşbu Sözleşme’den doğan damga vergisi YAPIMCI tarafından ödenecektir."
+    },
+    {
+      "id": "MB-008",
+      "title": "Yayınlanmayan / çekilmiş bölüm ücreti",
+      "rule_id": "OLI-TV-030",
+      "clause": "OYUNCU’nun çekimlerini tamamladığı bölümün herhangi bir nedenle yayınlanmaması, söz konusu bölüme ilişkin Oyunculuk Bedeli’ne hak kazanmasını engellemez."
+    },
+    {
+      "id": "MB-009",
+      "title": "Yapım yarıda kalırsa",
+      "rule_id": "OLI-TV-023",
+      "clause": "Yapımın durması, sona ermesi veya bölümün yayınlanmaması, OYUNCU’nun fiilen gerçekleştirdiği çalışmalar bakımından ücret hakkını ortadan kaldırmaz."
+    },
+    {
+      "id": "MB-010",
+      "title": "Üçüncü kişi reklamı",
+      "rule_id": "OLI-TV-025",
+      "clause": "OYUNCU’nun adı, görüntüsü ve sesi DİZİ’nin tanıtımı dışında üçüncü kişi veya marka reklamında ancak OYUNCU’nun önceden yazılı onayı ve ayrıca belirlenecek ücret karşılığında kullanılabilir."
+    },
+    {
+      "id": "MB-011",
+      "title": "Ürün yerleştirme",
+      "rule_id": "OLI-TV-024",
+      "clause": "OYUNCU’nun aktif ürün veya marka kullanımı, marka mesajı vermesi veya ürünün senaryoya özel olarak entegre edilmesi ayrıca mutabakata ve ek ücrete tabidir."
+    },
+    {
+      "id": "MB-012",
+      "title": "Ödeme vadesi",
+      "rule_id": "OLI-TV-029",
+      "clause": "Oyunculuk Bedeli, ilgili bölümün ilk yayın tarihini takip eden en geç [30/45] gün içinde ödenir."
+    },
+    {
+      "id": "MB-013",
+      "title": "Fiziksel görünüm",
+      "rule_id": "OLI-TV-005",
+      "clause": "OYUNCU’nun saç, kilo, yüz, stil ve benzeri fiziksel özelliklerinde esaslı değişiklik yapılması OYUNCU’nun önceden yazılı onayına tabidir."
+    },
+    {
+      "id": "MB-014",
+      "title": "Kişisel / siyasi açıklamalar",
+      "rule_id": "OLI-TV-008",
+      "clause": "OYUNCU’nun kişisel açıklamalarına ilişkin sınırlamalar yalnızca DİZİ’ye ilişkin gizlilik yükümlülükleri ve somut sözleşme ihlalleri ile sınırlıdır."
+    },
+    {
+      "id": "MB-015",
+      "title": "Cezai şart - miktar",
+      "rule_id": "OLI-TV-017",
+      "clause": "OYUNCU tarafından ödenecek cezai şart, [2] Bölüm Oyunculuk Bedeli ile sınırlıdır."
+    }
+  ]
+}

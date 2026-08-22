@@ -1,19 +1,13 @@
-# OLI v0.4.1
+# OLI v0.5
 
-Bu patch:
-1. İndirilen Word: `[Orijinal Ad] - GG.AA.YYYY REVİZE.docx`
-2. 30 Rule Library dışındaki riskler için ayrı `OLI Ek Bulgular` taraması
-3. Av. Onur Güneş'in nihai Word'ünü geri yükleyip OLI çıktısıyla karşılaştırma
-4. Öğrenme adayları otomatik kütüphaneye yazılmaz; `Library adayı / dosyaya özgü` ayrımı yapılır
-5. `.....`, `……`, `[....]`, `GG.AA.YYYY` benzeri doldurulacak alanlar Word'de sarı highlight
-6. Track Changes zamanı `Europe/Istanbul`
-7. Eksik koruyucu hükümlerde daha sıkı konu-bazlı `APPEND_AFTER` yerleştirme
-8. Track Changes yazarı `Av. Onur Güneş`
-9. Font/punto/paragraf biçimini miras alma korunur
+Bu sürüm v0.4.1 üzerine aşağıdaki geliştirmeleri getirir:
 
-## Dosya/proje klasörü
-v0.4.1 öğrenme akışını hazırlar; gerçek müvekkil dosyalarını kalıcı olarak sunucuda saklayan proje klasörü henüz aktive edilmemiştir.
-Bunu güvenlik, erişim, şifreleme ve saklama politikasıyla birlikte sonraki sürümde kurmak daha güvenlidir.
+- **Madde Bankası v0.1 entegrasyonu:** Kullanıcının kısmen gözden geçirdiği mevcut 15 hazır cümle `clause_bank.json` olarak motora bağlandı. Madde Bankası, Revision Library'den önce gelir.
+- **Minimal Track Changes:** OLI artık mümkün olduğunda paragrafın tamamını silip yeniden yazmak yerine yalnız değişen kelime/cümlecikleri silme-ekleme olarak işler.
+- **Daha az AI genişletmesi:** Onaylı Madde Bankası cümlesi varsa AI'nın metni gereksiz ayrıntılandırmaması için prompt sıkılaştırıldı.
+- **Bold temizliği:** Yeni/revize edilen gövde metninde kaynak paragraftan gelen bold zorlaması kaldırılır; font ve punto gibi diğer temel biçimler korunur.
+- **Türkiye saati:** Track Changes zaman damgası Europe/Istanbul duvar saati olarak yazılır; önceki 3 saatlik kaymayı önlemek için offset XML'e eklenmez.
+- v0.4.1'deki tarihli `REVİZE` dosya adı, ek risk taraması, nihai revizyondan öğrenme ve sarı placeholder işaretleme korunur.
 
 ## GitHub
-ZIP içindeki dosyaların hepsini repository köküne yükleyin ve commit edin.
+ZIP içindeki dosyaların hepsini repository köküne yükleyip mevcutların üzerine yazın ve commit edin.
