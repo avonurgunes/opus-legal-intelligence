@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from difflib import SequenceMatcher
 from io import BytesIO
 import re
@@ -39,7 +40,7 @@ def _tracked_run(tag: str, text: str, change_id: int, author: str, rPr=None):
     change = OxmlElement(tag)
     change.set(qn("w:id"), str(change_id))
     change.set(qn("w:author"), author)
-    change.set(qn("w:date"), datetime.now(timezone.utc).isoformat())
+    change.set(qn("w:date"), datetime.now(ZoneInfo("Europe/Istanbul")).isoformat())
 
     r = OxmlElement("w:r")
     if rPr is not None:
@@ -130,6 +131,70 @@ def find_best_paragraph(doc, anchor_text: str):
     return best_p, best_score
 
 
+
+def highlight_placeholders(doc):
+    """Highlight fillable blanks/placeholders yellow without guessing their values."""
+    patterns = [
+        re.compile(r"[…]{3,}"),
+        re.compile(r"\.{5,}"),
+        re.compile(r"\[\s*(?:[A-ZÇĞİÖŞÜ0-9 _/-]{0,40})\s*\]"),
+        re.compile(r"\bGG[./-]AA[./-]YYYY\b", re.I),
+    ]
+    count = 0
+    for p in _all_paragraphs(doc):
+        for run in list(p.runs):
+            txt = run.text or ""
+            if not txt:
+                continue
+            spans = []
+            for pat in patterns:
+                spans.extend((m.start(), m.end()) for m in pat.finditer(txt))
+            if not spans:
+                continue
+            # Merge spans.
+            spans.sort()
+            merged = []
+            for s,e in spans:
+                if merged and s <= merged[-1][1]:
+                    merged[-1] = (merged[-1][0], max(merged[-1][1], e))
+                else:
+                    merged.append((s,e))
+            # Rebuild this run as multiple runs while copying formatting.
+            parent = run._r.getparent()
+            idx = parent.index(run._r)
+            rPr = run._r.find(qn("w:rPr"))
+            parent.remove(run._r)
+            cursor = 0
+            pieces = []
+            for s,e in merged:
+                if s > cursor:
+                    pieces.append((txt[cursor:s], False))
+                pieces.append((txt[s:e], True))
+                cursor = e
+            if cursor < len(txt):
+                pieces.append((txt[cursor:], False))
+            for text_piece, hi in pieces:
+                nr = OxmlElement("w:r")
+                if rPr is not None:
+                    nr.append(deepcopy(rPr))
+                if hi:
+                    nrPr = nr.find(qn("w:rPr"))
+                    if nrPr is None:
+                        nrPr = OxmlElement("w:rPr")
+                        nr.insert(0, nrPr)
+                    hl = OxmlElement("w:highlight")
+                    hl.set(qn("w:val"), "yellow")
+                    nrPr.append(hl)
+                    count += 1
+                t = OxmlElement("w:t")
+                _set_space_preserve(t)
+                t.text = text_piece
+                nr.append(t)
+                parent.insert(idx, nr)
+                idx += 1
+    return count
+
+
 def apply_revisions_to_docx(
     original_bytes: bytes,
     revisions: list[dict],
@@ -165,6 +230,7 @@ def apply_revisions_to_docx(
 
         applied.append({**rev, "match_score": score})
 
+    placeholder_count = highlight_placeholders(doc)
     bio = BytesIO()
     doc.save(bio)
-    return bio.getvalue(), applied, skipped
+    return bio.getvalue(), applied, skipped, placeholder_count

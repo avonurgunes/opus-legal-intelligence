@@ -1,6 +1,9 @@
 import streamlit as st
 import json
 import re
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from difflib import SequenceMatcher
 from io import BytesIO
 from pathlib import Path
 
@@ -235,6 +238,7 @@ KURALLAR:
 - Mevcut hüküm varsa action=REPLACE_PARAGRAPH ve anchor_text sözleşmeden birebir kısa bir parça olsun.
 - Koruyucu hüküm tamamen eksikse NOT_FOUND diye bırakma: mutlaka yeni hüküm üret. Sözleşmede konu bakımından en uygun mevcut maddeyi anchor seç ve APPEND_AFTER kullan. APPEND_END yalnız gerçekten uygun bölüm bulunamıyorsa son çaredir.
 - Eksik hükmün ekleneceği yeri konu bütünlüğüne göre seç: ücret/ödeme hükümleri ücret bölümüne; mali hak/telif hükümleri mali haklar bölümüne; fesih/cezai şart hükümleri ilgili fesih/ceza bölümüne; vergi/damga vergisi diğer hükümler/vergi bölümüne.
+- APPEND_AFTER kullanırken anchor_text mutlaka sözleşmede BİREBİR bulunan ve hedef bölümdeki son uygun paragraftan 25-100 karakterlik bir parça olmalı. Madde numarasını uydurma. Yeni metnin numaralandırması belirsizse numarasız koruyucu paragraf üret; Word'e yerleştirildikten sonra kullanıcı kontrol eder.
 - replacement_text sadece sözleşmeye girecek nihai madde/paragraf metni olsun.
 - Pazarlık gücü sadece sertlik düzeyini belirler.
 - Yanıt yalnız geçerli JSON.
@@ -283,6 +287,49 @@ def icon(status):
         "RED": "🔴", "ORANGE": "🟠", "YELLOW": "🟡",
         "GREEN": "🟢", "NOT_FOUND": "⚪"
     }.get(status, "⚪")
+
+
+
+def analyse_extra_risks(contract_text: str):
+    system = """Sen OLI Extra Risk Scanner'sın.
+30 maddelik Opus Rule Library DIŞINDA kalan sözleşmesel riskleri ara.
+Rule Library'deki konuları tekrar etme. Yalnız gerçekten yeni ve anlamlı hukuki/ticari bulguları yaz.
+Bulguları otomatik revize etme; kullanıcıya not olarak sun.
+Yanıt yalnız JSON:
+{"extra_findings":[{"title":"...","risk":"HIGH|MEDIUM|LOW","reference":"madde/bölüm","assessment":"...","suggested_action":"..."}]}
+Hiç ek bulgu yoksa boş liste döndür."""
+    user = f"""MEVCUT 30 KURAL BAŞLIĞI:
+{chr(10).join(r.get('title','') for r in RULES)}
+
+SÖZLEŞME:
+{contract_text[:140000]}"""
+    client = OpenAI(api_key=get_api_key())
+    resp = client.responses.create(
+        model=get_model(),
+        input=[{"role":"system","content":system},{"role":"user","content":user}]
+    )
+    return clean_json(resp.output_text)
+
+
+def compare_final_revision(oli_text: str, final_text: str):
+    system = """Sen OLI Learning Review motorusun.
+OLI'nin ürettiği revize metin ile Av. Onur Güneş'in nihai revize metnini karşılaştır.
+Yalnız anlamlı hukuki/drafting farklarını çıkar.
+Bir hükme dokunulmamasını asla otomatik olarak 'Opus standardı' kabul etme.
+Her fark için bunun kütüphaneye alınabilecek genel bir tercih mi, yoksa dosyaya özgü mü olabileceğini öner.
+Yanıt yalnız JSON:
+{"learning_candidates":[{"title":"...","oli_position":"...","final_position":"...","difference":"...","recommendation":"LIBRARY_CANDIDATE|CASE_SPECIFIC","confidence":"HIGH|MEDIUM|LOW"}]}"""
+    user = f"""OLI REVİZE METİN:
+{oli_text[:100000]}
+
+AV. ONUR GÜNEŞ NİHAİ METİN:
+{final_text[:100000]}"""
+    client = OpenAI(api_key=get_api_key())
+    resp = client.responses.create(
+        model=get_model(),
+        input=[{"role":"system","content":system},{"role":"user","content":user}]
+    )
+    return clean_json(resp.output_text)
 
 
 st.markdown("""
@@ -368,6 +415,24 @@ if result:
     for item in result.get("top_negotiation_points", [])[:5]:
         st.write("• " + item)
 
+    st.subheader("OLI Ek Bulgular")
+    st.caption("30 Opus kuralı dışında kalan olası riskler. Bunlar otomatik revizyona alınmaz.")
+    if st.button("🔎 30 Kural Dışı Riskleri Tara", use_container_width=True):
+        with st.spinner("Sözleşme ikinci katman risk taramasından geçiyor..."):
+            try:
+                st.session_state["extra_risks"] = analyse_extra_risks(st.session_state["contract_text"])
+            except Exception as e:
+                st.error(f"Ek risk taraması çalıştırılamadı: {e}")
+    extras = st.session_state.get("extra_risks", {}).get("extra_findings", [])
+    if extras:
+        for x in extras:
+            with st.expander(f"🧭 {x.get('risk','-')} — {x.get('title','Ek bulgu')}"):
+                st.write("**Referans:**", x.get("reference","-"))
+                st.write("**Değerlendirme:**", x.get("assessment",""))
+                st.write("**Önerilen aksiyon:**", x.get("suggested_action",""))
+    elif "extra_risks" in st.session_state:
+        st.success("30 kural dışında ayrıca anlamlı bir risk tespit edilmedi.")
+
     st.subheader("30 Kural Analizi")
     order={"RED":0,"ORANGE":1,"YELLOW":2,"GREEN":3,"NOT_FOUND":4}
     findings=sorted(findings,key=lambda f:order.get(f.get("status"),9))
@@ -436,7 +501,7 @@ if result:
 
             if st.button("📄 Revize Word'ü Oluştur", type="primary", use_container_width=True):
                 try:
-                    revised_bytes, applied, skipped = apply_revisions_to_docx(
+                    revised_bytes, applied, skipped, placeholder_count = apply_revisions_to_docx(
                         st.session_state["original_bytes"],
                         edited,
                         author="Av. Onur Güneş"
@@ -444,30 +509,65 @@ if result:
                     st.session_state["revised_docx"] = revised_bytes
                     st.session_state["applied_revisions"] = applied
                     st.session_state["skipped_revisions"] = skipped
+                    st.session_state["placeholder_count"] = placeholder_count
                 except Exception as e:
                     st.error(f"Word oluşturulamadı: {e}")
 
             if st.session_state.get("revised_docx"):
                 name = Path(st.session_state.get("uploaded_name","sozlesme.docx")).stem
+                today_tr = datetime.now(ZoneInfo("Europe/Istanbul")).strftime("%d.%m.%Y")
                 st.success(
                     f"{len(st.session_state.get('applied_revisions',[]))} revizyon Word'e işlendi."
                 )
                 skipped = st.session_state.get("skipped_revisions", [])
                 if skipped:
                     st.warning(f"{len(skipped)} revizyon eşleşme bulunamadığı için uygulanamadı.")
+                ph = st.session_state.get("placeholder_count",0)
+                if ph:
+                    st.info(f"🟨 {ph} doldurulması gereken alan sarı ile işaretlendi.")
                 st.download_button(
                     "⬇️ Revize Word'ü İndir",
                     data=st.session_state["revised_docx"],
-                    file_name=f"{name}_OLI_revize.docx",
+                    file_name=f"{name} - {today_tr} REVİZE.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     use_container_width=True
                 )
     elif uploaded:
         st.info("Word üzerinde revizyon özelliği şu an yalnız .docx dosyalarında aktif.")
 
+
+st.divider()
+st.header("Nihai Revizyondan Öğren")
+st.caption("OLI çıktısını sen son kez revize ettikten sonra buraya yükle. Sistem farkları öğrenme adayı olarak çıkarır; hiçbir şeyi otomatik olarak Revision Library'ye eklemez.")
+final_upload = st.file_uploader("Av. Onur Güneş nihai revize Word", type=["docx"], key="final_revision_upload")
+if final_upload and st.session_state.get("revised_docx"):
+    if st.button("🧠 OLI Revizyonu ile Karşılaştır", use_container_width=True):
+        try:
+            oli_text = read_docx(st.session_state["revised_docx"])
+            final_text = read_docx(final_upload.getvalue())
+            with st.spinner("Nihai revizyon tercihleri karşılaştırılıyor..."):
+                st.session_state["learning_review"] = compare_final_revision(oli_text, final_text)
+        except Exception as e:
+            st.error(f"Karşılaştırma yapılamadı: {e}")
+
+    candidates = st.session_state.get("learning_review", {}).get("learning_candidates", [])
+    for c in candidates:
+        with st.expander(f"🧠 {c.get('title','Revizyon tercihi')}"):
+            st.write("**OLI:**", c.get("oli_position",""))
+            st.write("**Nihai tercih:**", c.get("final_position",""))
+            st.write("**Fark:**", c.get("difference",""))
+            st.caption(f"Öneri: {c.get('recommendation')} • Güven: {c.get('confidence')}")
+            st.radio(
+                "Bu öğrenme ne olsun?",
+                ["Henüz öğrenme", "Revision Library adayı", "Bu dosyaya özgü"],
+                index=0,
+                key=f"learn_{c.get('title','')}_{c.get('difference','')[:20]}"
+            )
+
+
 st.divider()
 with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Rule Library:** {len(RULES)} kontrol noktası")
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
 
-st.caption("OLI v0.4 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI v0.4.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
