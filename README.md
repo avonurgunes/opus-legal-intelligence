@@ -1,4 +1,4 @@
-# OLI - Arabuluculuk v1.3
+# OLI - Arabuluculuk v1.3.1
 
 v1.2 korunmuştur; toplu indirme mantığı düzeltildi.
 
@@ -21,3 +21,8 @@ Ayrıca her tutanağın ayrı Word/PDF/UDF indirme butonları korunmuştur.
 
 ## GitHub
 ZIP içindeki 8 dosyanın tamamını repository köküne yükleyip mevcut dosyaların üzerine yazın ve Commit changes yapın.
+
+
+## v1.3.1
+- Streamlit açılışını engelleyen `mediation.py` SyntaxError düzeltildi.
+- `app.py` ve `mediation.py` Python derleme kontrolünden geçirildi.

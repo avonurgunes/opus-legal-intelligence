@@ -317,10 +317,8 @@ def employment_agreement_terms(data):
         item_lines.append(f"TOPLAM: {netgross} {total_fmt} TL ({total_words})")
         lines.append(
             "2. Taraflar, TARAF 2 tarafından TARAF 1'e aşağıdaki işçilik alacaklarının "
-            f"{payment_date} tarihinde {method} ödenmesi hususunda anlaşmışlardır:
-" +
-            "
-".join(item_lines)
+            f"{payment_date} tarihinde {method} ödenmesi hususunda anlaşmışlardır:\n" +
+            "\n".join(item_lines)
         )
     else:
         lines.append(
@@ -339,9 +337,7 @@ def employment_agreement_terms(data):
         "hak ve alacağı kalmamış olacak ve taraflar birbirlerini gayri kabili rücu olarak ibra edilmiş sayacak, "
         "taraflar arasında çalışılan döneme ilişkin uyuşmazlık konusu ve dava konusu yapılabilecek herhangi bir ihtilaf da kalmamış olacaktır."
     )
-    return "
-
-".join(lines)
+    return "\n\n".join(lines)
 
 
 def rent_agreement_terms(data):
