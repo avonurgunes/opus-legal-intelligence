@@ -1,27 +1,23 @@
-# OLI - Arabuluculuk v1
+# OLI - Arabuluculuk v1.3
 
-Mevcut Sözleşmeler v0.5 korunmuştur ve Arabuluculuk modülü aktif edilmiştir.
+v1.2 korunmuştur; toplu indirme mantığı düzeltildi.
 
-## Arabuluculuk v1
-- Arabulucu seçimi: Av. Arb. Onur GÜNEŞ / Av. Arb. Serap TAŞDELEN GÜNEŞ
-- Arabulucu sicil ve adres bilgileri otomatik
-- 1-5 taraf
-- Taraf arama / kayıt / otomatik getirme (prototype SQLite)
-- Dosya no
-- Dosya açılış, anlaşma, son tutanak tarihleri
-- Uyuşmazlık: İşçilik Alacağı, Kira Tespit, Kiralananın Tahliyesi, birleşik kira
-- İşten çıkış/ayrılış bildirgesi PDF/DOCX üzerinden AI ile taraf bilgisi önerme
-- Kira ve işçilik için dinamik anlaşma alanları
-- Rakam ve tarihleri boş bırakabilme
-- Üç belgenin taslağını ekranda tamamen düzenleme
-- Bilgilendirme ve Belirleme Tutanağı: Word + PDF
-- Anlaşma Belgesi: Word + PDF
-- Son Tutanak: Word + PDF
+## Toplu indirme
+ZIP yoktur.
 
-Şablon metinleri kullanıcının sağladığı gerçek kira ve işçilik arabuluculuk örnekleri esas alınarak kurulmuştur.
+Üç arabuluculuk belgesi:
+1. Bilgilendirme ve Belirleme Tutanağı
+2. Anlaşma Belgesi
+3. Son Tutanak
 
-## Güvenlik notu
-Taraf hafızası şimdilik uygulama dizinindeki SQLite dosyasını kullanır. Community Cloud yeniden deploy/restart süreçlerinde bu kayıtların kalıcılığı garanti değildir ve bu prototip depolama şifreli değildir. Gerçek kalıcı taraf veritabanı, erişim ve şifreleme katmanıyla daha sonra kurulmalıdır.
+tek bir dosya içinde art arda birleştirilerek indirilebilir:
+
+- TEK WORD → `tum_tutanaklar.docx`
+- TEK PDF → `tum_tutanaklar.pdf`
+- TEK UDF → `tum_tutanaklar.udf`
+
+Word ve PDF'de her tutanak yeni sayfadan başlar.
+Ayrıca her tutanağın ayrı Word/PDF/UDF indirme butonları korunmuştur.
 
 ## GitHub
-ZIP içindeki dosyaların tamamını repository köküne yükleyip mevcut dosyaların üzerine yazın ve Commit changes yapın.
+ZIP içindeki 8 dosyanın tamamını repository köküne yükleyip mevcut dosyaların üzerine yazın ve Commit changes yapın.
