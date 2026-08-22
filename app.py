@@ -12,6 +12,7 @@ from pypdf import PdfReader
 from openai import OpenAI
 
 from revision_engine import apply_revisions_to_docx
+from mediation import render_mediation
 
 st.set_page_config(
     page_title="Opus Legal Intelligence",
@@ -357,12 +358,19 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+selected_module = st.radio(
+    "Modül",
+    ["Sözleşmeler", "Arabuluculuk", "KVKK", "Dava Dosyaları"],
+    horizontal=True,
+    label_visibility="collapsed"
+)
+
 cols = st.columns(4)
 module_data = [
-    ("Sözleşmeler", "Analyse • Negotiate • Revise", True),
-    ("Arabuluculuk", "Prepare • Generate", False),
-    ("KVKK", "Privacy • Compliance", False),
-    ("Dava Dosyaları", "Litigation Workspace", False),
+    ("Sözleşmeler", "Analyse • Negotiate • Revise", selected_module == "Sözleşmeler"),
+    ("Arabuluculuk", "Prepare • Generate", selected_module == "Arabuluculuk"),
+    ("KVKK", "Privacy • Compliance", selected_module == "KVKK"),
+    ("Dava Dosyaları", "Litigation Workspace", selected_module == "Dava Dosyaları"),
 ]
 for col, (title, sub, active) in zip(cols, module_data):
     with col:
@@ -374,6 +382,18 @@ for col, (title, sub, active) in zip(cols, module_data):
         )
 
 st.divider()
+if selected_module == "Arabuluculuk":
+    render_mediation()
+    st.stop()
+elif selected_module == "KVKK":
+    st.header("KVKK")
+    st.info("Bu modül sonraki aşamada aktif edilecek.")
+    st.stop()
+elif selected_module == "Dava Dosyaları":
+    st.header("Dava Dosyaları")
+    st.info("Bu modül sonraki aşamada aktif edilecek.")
+    st.stop()
+
 st.header("Yeni Sözleşme Analizi")
 
 c1,c2,c3 = st.columns(3)
@@ -588,4 +608,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI v0.5 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5 + Arabuluculuk v1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
