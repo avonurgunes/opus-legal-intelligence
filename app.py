@@ -12,7 +12,7 @@ from pypdf import PdfReader
 from openai import OpenAI
 
 from revision_engine import apply_revisions_to_docx
-from learning_engine import build_candidates, approve_candidates, load_memory, learning_prompt_block
+from learning_engine import build_candidates, approve_candidates, load_memory, learning_prompt_block, match_batch_documents, batch_candidates, cluster_candidates
 from mediation import render_mediation
 
 st.set_page_config(
@@ -792,6 +792,76 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 
 
+
+st.divider()
+st.header("🧠 Toplu Öğrenme")
+st.caption("Birden fazla ham ve revize Word yükle. OLI çiftleri eşleştirir, değişiklikleri kümeler ve senin onayladığın drafting davranışlarını topluca öğrenir.")
+
+bc1,bc2=st.columns(2)
+batch_raw=bc1.file_uploader("Ham sözleşmeler",type=["docx"],accept_multiple_files=True,key="batch_raw_v56")
+batch_rev=bc2.file_uploader("Senin revize ettiğin sözleşmeler",type=["docx"],accept_multiple_files=True,key="batch_rev_v56")
+
+if batch_raw and batch_rev and st.button("🔗 Sözleşmeleri Eşleştir",use_container_width=True):
+    try:
+        pairs,ur,uv=match_batch_documents(
+            [(f.name,f.getvalue()) for f in batch_raw],
+            [(f.name,f.getvalue()) for f in batch_rev]
+        )
+        st.session_state["batch_pairs_v56"]=pairs
+        st.session_state["batch_unmatched_v56"]=(ur,uv)
+    except Exception as e:
+        st.error(f"Eşleştirme yapılamadı: {e}")
+
+pairs=st.session_state.get("batch_pairs_v56",[])
+if pairs:
+    st.subheader("Eşleşmeler")
+    confident=sum(p["status"]=="CONFIDENT" for p in pairs)
+    review=len(pairs)-confident
+    st.info(f"{len(pairs)} çift bulundu · {confident} güçlü eşleşme · {review} manuel kontrol")
+    for i,p in enumerate(pairs):
+        icon="🟢" if p["status"]=="CONFIDENT" else "🟡"
+        st.write(f"{icon} **{p['raw_name']}** ↔ **{p['revised_name']}** · eşleşme {p['match_score']}")
+    ur,uv=st.session_state.get("batch_unmatched_v56",([],[]))
+    if ur or uv:
+        st.warning("Eşleşmeyen dosyalar: "+", ".join(ur+uv))
+    if st.button("🔬 Tüm Çiftlerden Öğrenme Özeti Çıkar",use_container_width=True):
+        try:
+            cs=batch_candidates(pairs)
+            clusters=cluster_candidates(cs)
+            st.session_state["batch_candidates_v56"]=cs
+            st.session_state["batch_clusters_v56"]=clusters
+        except Exception as e:
+            st.error(f"Toplu öğrenme analizi yapılamadı: {e}")
+
+clusters=st.session_state.get("batch_clusters_v56",[])
+allc=st.session_state.get("batch_candidates_v56",[])
+if clusters:
+    st.subheader("Toplu Öğrenme Özeti")
+    st.caption(f"{len(allc)} tekil değişiklik, {len(clusters)} davranış kümesine ayrıldı. Küme onayı, içindeki örnekleri topluca öğrenir.")
+    cluster_decisions={}
+    for i,c in enumerate(clusters):
+        with st.expander(f"{c['topic']} — {c['edit_style']} · {c['count']} örnek · güven {c['confidence']}",expanded=(i<4)):
+            for ex in c["examples"][:3]:
+                st.markdown(f"**{ex.get('pair_raw_name','')} → {ex.get('pair_revised_name','')}**")
+                st.caption("Önce: "+(ex.get("original_text") or "—")[:350])
+                st.caption("Nihai: "+(ex.get("final_text") or "—")[:350])
+            cc1,cc2,cc3=st.columns([1,1.4,1])
+            ok=cc1.checkbox("✓ Kümeyi Öğren",key=f"bc_ok_{i}")
+            topic=cc2.text_input("Konu",value=c["topic"],key=f"bc_topic_{i}")
+            scope=cc3.selectbox("Kapsam",["GENERAL","FILE_ONLY"],key=f"bc_scope_{i}")
+            cluster_decisions[c["cluster_id"]]={"approve":ok,"topic":topic,"scope":scope}
+    if st.button("💾 Onaylanan Kümeleri Hafızaya Kaydet",type="primary",use_container_width=True):
+        decisions={}
+        for c in clusters:
+            d=cluster_decisions.get(c["cluster_id"],{})
+            for cid in c["candidate_ids"]:
+                decisions[cid]={"approve":d.get("approve",False),"topic":d.get("topic",c["topic"]),"scope":d.get("scope","GENERAL")}
+        try:
+            added,mem=approve_candidates(allc,decisions)
+            st.success(f"{added} tekil emsal öğrenildi. Toplam onaylı kayıt: {sum(1 for r in mem['records'] if r.get('approved'))}")
+        except Exception as e:
+            st.error(f"Toplu öğrenme kaydedilemedi: {e}")
+
 st.divider()
 st.header("Nihai Revizyondan Öğren — Learning Engine v1")
 st.caption("Geçmiş dosyalarda ilk gelen Word + senin nihai revize Word'ünü karşılaştırır. Hiçbir kayıt sen onaylamadan kalıcı öğrenme hafızasına girmez.")
@@ -879,4 +949,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5.5 Learning Engine v1 + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.6 Batch Learning + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")

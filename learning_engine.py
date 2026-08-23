@@ -136,3 +136,94 @@ def learning_prompt_block(contract_text):
             f"  Nihai tercih: {r.get('final_text')}"
         )
     return "\n".join(parts)
+
+
+def _doc_signature(raw):
+    pars=read_docx_paragraphs(raw)
+    head=" ".join(pars[:12])
+    body=" ".join(pars[:80])
+    return head, body
+
+def match_batch_documents(raw_files, revised_files):
+    """
+    Match raw/revised DOCX files using filename + document-text similarity.
+    Returns confident pairs and uncertain pairs for manual review.
+    """
+    raw_meta=[]
+    rev_meta=[]
+    for name,data in raw_files:
+        h,b=_doc_signature(data); raw_meta.append({"name":name,"data":data,"head":h,"body":b})
+    for name,data in revised_files:
+        h,b=_doc_signature(data); rev_meta.append({"name":name,"data":data,"head":h,"body":b})
+
+    candidates=[]
+    for i,r in enumerate(raw_meta):
+        for j,v in enumerate(rev_meta):
+            fn=_similarity(Path(r["name"]).stem,Path(v["name"]).stem)
+            head=_similarity(r["head"],v["head"])
+            body=_similarity(r["body"][:12000],v["body"][:12000])
+            score=0.20*fn+0.35*head+0.45*body
+            candidates.append((score,i,j))
+    candidates.sort(reverse=True)
+    used_r=set(); used_v=set(); pairs=[]
+    for score,i,j in candidates:
+        if i in used_r or j in used_v: continue
+        used_r.add(i); used_v.add(j)
+        pairs.append({
+            "raw_name":raw_meta[i]["name"],"raw_data":raw_meta[i]["data"],
+            "revised_name":rev_meta[j]["name"],"revised_data":rev_meta[j]["data"],
+            "match_score":round(score,3),
+            "status":"CONFIDENT" if score>=0.62 else "REVIEW"
+        })
+    unmatched_raw=[x["name"] for i,x in enumerate(raw_meta) if i not in used_r]
+    unmatched_revised=[x["name"] for j,x in enumerate(rev_meta) if j not in used_v]
+    return pairs,unmatched_raw,unmatched_revised
+
+def batch_candidates(pairs):
+    allc=[]
+    for p in pairs:
+        cs=build_candidates(p["raw_data"],p["revised_data"],source_name=p["revised_name"])
+        for c in cs:
+            c["pair_raw_name"]=p["raw_name"]
+            c["pair_revised_name"]=p["revised_name"]
+            c["pair_match_score"]=p["match_score"]
+        allc.extend(cs)
+    return allc
+
+def cluster_candidates(candidates):
+    """
+    Lightweight clusters by inferred legal topic keywords + edit style.
+    AI-free first pass, intended for review/approval UI.
+    """
+    topics=[
+        ("Münhasırlık",["münhasır","başka proje","başka bir proje","rakip"]),
+        ("Ücret / Ödeme",["ücret","ödeme","kdv","fatura","serbest meslek","bölüm başı"]),
+        ("Cezai Şart",["cezai şart","ceza koşulu"]),
+        ("Opsiyon / Sezon",["opsiyon","sezon","yeni sezon","devam sezon"]),
+        ("Tanıtım / PR",["tanıtım","pr ","röportaj","gala","basın"]),
+        ("Sosyal Medya",["sosyal medya","instagram","paylaşım"]),
+        ("Ürün Yerleştirme",["ürün yerleştirme","ürün kullan","marka"]),
+        ("Yapay Zeka / Dijital Kullanım",["yapay zeka","machine learning","data mining","sentetik","dijital kopya"]),
+        ("Fikri Haklar",["mali hak","fsek","telif","icracı","bağlantılı hak"]),
+        ("Fesih",["fesih","sona er","sözleşmeyi sona"]),
+        ("Çalışma / Set",["çekim","set ","çalışma saati","iş günü","takvim"]),
+    ]
+    groups={}
+    for c in candidates:
+        hay=(" "+c.get("original_text","")+" "+c.get("final_text","")+" ").lower()
+        topic="Diğer"
+        for label,keys in topics:
+            if any(k in hay for k in keys):
+                topic=label; break
+        key=(topic,c.get("edit_style","UNKNOWN"))
+        groups.setdefault(key,[]).append(c)
+    out=[]
+    for (topic,style),items in groups.items():
+        out.append({
+            "cluster_id":f"{topic}|{style}",
+            "topic":topic,"edit_style":style,"count":len(items),
+            "confidence":round(min(0.95,0.40+0.08*len(items)),2),
+            "examples":items[:5],
+            "candidate_ids":[x["candidate_id"] for x in items]
+        })
+    return sorted(out,key=lambda x:(-x["count"],x["topic"]))

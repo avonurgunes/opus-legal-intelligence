@@ -1,29 +1,18 @@
-# OLI Sözleşmeler v0.5.5 — Learning Engine v1
+# OLI Sözleşmeler v0.5.6 — Batch Learning
 
-## Amaç
-Nihai revizyonlardan kontrollü biçimde öğrenmeye başlamak.
+v0.5.5 Learning Engine üzerine Toplu Öğrenme eklenmiştir.
 
-## İki Word ile geçmiş öğrenme
-- İlk gelen sözleşme (.docx)
-- Av. Onur Güneş'in nihai/revize sözleşmesi (.docx)
-- Sistem değişen paragrafları ve yeni eklemeleri eşleştirir.
-- MICRO / PHRASE / BLOCK / NEW_CLAUSE drafting stili çıkarır.
-- Her fark önce Öğrenme Adayı olur.
-- Kullanıcı açıkça `✓ Öğren` demeden hiçbir kayıt kalıcı hafızaya girmez.
-- Dosyaya özgü tavizler `FILE_ONLY` seçilebilir ve yeni sözleşmelerde genel emsal olarak kullanılmaz.
+Akış:
+1. Birden fazla ham DOCX yükle.
+2. Birden fazla Av. Onur Güneş revizeli DOCX yükle.
+3. OLI dosya adı + içerik benzerliğiyle çiftleri eşleştirir.
+4. Güçlü eşleşmeler yeşil, kontrol gerektirenler sarı gösterilir.
+5. Tüm çiftlerden değişiklik adayları çıkarılır.
+6. Adaylar konu + drafting stili (MICRO/PHRASE/BLOCK/NEW_CLAUSE) bazında kümelenir.
+7. Kullanıcı tek tek yüzlerce değişiklik yerine kümeleri onaylayabilir.
+8. Yalnız açıkça onaylanan kümelerin tekil emsalleri Learning Memory'ye girer.
+9. FILE_ONLY kayıtlar genel drafting emsali olarak kullanılmaz.
 
-## Yeni sözleşmede kullanım
-Onaylı geçmiş öğrenimler analiz/drafting promptuna bağlanır.
-Bunlar kalıp cümle olarak değil, drafting davranışı ve tercih örneği olarak kullanılır.
-Madde Bankası cümlesini körlemesine yapıştırmak yerine gelen sözleşmenin dili korunur.
+Not: v0.5.6 da learning_memory.json kullanır. Streamlit Cloud deploy/restart kalıcılığı garanti etmez. Production kalıcılığı için harici veritabanı sonraki adımdır.
 
-## Güven
-Aynı konu onaylı örneklerde tekrar ettikçe precedent_count ve confidence artar.
-Rule Library otomatik değiştirilmez.
-
-## ÖNEMLİ — kalıcılık
-Bu v1 `learning_memory.json` kullanır. Lokal/GitHub çalışma kopyasında kalıcıdır; Streamlit Cloud runtime dosya sistemi deploy/restart sonrası kalıcılık garantisi vermez.
-Bu nedenle bu sürüm öğrenme davranışını ve onay akışını kurar; gerçek production kalıcılığı için sonraki adım harici persistent storage (örn. Supabase/Postgres) bağlamaktır.
-
-## Korunanlar
-v0.5.4 Hybrid Redline ve çalışan Word üretim motoru değiştirilmeden korunmuştur.
+v0.5.4 Word/Hybrid Redline motoruna dokunulmamıştır.
