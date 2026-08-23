@@ -697,38 +697,33 @@ if result:
         drafts = st.session_state.get("revision_drafts", [])
         edited=[]
         if drafts:
-            st.subheader("Revizyonları Kontrol Et")
-            for i, rev in enumerate(drafts):
-                with st.expander(f"✏️ {rev.get('rule_id')} — {rev.get('title')}", expanded=True):
-                    st.caption(f"Eylem: {rev.get('action')} • Güven: {rev.get('confidence')}")
-                    if rev.get("anchor_text"):
-                        st.write("**Eşleşme noktası:**", rev.get("anchor_text"))
-                    st.write("**Neden:**", rev.get("reason",""))
-                    new_text = st.text_area(
-                        "Word'e uygulanacak metin",
-                        value=rev.get("replacement_text",""),
-                        height=160,
-                        key=f"revtext_{i}"
-                    )
-                    include = st.checkbox("Bu revizyonu uygula", value=True, key=f"apply_{i}")
-                    if include:
-                        edited.append({**rev, "replacement_text": new_text})
+            edited = render_revision_preview(
+                drafts,
+                st.session_state.get("contract_text", "")
+            )
+            st.session_state["approved_revision_plan"] = [dict(x) for x in edited]
 
-            if st.button("📄 Revize Word'ü Oluştur", type="primary", use_container_width=True):
-                try:
-                    revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
-                        st.session_state["original_bytes"],
-                        st.session_state.get("approved_revision_plan", []),
-                        author="Av. Onur Güneş",
-                        flags=st.session_state.get("word_flags", [])
-                    )
-                    st.session_state["revised_docx"] = revised_bytes
-                    st.session_state["applied_revisions"] = applied
-                    st.session_state["skipped_revisions"] = skipped
-                    st.session_state["placeholder_count"] = placeholder_count
-                    st.session_state["flag_stats"] = flag_stats
-                except Exception as e:
-                    st.error(f"Word oluşturulamadı: {e}")
+            if st.button("📄 Onaylanan Revizyonlarla Word Oluştur", type="primary", use_container_width=True):
+                plan = st.session_state.get("approved_revision_plan", [])
+                if not plan:
+                    st.warning("Word oluşturmak için en az bir revizyonu kabul et.")
+                else:
+                    try:
+                        with st.spinner("Onaylanan revizyonlar Word'e uygulanıyor..."):
+                            revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
+                                st.session_state["original_bytes"],
+                                plan,
+                                author="Av. Onur Güneş",
+                                flags=st.session_state.get("word_flags", [])
+                            )
+                        st.session_state["revised_docx"] = revised_bytes
+                        st.session_state["applied_revisions"] = applied
+                        st.session_state["skipped_revisions"] = skipped
+                        st.session_state["placeholder_count"] = placeholder_count
+                        st.session_state["flag_stats"] = flag_stats
+                        st.success(f"Word hazır. {len(applied)} revizyon uygulandı.")
+                    except Exception as e:
+                        st.error(f"Word oluşturulamadı: {e}")
 
             if st.session_state.get("revised_docx"):
                 name = Path(st.session_state.get("uploaded_name","sozlesme.docx")).stem
@@ -824,4 +819,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5.2 Full Clause Preview + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.3 Preview/Word Fix + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")

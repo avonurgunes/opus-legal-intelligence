@@ -379,6 +379,7 @@ def highlight_flags_tracked(doc, flags, author, date_str):
 
 def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author: str = "Av. Onur Güneş", flags: list[dict] | None = None):
     doc=Document(BytesIO(original_bytes)); change_id=1000; applied=[]; skipped=[]
+    date_str = datetime.now(ZoneInfo("Europe/Istanbul")).isoformat()
     for rev in revisions:
         action=(rev.get("action") or "REPLACE_PARAGRAPH").upper(); new_text=(rev.get("replacement_text") or "").strip(); anchor=(rev.get("anchor_text") or "").strip()
         if not new_text: skipped.append({**rev,"reason":"Boş revizyon metni"}); continue
