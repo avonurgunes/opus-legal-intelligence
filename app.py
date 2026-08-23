@@ -321,10 +321,6 @@ STRATEJİ: {POWER_GUIDANCE[negotiation_power]}
 DOSYAYA ÖZGÜ İLK NOT / AJANS NOTU: {initial_note or "Yok"}
 Bu not yalnız bu dosyanın analiz ve müzakere önceliklerini etkiler; Opus standardı değildir.
 
-ONAYLANMIŞ GEÇMİŞ DRAFTING ÖĞRENİMLERİ:
-{learning_prompt_block(contract_text)}
-Bunlar kalıp cümle değildir. Gelen sözleşmenin terminolojisini ve cümle yapısını koruyarak yalnız davranış/tercih örneği olarak kullan.
-
 RULE LIBRARY:
 {rules_text}
 
@@ -923,4 +919,4 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 
 st.divider()
-st.caption("OLI • Sözleşmeler v0.5.7.1 One Click Revision + Arabuluculuk v1.3.1 • Prototip.")
+st.caption("OLI • Sözleşmeler v0.5.7.2 Learning Reference Fix + Arabuluculuk v1.3.1 • Prototip.")
