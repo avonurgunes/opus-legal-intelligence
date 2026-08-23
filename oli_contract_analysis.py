@@ -171,6 +171,12 @@ ZORUNLU İLKELER:
 8. Kullanıcı Word'e revizyonu kendisi işleyecek. Öneri kısa, net, kopyalanabilir ve sözleşme diline uyumlu olsun.
 9. Aynı hukuki sorunu tekrar eden birden fazla bulguya bölme.
 10. Yalnız anlamlı müdahaleleri getir.
+11. short_notes alanı ajansa ilk gönderilecek kısa pazarlık notudur. Her not 2-3 kısa cümle olsun ve mutlaka şu üç unsuru içersin:
+    (a) mevcut maddede ne düzenlendiği,
+    (b) bunun neden sorunlu / fazla geniş / eksik olduğu,
+    (c) nasıl değiştirilmesini istediğimiz.
+    Hukuki mütalaa uzunluğuna çıkma; tam revizyon metnini burada tekrar etme.
+    Örnek ton: "Mevcut düzenlemede OYUNCU'nun başka televizyon projelerinde yer alması tamamen yasaklanmış. Bu yasak fazla geniş. Yasağın yalnızca ana projenin çekimlerini aksatacak veya doğrudan rekabet yaratacak işler bakımından sınırlandırılmasını öneriyoruz."
 
 YANIT YALNIZ GEÇERLİ JSON:
 ÇIKTI KURALLARI:

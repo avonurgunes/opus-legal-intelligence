@@ -1,13 +1,13 @@
-# OLI Clean v0.2.2 — Word Fix
+# OLI Clean v0.2.3 — Final Polish
 
-Dondurulan tasarım, analiz ve not mantığı korunmuştur.
+v0.2.2 akışı korunur.
 
-Değişiklikler:
-- “Ajansa gönderilecek öneri metni” adı → “Revize Önerileri”.
-- Word eşleştirme motoru yeniden kuruldu.
-- DOCX içindeki normal paragraflar ve tablo hücreleri taranır.
-- Önce excerpt, sonra gerçek madde numarası ile eşleşme aranır.
-- Revizyonlar Track Changes olarak `Av. Onur Güneş` yazarıyla işlenir.
-- Tüm dikkat noktalarında tek renk sarı kullanılır.
-- Sarı işaret paragrafın başındaki ilk görünür metin parçasına uygulanır; tüm paragraf boyanmaz.
-- Word üretiminden sonra kaç revizyon işlendiği ve kaç noktanın yalnız dikkat olarak kaldığı gösterilir.
+Son iki düzeltme:
+1. OLI Kısa Notları artık her maddede kısa biçimde:
+   - mevcut düzenleme ne,
+   - sorun ne,
+   - nasıl değiştirelim
+   sırasını izler.
+2. Word Track Changes ile silinen/eklenen metinler, hedef paragrafın mevcut ilk görünür run'ının font/run biçimini devralır. Böylece revizyon metninin font/boyut olarak sıçraması önlenir.
+
+Diğer tasarım, çıktı akışı, sarı dikkat mantığı ve `Av. Onur Güneş` değişiklik yazarı korunur.

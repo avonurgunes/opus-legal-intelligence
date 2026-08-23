@@ -1,5 +1,6 @@
 from io import BytesIO
 import re
+from copy import deepcopy
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -60,9 +61,19 @@ def _highlight_first_word_simple(paragraph):
     return False
 
 def _tracked_replace_whole_paragraph(paragraph, new_text, change_id):
-    """Replace paragraph text as tracked delete+insert, author fixed to Av. Onur Güneş."""
+    """Tracked delete+insert while preserving the paragraph's existing run formatting."""
     old_text=paragraph.text
-    # Remove existing runs/content, preserve paragraph properties.
+
+    # Capture formatting from the first visible original run.
+    template_rpr=None
+    for run in paragraph.runs:
+        if run.text and run.text.strip():
+            rpr=run._r.find(qn("w:rPr"))
+            if rpr is not None:
+                template_rpr=deepcopy(rpr)
+            break
+
+    # Remove content but preserve paragraph properties.
     for child in list(paragraph._p):
         if child.tag != qn("w:pPr"):
             paragraph._p.remove(child)
@@ -71,6 +82,8 @@ def _tracked_replace_whole_paragraph(paragraph, new_text, change_id):
     dele.set(qn("w:id"),str(change_id)); change_id+=1
     dele.set(qn("w:author"),AUTHOR)
     dr=OxmlElement("w:r")
+    if template_rpr is not None:
+        dr.append(deepcopy(template_rpr))
     dt=OxmlElement("w:delText")
     dt.set(qn("xml:space"),"preserve")
     dt.text=old_text
@@ -80,6 +93,8 @@ def _tracked_replace_whole_paragraph(paragraph, new_text, change_id):
     ins.set(qn("w:id"),str(change_id)); change_id+=1
     ins.set(qn("w:author"),AUTHOR)
     ir=OxmlElement("w:r")
+    if template_rpr is not None:
+        ir.append(deepcopy(template_rpr))
     it=OxmlElement("w:t")
     it.set(qn("xml:space"),"preserve")
     it.text=new_text
