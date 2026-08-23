@@ -548,6 +548,22 @@ def render_revision_preview(items, contract_text):
 
 
 
+
+def build_revision_recommendation_report(result, drafts):
+    findings={str(f.get("rule_id","")):f for f in (result or {}).get("findings",[])}
+    rows=[]
+    for d in drafts or []:
+        rid=str(d.get("rule_id","")); f=findings.get(rid,{})
+        rows.append({
+            "rule_id":rid,
+            "title":d.get("title") or f.get("title") or "Revizyon",
+            "reason":d.get("reason") or f.get("issue") or f.get("analysis") or "",
+            "action":(d.get("action") or d.get("mode") or "").upper(),
+            "original":(d.get("anchor_text") or d.get("original_text") or "").strip(),
+            "suggestion":(d.get("replacement_text") or d.get("revised_text") or "").strip(),
+        })
+    return rows
+
 # Compact top navigation
 nav1, nav2 = st.columns([1.2, 4.8])
 with nav1:
@@ -555,7 +571,7 @@ with nav1:
 with nav2:
     selected_module = st.radio(
         "Modül",
-        ["Sözleşmeler", "Arabuluculuk", "Madde Bankası"],
+        ["Sözleşmeler", "Arabuluculuk", "KVKK", "Dava Dosyaları"],
         horizontal=True,
         label_visibility="collapsed",
         key="oli_module_nav_v59"
@@ -564,25 +580,25 @@ st.divider()
 if selected_module == "Arabuluculuk":
     render_mediation()
     st.stop()
-elif selected_module == "Madde Bankası":
-    st.header("Madde Bankası")
-    st.caption("Opus'un kontrollü revizyon kalıpları ve drafting tercihleri.")
-    with st.expander("Aktif Madde Bankası", expanded=True):
-        for rid, item in REVISION_LIBRARY.items():
-            st.markdown(f"**{rid} — {item.get('title','')}**")
-            st.write(item.get("preferred_drafting",""))
+elif selected_module == "KVKK":
+    st.header("KVKK")
+    st.info("Bu modül sonraki aşamada aktif edilecek.")
+    st.stop()
+elif selected_module == "Dava Dosyaları":
+    st.header("Dava Dosyaları")
+    st.info("Bu modül sonraki aşamada aktif edilecek.")
     st.stop()
 
 st.markdown("""
 <div class="oli-workspace">
   <div class="oli-workspace-title">Sözleşme Revizyonu</div>
-  <div class="oli-workspace-sub">Belgeyi yükle, OLI analiz etsin ve revize Word dosyasını hazırlasın.</div>
+  <div class="oli-workspace-sub">Belgeyi yükle. OLI ister revizyon notu ve öneri metinlerini çıkarsın, ister otomatik revize Word hazırlasın.</div>
 </div>
 """, unsafe_allow_html=True)
 
 c1,c2,c3 = st.columns([1,1,1])
 with c1:
-    contract_type = st.selectbox("Sözleşme türü", ["Oyuncu Sözleşmesi"])
+    contract_type = st.selectbox("Sözleşme türü", ["Oyuncu Sözleşmesi", "Senarist Sözleşmesi", "Yönetmen Sözleşmesi"])
 with c2:
     project_type = st.selectbox("Proje türü", ["Ana Akım TV", "Dijital", "Sinema"])
 with c3:
@@ -591,7 +607,7 @@ with c3:
     )
 
 initial_note = st.text_area(
-    "Kısa Not / Ajans Notu",
+    "İlk Not / Ajans Notu",
     placeholder="Dosyaya özgü talimatı yaz. Örn. ücret tamam; münhasırlık kaldırılacak; bölüm garantisi 8 bölüm.",
     height=72
 )
@@ -615,7 +631,13 @@ if uploaded:
         elif not uploaded.name.lower().endswith(".docx"):
             st.warning("Otomatik Word revizyonu için .docx yükle. PDF şu an yalnız metin analizi için okunabilir.")
         elif project_type == "Ana Akım TV":
-            if st.button("OLI ANALİZİNİ ÇALIŞTIR VE WORD'E AKTAR", type="primary", use_container_width=True):
+            action_col1, action_col2 = st.columns(2)
+            with action_col1:
+                notes_action = st.button("REVİZYON NOTU + ÖNERİLERİ HAZIRLA", use_container_width=True)
+            with action_col2:
+                word_action = st.button("OTOMATİK REVİZE WORD OLUŞTUR", type="primary", use_container_width=True)
+            run_action = notes_action or word_action
+            if run_action:
                 try:
                     with st.spinner("OLI sözleşmeyi analiz ediyor ve revize Word'ü hazırlıyor..."):
                         # 1) Main legal analysis
@@ -662,26 +684,47 @@ if uploaded:
                             flags = []
                         st.session_state["word_flags"] = flags
 
-                        # 6) Apply directly to Word
-                        revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
-                            original_bytes,
-                            drafts,
-                            author="Av. Onur Güneş",
-                            flags=flags
-                        )
+                        # 6) Always prepare a human-readable revision report
+                        st.session_state["revision_report"] = build_revision_recommendation_report(result, drafts)
+                        st.session_state["last_contract_action"] = "word" if word_action else "notes"
 
-                        st.session_state["revised_docx"] = revised_bytes
-                        st.session_state["applied_revisions"] = applied
-                        st.session_state["skipped_revisions"] = skipped
-                        st.session_state["placeholder_count"] = placeholder_count
-                        st.session_state["flag_stats"] = flag_stats
+                        # 7) Mutate Word only in automatic Word mode
+                        if word_action:
+                            revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
+                                original_bytes, drafts, author="Av. Onur Güneş", flags=flags
+                            )
+                            st.session_state["revised_docx"] = revised_bytes
+                            st.session_state["applied_revisions"] = applied
+                            st.session_state["skipped_revisions"] = skipped
+                            st.session_state["placeholder_count"] = placeholder_count
+                            st.session_state["flag_stats"] = flag_stats
+                        else:
+                            st.session_state["revised_docx"] = None
+                            st.session_state["applied_revisions"] = []
+                            st.session_state["skipped_revisions"] = []
+                            st.session_state["placeholder_count"] = 0
+                            st.session_state["flag_stats"] = {}
 
-                    st.success("Revizyon tamamlandı.")
+                    st.success("Revizyon önerileri hazırlandı." if notes_action else "Revizyon tamamlandı ve Word hazırlandı.")
                 except Exception as e:
                     st.error(f"Belge/analiz hatası: {e}")
 
     except Exception as e:
         st.error(f"Belge okunamadı: {e}")
+
+if st.session_state.get("last_contract_action") == "notes" and st.session_state.get("revision_report"):
+    report=st.session_state["revision_report"]
+    st.markdown('<div class="oli-resultbar"><strong>Revizyon Notu + Öneriler hazır.</strong><br>Word dosyasına değişiklik uygulanmadı.</div>',unsafe_allow_html=True)
+    for i,item in enumerate(report,1):
+        with st.expander(f"{i}. {item.get('rule_id','')} — {item.get('title','Revizyon')}",expanded=True):
+            if item.get("reason"):
+                st.markdown("**Neden revize edilmeli?**"); st.write(item["reason"])
+            if item.get("original"):
+                st.markdown("**Sözleşmedeki ifade / müdahale noktası**"); st.code(item["original"],language=None)
+            if item.get("suggestion"):
+                st.markdown("**Önerilen metin**"); st.code(item["suggestion"],language=None)
+            if item.get("action"):
+                st.caption(f"Önerilen müdahale tipi: {item['action']}")
 
 if st.session_state.get("revised_docx"):
     applied = st.session_state.get("applied_revisions", [])
@@ -704,7 +747,7 @@ if st.session_state.get("revised_docx"):
 
     note_items = st.session_state.get("initial_review_note", {}).get("note_items", [])
     if note_items:
-        st.markdown("#### Kısa Notlar")
+        st.markdown("#### OLI Kısa Notları")
         for ni in note_items[:12]:
             ref = (ni.get("reference") or "").strip()
             title = (ni.get("title") or "").strip()
@@ -798,4 +841,4 @@ div[data-testid="stExpander"] summary *{opacity:1!important;color:#343A40!import
 </style>
 """,unsafe_allow_html=True)
 
-st.markdown("<div class=\"oli-footer\">OLI • Sözleşmeler v0.6.1 Contrast + Micro Engine + Notes + Arabuluculuk v1.3.1 • Prototip.</div>", unsafe_allow_html=True)
+st.markdown("<div class=\"oli-footer\">OLI • v0.6.2 Dual Mode • Sözleşmeler + Arabuluculuk + KVKK + Dava Dosyaları</div>", unsafe_allow_html=True)
