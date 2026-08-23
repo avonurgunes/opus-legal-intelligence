@@ -12,7 +12,7 @@ from pypdf import PdfReader
 from openai import OpenAI
 
 from revision_engine import apply_revisions_to_docx
-from learning_engine import build_candidates, approve_candidates, load_memory, learning_prompt_block, match_batch_documents, batch_candidates, cluster_candidates
+from learning_engine import build_candidates, approve_candidates, load_memory, learning_prompt_block, match_batch_documents, batch_candidates, cluster_candidates, semantic_diff, compact_change_summary
 from mediation import render_mediation
 
 st.set_page_config(
@@ -21,6 +21,23 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+st.markdown("""
+<style>
+:root{color-scheme:light}
+html,body,[data-testid="stAppViewContainer"],.stApp{background:#f7f8fb!important;color:#20242c!important}
+[data-testid="stHeader"]{background:rgba(247,248,251,.96)!important}
+div[data-testid="stExpander"] details{background:#fff!important;border:1px solid #dfe3ea!important;border-radius:12px!important}
+div[data-testid="stExpander"] details summary{background:#f5f6f8!important}
+div[data-testid="stTextInput"] input,div[data-testid="stTextArea"] textarea,
+div[data-testid="stSelectbox"] div[data-baseweb="select"]>div,div[data-testid="stFileUploaderDropzone"]{background:#fff!important;color:#20242c!important}
+.oli-diff-card{background:#fff;border:1px solid #e1e5eb;border-radius:10px;padding:12px 14px;margin:8px 0 12px;line-height:1.6;color:#20242c}
+.oli-diff-title{font-weight:700;margin-bottom:6px;color:#1f2937}
+.oli-del{background:#ffe2e2;color:#8b1e1e;text-decoration:line-through;padding:1px 2px;border-radius:3px}
+.oli-ins{background:#dff6e7;color:#126b38;font-weight:600;padding:1px 2px;border-radius:3px}
+.oli-summary{background:#eef4ff;border-left:4px solid #6b8fd6;border-radius:8px;padding:9px 12px;margin:8px 0 12px;color:#26354f}
+</style>
+""",unsafe_allow_html=True)
 
 RULES = json.loads(Path(__file__).with_name("rules.json").read_text(encoding="utf-8"))
 REVISION_LIBRARY = json.loads(
@@ -895,8 +912,12 @@ if clusters:
         ):
             for ex in c["examples"][:3]:
                 st.markdown(f"**{ex.get('pair_raw_name','')} → {ex.get('pair_revised_name','')}**")
-                st.caption("Önce: " + (ex.get("original_text") or "—")[:500])
-                st.caption("Nihai: " + (ex.get("final_text") or "—")[:500])
+                diff=semantic_diff(ex.get("original_text",""),ex.get("final_text",""))
+                summary=compact_change_summary(ex.get("original_text",""),ex.get("final_text",""))
+                if summary:
+                    st.markdown(f'<div class="oli-summary"><b>DEĞİŞİKLİK:</b> {summary}</div>',unsafe_allow_html=True)
+                st.markdown('<div class="oli-diff-card"><div class="oli-diff-title">HAM</div>'+(diff.get("old_html") or "—")+'</div>',unsafe_allow_html=True)
+                st.markdown('<div class="oli-diff-card"><div class="oli-diff-title">NİHAİ</div>'+(diff.get("new_html") or "—")+'</div>',unsafe_allow_html=True)
 
             cc1,cc2,cc3 = st.columns([1,1.4,1])
             ok = cc1.checkbox("✓ Kümeyi Öğren", key=f"bc_ok_561_{i}")
@@ -1014,4 +1035,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5.6.1 Batch Learning Fix + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.6.2 Semantic Diff + Light UI • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")

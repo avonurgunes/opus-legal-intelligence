@@ -1,3 +1,4 @@
+import html
 import json, os, re, hashlib
 from pathlib import Path
 from datetime import datetime
@@ -183,6 +184,7 @@ def batch_candidates(pairs):
     allc=[]
     for p in pairs:
         cs=build_candidates(p["raw_data"],p["revised_data"],source_name=p["revised_name"])
+        cs=filter_meaningful_candidates(cs)
         for c in cs:
             c["pair_raw_name"]=p["raw_name"]
             c["pair_revised_name"]=p["revised_name"]
@@ -227,3 +229,56 @@ def cluster_candidates(candidates):
             "candidate_ids":[x["candidate_id"] for x in items]
         })
     return sorted(out,key=lambda x:(-x["count"],x["topic"]))
+
+
+def semantic_diff(original, final):
+    def clean(s):
+        s=(s or "").replace("\u00a0"," ")
+        return re.sub(r"\s+"," ",s).strip()
+    def norm_semantic(s):
+        s=clean(s).lower()
+        s=re.sub(r"[“”\"'’`´]", "", s)
+        s=re.sub(r"\s*([,;:.!?()\-/])\s*", r"\1", s)
+        return s
+    o=clean(original); f=clean(final)
+    if norm_semantic(o)==norm_semantic(f):
+        return {"meaningful":False,"changes":[],"old_html":html.escape(o),"new_html":html.escape(f)}
+    tok_re=re.compile(r"\w+|[^\w\s]|\s+", re.UNICODE)
+    ot=tok_re.findall(o); ft=tok_re.findall(f)
+    sm=SequenceMatcher(None,ot,ft,autojunk=False)
+    changes=[]; old_parts=[]; new_parts=[]
+    for tag,i1,i2,j1,j2 in sm.get_opcodes():
+        os="".join(ot[i1:i2]); ns="".join(ft[j1:j2])
+        if tag=="equal":
+            old_parts.append(html.escape(os)); new_parts.append(html.escape(ns))
+        else:
+            if norm_semantic(os)==norm_semantic(ns):
+                old_parts.append(html.escape(os)); new_parts.append(html.escape(ns)); continue
+            changes.append({"type":tag,"old":os,"new":ns})
+            if os: old_parts.append(f'<span class="oli-del">{html.escape(os)}</span>')
+            if ns: new_parts.append(f'<span class="oli-ins">{html.escape(ns)}</span>')
+    return {"meaningful":bool(changes),"changes":changes,"old_html":"".join(old_parts),"new_html":"".join(new_parts)}
+
+def compact_change_summary(original, final, max_items=4):
+    d=semantic_diff(original,final)
+    if not d["meaningful"]: return ""
+    parts=[]
+    for ch in d["changes"][:max_items]:
+        old=re.sub(r"\s+"," ",ch.get("old","")).strip()
+        new=re.sub(r"\s+"," ",ch.get("new","")).strip()
+        if old and new: parts.append(f'"{old}" → "{new}"')
+        elif old: parts.append(f'Silindi: "{old}"')
+        elif new: parts.append(f'Eklendi: "{new}"')
+    return " • ".join(parts)
+
+def filter_meaningful_candidates(candidates):
+    out=[]
+    for c in candidates:
+        if c.get("kind")=="ADDITION":
+            if len(_norm(c.get("final_text","")))>=35: out.append(c)
+            continue
+        if semantic_diff(c.get("original_text",""),c.get("final_text",""))["meaningful"]:
+            cc=dict(c)
+            cc["diff_summary"]=compact_change_summary(cc.get("original_text",""),cc.get("final_text",""))
+            out.append(cc)
+    return out
