@@ -12,7 +12,6 @@ from pypdf import PdfReader
 from openai import OpenAI
 
 from revision_engine import apply_revisions_to_docx
-from learning_engine import build_candidates, approve_candidates, load_memory, learning_prompt_block, match_batch_documents, batch_candidates, cluster_candidates, semantic_diff, compact_change_summary
 from mediation import render_mediation
 
 st.set_page_config(
@@ -24,20 +23,126 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-:root{color-scheme:light}
-html,body,[data-testid="stAppViewContainer"],.stApp{background:#f7f8fb!important;color:#20242c!important}
-[data-testid="stHeader"]{background:rgba(247,248,251,.96)!important}
-div[data-testid="stExpander"] details{background:#fff!important;border:1px solid #dfe3ea!important;border-radius:12px!important}
-div[data-testid="stExpander"] details summary{background:#f5f6f8!important}
-div[data-testid="stTextInput"] input,div[data-testid="stTextArea"] textarea,
-div[data-testid="stSelectbox"] div[data-baseweb="select"]>div,div[data-testid="stFileUploaderDropzone"]{background:#fff!important;color:#20242c!important}
-.oli-diff-card{background:#fff;border:1px solid #e1e5eb;border-radius:10px;padding:12px 14px;margin:8px 0 12px;line-height:1.6;color:#20242c}
-.oli-diff-title{font-weight:700;margin-bottom:6px;color:#1f2937}
-.oli-del{background:#ffe2e2;color:#8b1e1e;text-decoration:line-through;padding:1px 2px;border-radius:3px}
-.oli-ins{background:#dff6e7;color:#126b38;font-weight:600;padding:1px 2px;border-radius:3px}
-.oli-summary{background:#eef4ff;border-left:4px solid #6b8fd6;border-radius:8px;padding:9px 12px;margin:8px 0 12px;color:#26354f}
+:root { color-scheme: light; }
+
+/* OLI v5.7 — warm, readable workspace */
+html, body, [data-testid="stAppViewContainer"], .stApp {
+    background: #F2F0EB !important;
+    color: #262626 !important;
+}
+[data-testid="stHeader"] {
+    background: rgba(242,240,235,.96) !important;
+}
+[data-testid="stAppViewBlockContainer"] {
+    max-width: 1180px !important;
+    padding-top: 2rem !important;
+}
+h1,h2,h3 { color:#171717 !important; letter-spacing:-0.02em; }
+p, label, [data-testid="stCaptionContainer"] { color:#57534E !important; }
+
+/* Cards / expanders */
+div[data-testid="stExpander"] details {
+    background:#FCFBF8 !important;
+    border:1px solid #D9D4C9 !important;
+    border-radius:14px !important;
+    box-shadow:0 1px 2px rgba(0,0,0,.035);
+}
+div[data-testid="stExpander"] details summary {
+    background:#F8F6F1 !important;
+    border-radius:14px !important;
+}
+
+/* Inputs */
+div[data-testid="stTextInput"] input,
+div[data-testid="stTextArea"] textarea,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+div[data-testid="stFileUploaderDropzone"] {
+    background:#FCFBF8 !important;
+    color:#262626 !important;
+    border-color:#D9D4C9 !important;
+}
+
+/* Buttons */
+.stButton > button, .stDownloadButton > button {
+    border-radius:10px !important;
+    min-height:42px;
+}
+.stButton > button[kind="primary"] {
+    background:#9B7735 !important;
+    color:white !important;
+    border-color:#9B7735 !important;
+}
+
+/* Revision preview */
+.oli-revision-card {
+    background:#FCFBF8;
+    border:1px solid #D9D4C9;
+    border-radius:14px;
+    padding:16px 18px;
+    margin:10px 0 14px 0;
+}
+.oli-reason {
+    background:#F5EFE1;
+    border-left:4px solid #B18A46;
+    padding:10px 12px;
+    border-radius:8px;
+    color:#413A2F;
+    margin-bottom:12px;
+}
+.oli-original {
+    background:#F7F6F3;
+    border:1px solid #E2DED5;
+    border-radius:9px;
+    padding:11px 13px;
+    color:#3F3F3F;
+}
+.oli-revised {
+    background:#EEF5EF;
+    border:1px solid #CFE0D1;
+    border-radius:9px;
+    padding:11px 13px;
+    color:#243A29;
+}
+.oli-label {
+    font-size:.78rem;
+    font-weight:700;
+    letter-spacing:.04em;
+    color:#6B665E;
+    margin:8px 0 5px 0;
+}
+.oli-status {
+    display:inline-block;
+    padding:3px 8px;
+    border-radius:999px;
+    background:#ECE8DE;
+    color:#5D5547;
+    font-size:.78rem;
+    margin-right:6px;
+}
 </style>
-""",unsafe_allow_html=True)
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+/* v5.7.1 One Click Revision:
+   engine still builds revisions, but review widgets are hidden from the normal flow */
+.oli-oneclick-summary {
+    background:#FCFBF8;
+    border:1px solid #D9D4C9;
+    border-radius:14px;
+    padding:18px 20px;
+    margin:14px 0;
+}
+.oli-oneclick-summary h3 { margin:0 0 8px 0 !important; }
+.oli-oneclick-note {
+    color:#625D54;
+    font-size:.92rem;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+
 
 RULES = json.loads(Path(__file__).with_name("rules.json").read_text(encoding="utf-8"))
 REVISION_LIBRARY = json.loads(
@@ -574,6 +679,13 @@ with c3:
     )
 
 initial_note = st.text_area("İlk Not / Ajans Notu", placeholder="Bu dosyaya özgü bilgi veya talimatı yaz. Örn. ücret tamam; münhasırlık önemli.", height=90)
+st.markdown("""
+<div class="oli-oneclick-summary">
+<h3>⚡ Tek Tık Revizyon</h3>
+<div class="oli-oneclick-note">Sözleşmeyi yükle. OLI temel revizyonları otomatik uygular, eksik alanları ve riskleri işaretler ve revize Word'ü hazırlar. Tek tek revizyon onayı gerekmez.</div>
+</div>
+""", unsafe_allow_html=True)
+
 uploaded = st.file_uploader("Sözleşmeyi yükle", type=["docx","pdf"])
 if project_type != "Ana Akım TV":
     st.info("Aktif profil şu an ACTOR_TV_MAINSTREAM.")
@@ -727,7 +839,7 @@ if result:
             )
             st.session_state["approved_revision_plan"] = [dict(x) for x in edited]
 
-            if st.button("📄 Onaylanan Revizyonlarla Word Oluştur", type="primary", use_container_width=True):
+            if st.button("📄 📄 📄 Revize Word'ü Oluştur", type="primary", use_container_width=True):
                 plan = st.session_state.get("approved_revision_plan", [])
                 if not plan:
                     st.warning("Word oluşturmak için en az bir revizyonu kabul et.")
@@ -745,7 +857,7 @@ if result:
                         st.session_state["skipped_revisions"] = skipped
                         st.session_state["placeholder_count"] = placeholder_count
                         st.session_state["flag_stats"] = flag_stats
-                        st.success(f"Word hazır. {len(applied)} revizyon uygulandı.")
+                        st.success(f"Revizyon tamamlandı. Revizyon tamamlandı. Word hazır. {len(applied)} revizyon uygulandı.")
                     except Exception as e:
                         st.error(f"Word oluşturulamadı: {e}")
 
@@ -811,228 +923,4 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 
 st.divider()
-st.header("🧠 Toplu Öğrenme")
-st.caption("Birden fazla ham ve revize Word yükle. OLI çiftleri eşleştirir, sonra her çiftin içindeki gerçek revizyonları çıkarır ve kümeler.")
-
-bc1,bc2 = st.columns(2)
-batch_raw = bc1.file_uploader(
-    "Ham sözleşmeler",
-    type=["docx"],
-    accept_multiple_files=True,
-    key="batch_raw_v561"
-)
-batch_rev = bc2.file_uploader(
-    "Senin revize ettiğin sözleşmeler",
-    type=["docx"],
-    accept_multiple_files=True,
-    key="batch_rev_v561"
-)
-
-if batch_raw and batch_rev and st.button("🔗 Sözleşmeleri Eşleştir", use_container_width=True):
-    try:
-        raw_payload = [(f.name, bytes(f.getvalue())) for f in batch_raw]
-        rev_payload = [(f.name, bytes(f.getvalue())) for f in batch_rev]
-        pairs, ur, uv = match_batch_documents(raw_payload, rev_payload)
-
-        # Persist raw bytes safely across Streamlit reruns.
-        safe_pairs = []
-        for p in pairs:
-            safe_pairs.append({
-                "raw_name": p["raw_name"],
-                "raw_data": bytes(p["raw_data"]),
-                "revised_name": p["revised_name"],
-                "revised_data": bytes(p["revised_data"]),
-                "match_score": p["match_score"],
-                "status": p["status"],
-            })
-
-        st.session_state["batch_pairs_v561"] = safe_pairs
-        st.session_state["batch_unmatched_v561"] = (ur, uv)
-        st.session_state.pop("batch_candidates_v561", None)
-        st.session_state.pop("batch_clusters_v561", None)
-        st.success(f"{len(safe_pairs)} sözleşme çifti eşleştirildi.")
-    except Exception as e:
-        st.error(f"Eşleştirme yapılamadı: {e}")
-
-pairs = st.session_state.get("batch_pairs_v561", [])
-if pairs:
-    st.subheader("Eşleşmeler")
-    confident = sum(p["status"] == "CONFIDENT" for p in pairs)
-    review = len(pairs) - confident
-    st.info(f"📁 {len(pairs)} sözleşme çifti eşleştirildi · {confident} güçlü eşleşme · {review} manuel kontrol")
-
-    for i,p in enumerate(pairs):
-        icon = "🟢" if p["status"] == "CONFIDENT" else "🟡"
-        st.write(f"{icon} **{p['raw_name']}** ↔ **{p['revised_name']}** · eşleşme {p['match_score']}")
-
-    ur, uv = st.session_state.get("batch_unmatched_v561", ([], []))
-    if ur or uv:
-        st.warning("Eşleşmeyen dosyalar: " + ", ".join(ur + uv))
-
-    if st.button("🔬 Tüm Çiftlerden Öğrenme Özeti Çıkar", type="primary", use_container_width=True):
-        try:
-            with st.spinner("Sözleşme çiftlerindeki gerçek revizyonlar çıkarılıyor..."):
-                cs = batch_candidates(pairs)
-                clusters = cluster_candidates(cs)
-
-            st.session_state["batch_candidates_v561"] = cs
-            st.session_state["batch_clusters_v561"] = clusters
-
-            styles = {}
-            for c in cs:
-                styles[c.get("edit_style","UNKNOWN")] = styles.get(c.get("edit_style","UNKNOWN"), 0) + 1
-
-            style_text = " · ".join(f"{k}: {v}" for k,v in styles.items())
-            st.success(f"✏️ {len(cs)} revizyon/öğrenme adayı bulundu. {style_text}")
-        except Exception as e:
-            st.error(f"Toplu öğrenme analizi yapılamadı: {e}")
-
-clusters = st.session_state.get("batch_clusters_v561", [])
-allc = st.session_state.get("batch_candidates_v561", [])
-
-if allc:
-    styles = {}
-    for c in allc:
-        styles[c.get("edit_style","UNKNOWN")] = styles.get(c.get("edit_style","UNKNOWN"), 0) + 1
-    c1,c2,c3,c4 = st.columns(4)
-    c1.metric("Revizyon Adayı", len(allc))
-    c2.metric("MICRO", styles.get("MICRO",0))
-    c3.metric("PHRASE", styles.get("PHRASE",0))
-    c4.metric("BLOCK / YENİ", styles.get("BLOCK",0) + styles.get("NEW_CLAUSE",0))
-
-if clusters:
-    st.subheader("Toplu Öğrenme Özeti")
-    st.caption(f"{len(allc)} tekil değişiklik, {len(clusters)} davranış kümesine ayrıldı. Tek tek yüzlerce fark yerine kümeleri onaylayabilirsin.")
-
-    cluster_decisions = {}
-    for i,c in enumerate(clusters):
-        with st.expander(
-            f"{c['topic']} — {c['edit_style']} · {c['count']} örnek · güven {c['confidence']}",
-            expanded=(i < 4)
-        ):
-            for ex in c["examples"][:3]:
-                st.markdown(f"**{ex.get('pair_raw_name','')} → {ex.get('pair_revised_name','')}**")
-                diff=semantic_diff(ex.get("original_text",""),ex.get("final_text",""))
-                summary=compact_change_summary(ex.get("original_text",""),ex.get("final_text",""))
-                if summary:
-                    st.markdown(f'<div class="oli-summary"><b>DEĞİŞİKLİK:</b> {summary}</div>',unsafe_allow_html=True)
-                st.markdown('<div class="oli-diff-card"><div class="oli-diff-title">HAM</div>'+(diff.get("old_html") or "—")+'</div>',unsafe_allow_html=True)
-                st.markdown('<div class="oli-diff-card"><div class="oli-diff-title">NİHAİ</div>'+(diff.get("new_html") or "—")+'</div>',unsafe_allow_html=True)
-
-            cc1,cc2,cc3 = st.columns([1,1.4,1])
-            ok = cc1.checkbox("✓ Kümeyi Öğren", key=f"bc_ok_561_{i}")
-            topic = cc2.text_input("Konu", value=c["topic"], key=f"bc_topic_561_{i}")
-            scope = cc3.selectbox("Kapsam", ["GENERAL","FILE_ONLY"], key=f"bc_scope_561_{i}")
-            cluster_decisions[c["cluster_id"]] = {
-                "approve": ok,
-                "topic": topic,
-                "scope": scope
-            }
-
-    if st.button("💾 Onaylanan Kümeleri Hafızaya Kaydet", type="primary", use_container_width=True):
-        decisions = {}
-        for c in clusters:
-            d = cluster_decisions.get(c["cluster_id"], {})
-            for cid in c["candidate_ids"]:
-                decisions[cid] = {
-                    "approve": d.get("approve", False),
-                    "topic": d.get("topic", c["topic"]),
-                    "scope": d.get("scope", "GENERAL")
-                }
-        try:
-            added, mem = approve_candidates(allc, decisions)
-            st.success(
-                f"{added} tekil emsal öğrenildi. "
-                f"Toplam onaylı kayıt: {sum(1 for r in mem['records'] if r.get('approved'))}"
-            )
-        except Exception as e:
-            st.error(f"Toplu öğrenme kaydedilemedi: {e}")
-
-st.divider()
-st.header("Nihai Revizyondan Öğren — Learning Engine v1")
-st.caption("Geçmiş dosyalarda ilk gelen Word + senin nihai revize Word'ünü karşılaştırır. Hiçbir kayıt sen onaylamadan kalıcı öğrenme hafızasına girmez.")
-
-lc1,lc2=st.columns(2)
-learn_original=lc1.file_uploader("İlk gelen sözleşme (.docx)",type=["docx"],key="learn_original_v1")
-learn_final=lc2.file_uploader("Nihai / senin revize ettiğin sözleşme (.docx)",type=["docx"],key="learn_final_v1")
-
-if learn_original and learn_final and st.button("🧠 Öğrenme Adaylarını Çıkar",use_container_width=True):
-    try:
-        candidates=build_candidates(
-            learn_original.getvalue(),
-            learn_final.getvalue(),
-            source_name=learn_final.name
-        )
-        st.session_state["learning_candidates_v1"]=candidates
-    except Exception as e:
-        st.error(f"Öğrenme adayları çıkarılamadı: {e}")
-
-cands=st.session_state.get("learning_candidates_v1",[])
-if cands:
-    st.info(f"{len(cands)} değişiklik/adisyon öğrenme adayı bulundu. Yalnız onayladıkların kaydedilecek.")
-    decisions={}
-    for i,c in enumerate(cands):
-        with st.expander(f"{i+1}. {c.get('edit_style')} — {c.get('final_text','')[:90]}",expanded=(i<3)):
-            st.markdown("**ÖNCE**")
-            st.text_area("Önce",c.get("original_text") or "—",height=100,disabled=True,key=f"l_old_{i}",label_visibility="collapsed")
-            st.markdown("**NİHAİ TERCİH**")
-            st.text_area("Nihai",c.get("final_text") or "—",height=110,disabled=True,key=f"l_new_{i}",label_visibility="collapsed")
-            cc1,cc2,cc3=st.columns([1,1.4,1.2])
-            approve=cc1.checkbox("✓ Öğren",key=f"l_ok_{i}")
-            topic=cc2.text_input("Konu",value=c.get("topic","SINIFLANDIRILMADI"),key=f"l_topic_{i}")
-            scope=cc3.selectbox("Kapsam",["GENERAL","FILE_ONLY"],key=f"l_scope_{i}")
-            decisions[c["candidate_id"]]={"approve":approve,"topic":topic,"scope":scope}
-    if st.button("💾 Onaylananları Öğrenme Hafızasına Kaydet",type="primary",use_container_width=True):
-        try:
-            added,mem=approve_candidates(cands,decisions)
-            st.success(f"{added} öğrenme kaydı kaydedildi. Toplam onaylı kayıt: {sum(1 for r in mem['records'] if r.get('approved'))}")
-            st.session_state.pop("learning_candidates_v1",None)
-        except Exception as e:
-            st.error(f"Öğrenme hafızası kaydedilemedi: {e}")
-
-mem=load_memory()
-approved=[r for r in mem.get("records",[]) if r.get("approved")]
-with st.expander(f"📚 Öğrenme Hafızası ({len(approved)} onaylı kayıt)"):
-    if not approved:
-        st.caption("Henüz onaylı öğrenme kaydı yok.")
-    else:
-        for r in approved[-20:][::-1]:
-            st.write(f"**{r.get('topic')}** · {r.get('edit_style')} · güven {r.get('confidence')} · {r.get('precedent_count',1)} örnek")
-            st.caption((r.get("final_text") or "")[:300])
-
-st.divider()
-st.header("Nihai Revizyondan Öğren")
-st.caption("OLI çıktısını sen son kez revize ettikten sonra buraya yükle. Sistem farkları öğrenme adayı olarak çıkarır; hiçbir şeyi otomatik olarak Revision Library'ye eklemez.")
-final_upload = st.file_uploader("Av. Onur Güneş nihai revize Word", type=["docx"], key="final_revision_upload")
-if final_upload and st.session_state.get("revised_docx"):
-    if st.button("🧠 OLI Revizyonu ile Karşılaştır", use_container_width=True):
-        try:
-            oli_text = read_docx(st.session_state["revised_docx"])
-            final_text = read_docx(final_upload.getvalue())
-            with st.spinner("Nihai revizyon tercihleri karşılaştırılıyor..."):
-                st.session_state["learning_review"] = compare_final_revision(oli_text, final_text)
-        except Exception as e:
-            st.error(f"Karşılaştırma yapılamadı: {e}")
-
-    candidates = st.session_state.get("learning_review", {}).get("learning_candidates", [])
-    for c in candidates:
-        with st.expander(f"🧠 {c.get('title','Revizyon tercihi')}"):
-            st.write("**OLI:**", c.get("oli_position",""))
-            st.write("**Nihai tercih:**", c.get("final_position",""))
-            st.write("**Fark:**", c.get("difference",""))
-            st.caption(f"Öneri: {c.get('recommendation')} • Güven: {c.get('confidence')}")
-            st.radio(
-                "Bu öğrenme ne olsun?",
-                ["Henüz öğrenme", "Revision Library adayı", "Bu dosyaya özgü"],
-                index=0,
-                key=f"learn_{c.get('title','')}_{c.get('difference','')[:20]}"
-            )
-
-
-st.divider()
-with st.expander("OLI Bilgi Tabanı"):
-    st.write(f"**Rule Library:** {len(RULES)} kontrol noktası")
-    st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
-    st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
-
-st.caption("OLI • Sözleşmeler v0.5.6.2 Semantic Diff + Light UI • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.7.1 One Click Revision + Arabuluculuk v1.3.1 • Prototip.")
