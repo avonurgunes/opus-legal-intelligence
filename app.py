@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from contracts_ui import render_contracts
+from oli_contracts_ui import render_contracts
 from mediation import render_mediation
 
 
@@ -98,4 +98,4 @@ else:
     st.markdown('<div class="work-card"><div class="eyebrow">DAVA DOSYALARI</div><h1>Dava Dosyaları</h1><p>Bu modül sonraki aşamada geliştirilecek.</p></div>',unsafe_allow_html=True)
 
 st.markdown("---")
-st.caption("OLI Clean v0.1.1 • Sözleşmeler sıfırdan • Arabuluculuk v1.3.1 korunmuştur.")
+st.caption("OLI Clean v0.1.2 • Sözleşmeler sıfırdan • Arabuluculuk v1.3.1 korunmuştur.")

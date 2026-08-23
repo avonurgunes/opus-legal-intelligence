@@ -1,27 +1,19 @@
-# OLI Clean v0.1
+# OLI Clean v0.1.2 — No Package Conflict
 
-Tam temiz başlangıç.
+Bu sürüm Streamlit Cloud'daki `contracts.py` isim çakışmasını ortadan kaldırır.
 
-## Korunan
-- Arabuluculuk v1.3.1 `modules/mediation.py` olarak birebir korunmuştur.
+Sorun:
+Repo'da eski sürümlerden kalan `contracts.py`, Python'ın `contracts/` paketini gölgeliyordu.
+Bu nedenle `from contracts.analysis ...` importu hata veriyordu.
 
-## Sıfırdan yazılan Sözleşmeler v0.1
-İlk hedef yalnız:
-- sözleşme yükleme,
-- Oyuncu / Senarist / Yönetmen seçimi,
-- proje türü,
-- pazarlık gücü,
-- İlk Not / Ajans Notu,
-- sözleşmenin analizi,
-- OLI Kısa Notları,
-- Madde → Neden → Sözleşmedeki İfade → Revizyon Tipi → Önerilen Revizyon çıktısı.
+Çözüm:
+Sözleşme modülü artık benzersiz root-level dosya adları kullanır:
+- oli_contracts_ui.py
+- oli_contract_analysis.py
+- oli_contract_profiles.py
+- oli_actor_tv_rules.json
 
-Bu sürüm Word'e otomatik müdahale etmez.
-Önce analiz ve revizyon önerisi kalitesi sabitlenecektir.
+`app.py` yalnız `oli_contracts_ui` üzerinden sözleşme ekranını çağırır.
+Eski `contracts.py` dosyası repo'da kalsa bile artık bu import zincirini bozamaz.
 
-## Profil durumu
-- Oyuncu / Ana Akım TV: mevcut kontrollü 30 Opus kuralı kullanılır.
-- Diğer kombinasyonlar: genel entertainment/media sözleşme analizi; özel Rule Library sonradan eklenecektir.
-
-## Ana modüller
-Sözleşmeler | Arabuluculuk | KVKK | Dava Dosyaları
+Arabuluculuk korunmuştur.
