@@ -154,7 +154,7 @@ def clean_json(text: str):
     return json.loads(text)
 
 
-def analyse_contract(contract_text: str, negotiation_power: str):
+def analyse_contract(contract_text: str, negotiation_power: str, initial_note: str = ""):
     rules_text = "\n".join(
         f"{r['id']} | {r['title']} | Öncelik: {r['priority']} | Opus standardı: {r['standard']}"
         for r in RULES
@@ -195,6 +195,8 @@ Her 30 kural için findings üret.
     user = f"""PROFİL: ACTOR_TV_MAINSTREAM
 PAZARLIK GÜCÜ: {negotiation_power}
 STRATEJİ: {POWER_GUIDANCE[negotiation_power]}
+DOSYAYA ÖZGÜ İLK NOT / AJANS NOTU: {initial_note or "Yok"}
+Bu not yalnız bu dosyanın analiz ve müzakere önceliklerini etkiler; Opus standardı değildir.
 
 RULE LIBRARY:
 {rules_text}
@@ -350,6 +352,68 @@ AV. ONUR GÜNEŞ NİHAİ METİN:
     return clean_json(resp.output_text)
 
 
+
+def build_initial_review_note(result):
+    system = """Sen OLI Ajans Bilgilendirme Notu motorusun.
+Verilen sözleşme analizinden yalnız müdahale edilmesi, ajansa bildirilmesi veya karar alınması gereken noktaları kısa Türkçe not halinde yaz.
+Her satır mümkünse sözleşme madde numarasıyla başlasın.
+Dil kısa ve pratik olsun: '5.4. Münhasırlık Yapımcı onayına bağlanmış. Bilgilendirmeye çevirelim.' gibi.
+Uzun hukuki açıklama yapma. GREEN/KORU maddelerini yazma. Yanıt yalnız JSON:
+{"note_items":[{"reference":"5.4","title":"Münhasırlık","note":"..."}]}"""
+    client = OpenAI(api_key=get_api_key())
+    resp = client.responses.create(
+        model=get_model(),
+        input=[{"role":"system","content":system},
+               {"role":"user","content":json.dumps(result, ensure_ascii=False)[:100000]}]
+    )
+    return clean_json(resp.output_text)
+
+
+def classify_word_flags(contract_text: str, result: dict, extra_risks: dict | None = None):
+    rules_text = "\n".join(f"{r['id']} | {r['title']} | {r['standard']}" for r in RULES)
+    system = """Sen OLI Word Flag motorusun.
+Sözleşmedeki yalnız iki tür hükmü işaretle:
+ORANGE: hukuki/ticari risk veya manuel dikkat gerektiren hüküm; fakat Word revizyonu ile zaten doğrudan değiştirilecek parça olmak zorunda değil.
+BLUE: mevcut Rule Library ile ANLAMSAL olarak eşleşmeyen, gerçekten yeni/öğrenilmemiş bir hukuki düzenleme.
+Aynı konunun farklı kelimelerle yazılması BLUE değildir. Örneğin farklı yazılmış cezai şart yine cezai şarttır.
+Her flag için anchor_text sözleşmede BİREBİR geçen 25-100 karakterlik kısa parça olmalı.
+Yanıt yalnız JSON:
+{"flags":[{"color":"orange|blue","title":"...","reference":"...","anchor_text":"...","reason":"..."}]}"""
+    user = f"""RULE LIBRARY:
+{rules_text}
+
+30 KURAL ANALİZİ:
+{json.dumps(result, ensure_ascii=False)}
+
+EK RİSKLER:
+{json.dumps(extra_risks or {}, ensure_ascii=False)}
+
+SÖZLEŞME:
+{contract_text[:140000]}"""
+    client = OpenAI(api_key=get_api_key())
+    resp = client.responses.create(model=get_model(), input=[{"role":"system","content":system},{"role":"user","content":user}])
+    return clean_json(resp.output_text)
+
+
+def compare_counterparty_return(our_text: str, returned_text: str):
+    system = """Sen OLI Negotiation Compare motorusun.
+Av. Onur Güneş tarafından gönderilen revize sözleşme ile karşı taraftan dönen sözleşmeyi hukuki anlam bakımından karşılaştır.
+Sınıflar:
+ACCEPTED = bizim değişiklik kabul edilmiş.
+PARTIAL = kısmen kabul edilmiş/değiştirilmiş.
+REJECTED = bizim değişiklik kaldırılmış/eski pozisyona dönülmüş.
+NEW = karşı taraf yeni bir hüküm eklemiş.
+Kısa, ajansa aktarılabilir dil kullan. Yanıt yalnız JSON:
+{"items":[{"reference":"...","title":"...","status":"ACCEPTED|PARTIAL|REJECTED|NEW","our_position":"...","counterparty_position":"...","note":"..."}]}"""
+    client = OpenAI(api_key=get_api_key())
+    resp = client.responses.create(
+        model=get_model(),
+        input=[{"role":"system","content":system},
+               {"role":"user","content":f"BİZİM GÖNDERDİĞİMİZ:\\n{our_text[:100000]}\\n\\nKARŞI TARAF DÖNÜŞÜ:\\n{returned_text[:100000]}"}]
+    )
+    return clean_json(resp.output_text)
+
+
 st.markdown("""
 <div class="opus-hero">
   <div class="opus-kicker">OPUS • PRIVATE COUNSEL SYSTEM</div>
@@ -406,6 +470,7 @@ with c3:
         "Pazarlık gücü", ["Düşük","Orta","Yüksek","Çok Yüksek"], value="Orta"
     )
 
+initial_note = st.text_area("İlk Not / Ajans Notu", placeholder="Bu dosyaya özgü bilgi veya talimatı yaz. Örn. ücret tamam; münhasırlık önemli.", height=90)
 uploaded = st.file_uploader("Sözleşmeyi yükle", type=["docx","pdf"])
 if project_type != "Ana Akım TV":
     st.info("Aktif profil şu an ACTOR_TV_MAINSTREAM.")
@@ -427,7 +492,7 @@ if uploaded:
         elif project_type == "Ana Akım TV":
             if st.button("⚖️ OLI Analizini Çalıştır", type="primary", use_container_width=True):
                 with st.spinner("OLI 30 kontrol noktasını inceliyor..."):
-                    result = analyse_contract(text, negotiation_power)
+                    result = analyse_contract(text, negotiation_power, initial_note)
                     st.session_state["oli_result"] = result
                     st.session_state.pop("revision_drafts", None)
     except Exception as e:
@@ -451,6 +516,22 @@ if result:
     st.subheader("Masaya Getirilecek Konular")
     for item in result.get("top_negotiation_points", [])[:5]:
         st.write("• " + item)
+
+    st.subheader("İlk İnceleme Notu")
+    st.caption("Ajansa gönderilecek kısa müdahale özeti.")
+    if st.button("📝 İlk İnceleme Notunu Hazırla", use_container_width=True):
+        with st.spinner("Kısa bilgilendirme notu hazırlanıyor..."):
+            try:
+                st.session_state["initial_review_note"] = build_initial_review_note(result)
+            except Exception as e:
+                st.error(f"İlk inceleme notu hazırlanamadı: {e}")
+    note_items = st.session_state.get("initial_review_note", {}).get("note_items", [])
+    if note_items:
+        note_text = "\n".join(
+            f"{x.get('reference','')} {x.get('title','')}: {x.get('note','')}".strip()
+            for x in note_items
+        )
+        st.text_area("Kopyalanabilir İlk İnceleme Notu", note_text, height=180)
 
     st.subheader("OLI Ek Bulgular")
     st.caption("30 Opus kuralı dışında kalan olası riskler. Bunlar otomatik revizyona alınmaz.")
@@ -504,6 +585,24 @@ if result:
         st.header("Word Revizyon Motoru")
         st.caption("OLI mevcut hükümleri revize eder; eksik koruyucu hükümleri uygun bölüme ekler. Word biçimi mümkün olduğunca korunur ve değişiklik yazarı Av. Onur Güneş olarak işlenir.")
 
+        st.subheader("Word İşaretleri")
+        st.caption("🟨 boş/doldurulacak alan • 🟧 risk/dikkat • 🟦 Rule Library'de anlamsal karşılığı olmayan yeni hüküm")
+        if st.button("🎨 Sarı / Turuncu / Mavi İşaretleri Hazırla", use_container_width=True):
+            with st.spinner("Word işaretleri belirleniyor..."):
+                try:
+                    st.session_state["word_flags"] = classify_word_flags(
+                        st.session_state["contract_text"],
+                        result,
+                        st.session_state.get("extra_risks")
+                    ).get("flags", [])
+                except Exception as e:
+                    st.error(f"Word işaretleri hazırlanamadı: {e}")
+        flags = st.session_state.get("word_flags", [])
+        if flags:
+            blue = sum(x.get("color") == "blue" for x in flags)
+            orange = sum(x.get("color") == "orange" for x in flags)
+            st.info(f"🟧 {orange} risk/dikkat • 🟦 {blue} yeni/öğrenilmemiş hüküm bulundu.")
+
         if st.button("✍️ Revizyon Metinlerini Hazırla", use_container_width=True):
             if not selectable:
                 st.warning("En az bir bulguyu Word revizyonuna dahil et.")
@@ -538,15 +637,17 @@ if result:
 
             if st.button("📄 Revize Word'ü Oluştur", type="primary", use_container_width=True):
                 try:
-                    revised_bytes, applied, skipped, placeholder_count = apply_revisions_to_docx(
+                    revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
                         st.session_state["original_bytes"],
                         edited,
-                        author="Av. Onur Güneş"
+                        author="Av. Onur Güneş",
+                        flags=st.session_state.get("word_flags", [])
                     )
                     st.session_state["revised_docx"] = revised_bytes
                     st.session_state["applied_revisions"] = applied
                     st.session_state["skipped_revisions"] = skipped
                     st.session_state["placeholder_count"] = placeholder_count
+                    st.session_state["flag_stats"] = flag_stats
                 except Exception as e:
                     st.error(f"Word oluşturulamadı: {e}")
 
@@ -562,6 +663,9 @@ if result:
                 ph = st.session_state.get("placeholder_count",0)
                 if ph:
                     st.info(f"🟨 {ph} doldurulması gereken alan sarı ile işaretlendi.")
+                fs = st.session_state.get("flag_stats", {})
+                if fs.get("orange") or fs.get("blue"):
+                    st.info(f"🟧 {fs.get('orange',0)} risk/dikkat • 🟦 {fs.get('blue',0)} yeni/öğrenilmemiş hüküm Word'de işaretlendi.")
                 st.download_button(
                     "⬇️ Revize Word'ü İndir",
                     data=st.session_state["revised_docx"],
@@ -571,6 +675,39 @@ if result:
                 )
     elif uploaded:
         st.info("Word üzerinde revizyon özelliği şu an yalnız .docx dosyalarında aktif.")
+
+
+st.divider()
+st.header("Karşı Taraf Dönüşü")
+st.caption("Bizim gönderdiğimiz revize Word ile karşı taraftan dönen Word'ü karşılaştırır ve ajans bilgilendirme notunu çıkarır.")
+returned_upload = st.file_uploader("Karşı taraftan dönen Word", type=["docx"], key="counterparty_return_upload")
+if returned_upload and st.session_state.get("revised_docx"):
+    if st.button("🔄 Karşı Taraf Revizyonunu Karşılaştır", use_container_width=True):
+        try:
+            our_text = read_docx(st.session_state["revised_docx"])
+            returned_text = read_docx(returned_upload.getvalue())
+            with st.spinner("Müzakere farkları sınıflandırılıyor..."):
+                st.session_state["counterparty_review"] = compare_counterparty_return(our_text, returned_text)
+        except Exception as e:
+            st.error(f"Karşılaştırma yapılamadı: {e}")
+
+    cp_items = st.session_state.get("counterparty_review", {}).get("items", [])
+    if cp_items:
+        icons = {"ACCEPTED":"🟢","PARTIAL":"🟡","REJECTED":"🔴","NEW":"🔵"}
+        lines=[]
+        for x in cp_items:
+            label = icons.get(x.get("status"),"⚪")
+            st.write(f"{label} **{x.get('reference','')} {x.get('title','')}** — {x.get('note','')}")
+            lines.append(f"{x.get('reference','')} {x.get('note','')}".strip())
+        st.text_area("Revizyon Dönüş Notu", "\n".join(lines), height=180)
+
+        st.text_area(
+            "Ajans Geri Bildirimi",
+            key="agency_feedback",
+            placeholder="Örn. 5.4 kabul. KDV'de ısrar. Cezai şart maksimum 3 olabilir.",
+            height=100
+        )
+        st.caption("Ajans geri bildirimi dosyaya özgüdür; Rule Library veya Madde Bankası'na otomatik eklenmez.")
 
 
 st.divider()
@@ -608,4 +745,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5 + Arabuluculuk v1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5 Final Patch + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")

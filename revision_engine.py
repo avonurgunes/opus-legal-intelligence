@@ -212,7 +212,48 @@ def highlight_placeholders(doc):
     return count
 
 
-def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author: str = "Av. Onur Güneş"):
+
+def _highlight_paragraph(paragraph, color: str):
+    """Apply Word highlight to the visible runs of a paragraph without changing font/size."""
+    changed = 0
+    for run in paragraph.runs:
+        if not (run.text or "").strip():
+            continue
+        rPr = run._r.get_or_add_rPr()
+        old = rPr.find(qn("w:highlight"))
+        if old is not None:
+            rPr.remove(old)
+        hl = OxmlElement("w:highlight")
+        hl.set(qn("w:val"), color)
+        rPr.append(hl)
+        changed += 1
+    return changed
+
+
+def highlight_flags(doc, flags):
+    """
+    ORANGE = risk/dikkat; BLUE = Rule Library ile anlamsal eşleşmeyen yeni hüküm.
+    Uses paragraph highlighting only; no font/size/bold mutation.
+    """
+    stats = {"orange": 0, "blue": 0, "skipped": []}
+    for flag in flags or []:
+        color = (flag.get("color") or "").lower()
+        if color not in ("orange", "blue"):
+            continue
+        anchor = (flag.get("anchor_text") or "").strip()
+        p, score = find_best_paragraph(doc, anchor)
+        if p is None or score < 0.42:
+            stats["skipped"].append({**flag, "reason": f"Anchor bulunamadı ({score:.2f})"})
+            continue
+        # Word's supported highlight palette has no orange. darkYellow is used as the
+        # closest native highlight and remains removable with Word's formatting controls.
+        word_color = "darkYellow" if color == "orange" else "cyan"
+        if _highlight_paragraph(p, word_color):
+            stats[color] += 1
+    return stats
+
+
+def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author: str = "Av. Onur Güneş", flags: list[dict] | None = None):
     doc=Document(BytesIO(original_bytes)); change_id=1000; applied=[]; skipped=[]
     for rev in revisions:
         action=(rev.get("action") or "REPLACE_PARAGRAPH").upper(); new_text=(rev.get("replacement_text") or "").strip(); anchor=(rev.get("anchor_text") or "").strip()
@@ -224,5 +265,7 @@ def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author
         if action=="APPEND_AFTER": change_id=insert_after_tracked(paragraph,new_text,change_id,author)
         else: change_id=replace_paragraph_tracked(paragraph,new_text,change_id,author)
         applied.append({**rev,"match_score":score})
-    placeholder_count=highlight_placeholders(doc); bio=BytesIO(); doc.save(bio)
-    return bio.getvalue(),applied,skipped,placeholder_count
+    placeholder_count=highlight_placeholders(doc)
+    flag_stats=highlight_flags(doc, flags or [])
+    bio=BytesIO(); doc.save(bio)
+    return bio.getvalue(),applied,skipped,placeholder_count,flag_stats

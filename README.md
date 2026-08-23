@@ -1,28 +1,24 @@
-# OLI - Arabuluculuk v1.3.1
+# OLI — Sözleşmeler v0.5 Final Patch
 
-v1.2 korunmuştur; toplu indirme mantığı düzeltildi.
+Bu paket mevcut Arabuluculuk v1.3.1'i korur ve Sözleşmeler modülüne son konuşulan geliştirmeleri ekler.
 
-## Toplu indirme
-ZIP yoktur.
+## Sözleşmeler
+- İlk Not / Ajans Notu: yalnız dosyaya özgü analiz girdisi.
+- İlk İnceleme Notu: ajansa gönderilebilir kısa müdahale özeti.
+- Word redline yazarı: Av. Onur Güneş.
+- Word redline saati: Europe/Istanbul.
+- Revize dosya adı: `<orijinal ad> - GG.AA.YYYY REVİZE.docx`.
+- Mevcut font ve puntoyu mümkün olduğunca korur; yeni gövde metnini zorla kalın yapmaz.
+- Revizyonlar mümkün olduğunca minimal token/cümlecik düzeyinde Track Changes ile işlenir.
+- Eksik koruyucu hükümler uygun bölüme APPEND_AFTER ile eklenebilir.
+- 🟨 Sarı: doldurulacak/boş alan.
+- 🟧 Turuncu: risk/dikkat.
+- 🟦 Mavi: Rule Library ile anlamsal olarak eşleşmeyen yeni/öğrenilmemiş hüküm. Sadece farklı ifade edilmiş mevcut konu mavi sayılmaz.
+- Karşı taraf dönüşü: bizim revize Word ile dönen Word'ü ACCEPTED / PARTIAL / REJECTED / NEW olarak sınıflandırır.
+- Revizyon Dönüş Notu: kısa ajans bilgilendirme dili.
+- Ajans Geri Bildirimi: dosyaya özgü talimat alanı.
+- Nihai Revizyondan Öğren: mevcut kontrollü öğrenme akışı korunur.
+- Madde Bankası mevcut haliyle korunur; otomatik öğrenme yapılmaz.
 
-Üç arabuluculuk belgesi:
-1. Bilgilendirme ve Belirleme Tutanağı
-2. Anlaşma Belgesi
-3. Son Tutanak
-
-tek bir dosya içinde art arda birleştirilerek indirilebilir:
-
-- TEK WORD → `tum_tutanaklar.docx`
-- TEK PDF → `tum_tutanaklar.pdf`
-- TEK UDF → `tum_tutanaklar.udf`
-
-Word ve PDF'de her tutanak yeni sayfadan başlar.
-Ayrıca her tutanağın ayrı Word/PDF/UDF indirme butonları korunmuştur.
-
-## GitHub
-ZIP içindeki 8 dosyanın tamamını repository köküne yükleyip mevcut dosyaların üzerine yazın ve Commit changes yapın.
-
-
-## v1.3.1
-- Streamlit açılışını engelleyen `mediation.py` SyntaxError düzeltildi.
-- `app.py` ve `mediation.py` Python derleme kontrolünden geçirildi.
+## Not
+Word turuncu işaretlemede Word'ün yerleşik highlight paletindeki en yakın renk olan darkYellow kullanılır; mavi için cyan kullanılır.
