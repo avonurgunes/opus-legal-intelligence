@@ -24,122 +24,76 @@ st.set_page_config(
 st.markdown("""
 <style>
 :root { color-scheme: light; }
-
-/* OLI v5.7 — warm, readable workspace */
 html, body, [data-testid="stAppViewContainer"], .stApp {
-    background: #F2F0EB !important;
-    color: #262626 !important;
+    background: #ECEBE7 !important;
+    color: #202124 !important;
 }
-[data-testid="stHeader"] {
-    background: rgba(242,240,235,.96) !important;
-}
+[data-testid="stHeader"] { background: rgba(236,235,231,.96) !important; }
 [data-testid="stAppViewBlockContainer"] {
-    max-width: 1180px !important;
-    padding-top: 2rem !important;
+    max-width: 1080px !important;
+    padding-top: 1.4rem !important;
 }
-h1,h2,h3 { color:#171717 !important; letter-spacing:-0.02em; }
-p, label, [data-testid="stCaptionContainer"] { color:#57534E !important; }
+h1,h2,h3 { color:#171717 !important; letter-spacing:-.02em; }
+p,label,[data-testid="stCaptionContainer"] { color:#5D5A54 !important; }
 
-/* Cards / expanders */
+.oli-shell {
+    background:#F7F6F2;
+    border:1px solid #D8D5CE;
+    border-radius:16px;
+    padding:18px 20px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+    margin-bottom:14px;
+}
+.oli-title {
+    display:flex; align-items:center; gap:10px;
+    font-size:1.18rem; font-weight:700; color:#202124;
+}
+.oli-sub {
+    font-size:.9rem; color:#6A665F; margin-top:4px;
+}
+.oli-result {
+    background:#F7F6F2;
+    border:1px solid #D8D5CE;
+    border-left:5px solid #9B7735;
+    border-radius:14px;
+    padding:17px 18px;
+    margin:14px 0;
+}
+.oli-result strong { color:#202124; }
+
 div[data-testid="stExpander"] details {
-    background:#FCFBF8 !important;
-    border:1px solid #D9D4C9 !important;
-    border-radius:14px !important;
-    box-shadow:0 1px 2px rgba(0,0,0,.035);
+    background:#F7F6F2 !important;
+    border:1px solid #D8D5CE !important;
+    border-radius:12px !important;
 }
 div[data-testid="stExpander"] details summary {
-    background:#F8F6F1 !important;
-    border-radius:14px !important;
+    background:#F2F0EA !important;
+    border-radius:12px !important;
 }
-
-/* Inputs */
 div[data-testid="stTextInput"] input,
 div[data-testid="stTextArea"] textarea,
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
 div[data-testid="stFileUploaderDropzone"] {
-    background:#FCFBF8 !important;
-    color:#262626 !important;
-    border-color:#D9D4C9 !important;
+    background:#FAF9F6 !important;
+    color:#202124 !important;
+    border-color:#D2CEC5 !important;
 }
-
-/* Buttons */
 .stButton > button, .stDownloadButton > button {
+    min-height:44px !important;
     border-radius:10px !important;
-    min-height:42px;
+    font-weight:650 !important;
 }
 .stButton > button[kind="primary"] {
-    background:#9B7735 !important;
+    background:#8B6A2D !important;
+    border-color:#8B6A2D !important;
     color:white !important;
-    border-color:#9B7735 !important;
-}
-
-/* Revision preview */
-.oli-revision-card {
-    background:#FCFBF8;
-    border:1px solid #D9D4C9;
-    border-radius:14px;
-    padding:16px 18px;
-    margin:10px 0 14px 0;
-}
-.oli-reason {
-    background:#F5EFE1;
-    border-left:4px solid #B18A46;
-    padding:10px 12px;
-    border-radius:8px;
-    color:#413A2F;
-    margin-bottom:12px;
-}
-.oli-original {
-    background:#F7F6F3;
-    border:1px solid #E2DED5;
-    border-radius:9px;
-    padding:11px 13px;
-    color:#3F3F3F;
-}
-.oli-revised {
-    background:#EEF5EF;
-    border:1px solid #CFE0D1;
-    border-radius:9px;
-    padding:11px 13px;
-    color:#243A29;
-}
-.oli-label {
-    font-size:.78rem;
-    font-weight:700;
-    letter-spacing:.04em;
-    color:#6B665E;
-    margin:8px 0 5px 0;
-}
-.oli-status {
-    display:inline-block;
-    padding:3px 8px;
-    border-radius:999px;
-    background:#ECE8DE;
-    color:#5D5547;
-    font-size:.78rem;
-    margin-right:6px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<style>
-/* v5.7.1 One Click Revision:
-   engine still builds revisions, but review widgets are hidden from the normal flow */
-.oli-oneclick-summary {
-    background:#FCFBF8;
-    border:1px solid #D9D4C9;
-    border-radius:14px;
-    padding:18px 20px;
-    margin:14px 0;
-}
-.oli-oneclick-summary h3 { margin:0 0 8px 0 !important; }
-.oli-oneclick-note {
-    color:#625D54;
-    font-size:.92rem;
-}
-</style>
-""", unsafe_allow_html=True)
+
+
+
 
 
 
@@ -662,9 +616,14 @@ elif selected_module == "Dava Dosyaları":
     st.info("Bu modül sonraki aşamada aktif edilecek.")
     st.stop()
 
-st.header("Yeni Sözleşme Analizi")
+st.markdown("""
+<div class="oli-shell">
+  <div class="oli-title">⚡ OLI Sözleşme Revizyonu</div>
+  <div class="oli-sub">Sözleşmeyi yükle. OLI analiz eder, gerekli revizyonları uygular, risk ve boş alan işaretlerini Word'e işler ve revize dosyayı hazırlar.</div>
+</div>
+""", unsafe_allow_html=True)
 
-c1,c2,c3 = st.columns(3)
+c1,c2,c3 = st.columns([1,1,1])
 with c1:
     contract_type = st.selectbox("Sözleşme türü", ["Oyuncu Sözleşmesi"])
 with c2:
@@ -674,17 +633,16 @@ with c3:
         "Pazarlık gücü", ["Düşük","Orta","Yüksek","Çok Yüksek"], value="Orta"
     )
 
-initial_note = st.text_area("İlk Not / Ajans Notu", placeholder="Bu dosyaya özgü bilgi veya talimatı yaz. Örn. ücret tamam; münhasırlık önemli.", height=90)
-st.markdown("""
-<div class="oli-oneclick-summary">
-<h3>⚡ Tek Tık Revizyon</h3>
-<div class="oli-oneclick-note">Sözleşmeyi yükle. OLI temel revizyonları otomatik uygular, eksik alanları ve riskleri işaretler ve revize Word'ü hazırlar. Tek tek revizyon onayı gerekmez.</div>
-</div>
-""", unsafe_allow_html=True)
+initial_note = st.text_area(
+    "İlk Not / Ajans Notu",
+    placeholder="Varsa dosyaya özgü kısa not. Örn. ücret tamam, münhasırlık önemli.",
+    height=72
+)
 
-uploaded = st.file_uploader("Sözleşmeyi yükle", type=["docx","pdf"])
+uploaded = st.file_uploader("Sözleşmeyi yükle", type=["docx","pdf"], key="contract_upload_v58")
+
 if project_type != "Ana Akım TV":
-    st.info("Aktif profil şu an ACTOR_TV_MAINSTREAM.")
+    st.info("Aktif revizyon profili şu an ACTOR_TV_MAINSTREAM. Dijital ve Sinema modülleri sonraki aşamada detaylandırılacak.")
 
 if uploaded:
     try:
@@ -693,195 +651,120 @@ if uploaded:
         st.session_state["contract_text"] = text
         st.session_state["original_bytes"] = original_bytes
         st.session_state["uploaded_name"] = uploaded.name
-        st.success(f"{uploaded.name} okundu • {len(text):,} karakter")
-
-        with st.expander("Belgeden çıkarılan metni kontrol et"):
-            st.text_area("Belge metni", text[:20000], height=220)
+        st.success(f"{uploaded.name} okundu")
 
         if not get_api_key():
             st.warning("OPENAI_API_KEY tanımlı değil.")
+        elif not uploaded.name.lower().endswith(".docx"):
+            st.warning("Otomatik Word revizyonu için .docx yükle. PDF şu an yalnız metin analizi için okunabilir.")
         elif project_type == "Ana Akım TV":
-            if st.button("⚖️ OLI Analizini Çalıştır", type="primary", use_container_width=True):
-                with st.spinner("OLI 30 kontrol noktasını inceliyor..."):
-                    result = analyse_contract(text, negotiation_power, initial_note)
-                    st.session_state["oli_result"] = result
-                    st.session_state.pop("revision_drafts", None)
-    except Exception as e:
-        st.error(f"Belge/analiz hatası: {e}")
-
-result = st.session_state.get("oli_result")
-if result:
-    st.divider()
-    st.header("Analiz Sonucu")
-
-    findings = result.get("findings", [])
-    a,b,c,d = st.columns(4)
-    a.metric("Genel Risk", result.get("overall_risk","-"))
-    b.metric("Kritik", sum(f.get("status")=="RED" for f in findings))
-    c.metric("Müzakere", sum(f.get("status")=="ORANGE" for f in findings))
-    d.metric("Korunacak", sum(f.get("status")=="GREEN" for f in findings))
-
-    st.subheader("Yönetici Özeti")
-    st.write(result.get("executive_summary",""))
-
-    st.subheader("Masaya Getirilecek Konular")
-    for item in result.get("top_negotiation_points", [])[:5]:
-        st.write("• " + item)
-
-    st.subheader("İlk İnceleme Notu")
-    st.caption("Ajansa gönderilecek kısa müdahale özeti.")
-    if st.button("📝 İlk İnceleme Notunu Hazırla", use_container_width=True):
-        with st.spinner("Kısa bilgilendirme notu hazırlanıyor..."):
-            try:
-                st.session_state["initial_review_note"] = build_initial_review_note(result)
-            except Exception as e:
-                st.error(f"İlk inceleme notu hazırlanamadı: {e}")
-    note_items = st.session_state.get("initial_review_note", {}).get("note_items", [])
-    if note_items:
-        note_text = "\n".join(
-            f"{x.get('reference','')} {x.get('title','')}: {x.get('note','')}".strip()
-            for x in note_items
-        )
-        st.text_area("Kopyalanabilir İlk İnceleme Notu", note_text, height=180)
-
-    st.subheader("OLI Ek Bulgular")
-    st.caption("30 Opus kuralı dışında kalan olası riskler. Bunlar otomatik revizyona alınmaz.")
-    if st.button("🔎 30 Kural Dışı Riskleri Tara", use_container_width=True):
-        with st.spinner("Sözleşme ikinci katman risk taramasından geçiyor..."):
-            try:
-                st.session_state["extra_risks"] = analyse_extra_risks(st.session_state["contract_text"])
-            except Exception as e:
-                st.error(f"Ek risk taraması çalıştırılamadı: {e}")
-    extras = st.session_state.get("extra_risks", {}).get("extra_findings", [])
-    if extras:
-        for x in extras:
-            with st.expander(f"🧭 {x.get('risk','-')} — {x.get('title','Ek bulgu')}"):
-                st.write("**Referans:**", x.get("reference","-"))
-                st.write("**Değerlendirme:**", x.get("assessment",""))
-                st.write("**Önerilen aksiyon:**", x.get("suggested_action",""))
-    elif "extra_risks" in st.session_state:
-        st.success("30 kural dışında ayrıca anlamlı bir risk tespit edilmedi.")
-
-    st.subheader("30 Kural Analizi")
-    order={"RED":0,"ORANGE":1,"YELLOW":2,"GREEN":3,"NOT_FOUND":4}
-    findings=sorted(findings,key=lambda f:order.get(f.get("status"),9))
-
-    selectable=[]
-    for f in findings:
-        with st.expander(f"{icon(f.get('status'))} {f.get('rule_id','')} — {f.get('title','')}"):
-            st.caption(
-                f"Durum: {f.get('status','-')} • Müzakere: {f.get('negotiation_priority','-')} "
-                f"• Güven: {f.get('confidence','-')}"
-            )
-            st.write("**Referans:**", f.get("contract_reference","-"))
-            st.write("**Mevcut hüküm:**", f.get("clause_excerpt","-"))
-            st.write("**OLI değerlendirmesi:**", f.get("assessment",""))
-            lib = revision_context_for(f.get("rule_id"))
-            if lib:
-                st.write("**Opus Revision Library:**", lib.get("preferred_drafting",""))
-            st.write("**İlk revizyon yaklaşımı:**", f.get("recommended_revision",""))
-
-            default = f.get("status") in ("RED","ORANGE")
-            if f.get("status") not in ("GREEN",):
-                chosen = st.checkbox(
-                    "Word revizyonuna dahil et",
-                    value=default,
-                    key=f"pick_{f.get('rule_id')}"
-                )
-                if chosen:
-                    selectable.append(f)
-
-    if uploaded and uploaded.name.lower().endswith(".docx"):
-        st.divider()
-        st.header("Word Revizyon Motoru")
-        st.caption("OLI mevcut hükümleri revize eder; eksik koruyucu hükümleri uygun bölüme ekler. Word biçimi mümkün olduğunca korunur ve değişiklik yazarı Av. Onur Güneş olarak işlenir.")
-
-        st.subheader("Word İşaretleri")
-        st.caption("🟨 boş/doldurulacak alan • 🟧 risk/dikkat • 🟦 Rule Library'de anlamsal karşılığı olmayan yeni hüküm")
-        if st.button("🎨 Sarı / Turuncu / Mavi İşaretleri Hazırla", use_container_width=True):
-            with st.spinner("Word işaretleri belirleniyor..."):
+            if st.button("⚖️ OLI Analizini Çalıştır ve Word'e Aktar", type="primary", use_container_width=True):
                 try:
-                    st.session_state["word_flags"] = classify_word_flags(
-                        st.session_state["contract_text"],
-                        result,
-                        st.session_state.get("extra_risks")
-                    ).get("flags", [])
-                except Exception as e:
-                    st.error(f"Word işaretleri hazırlanamadı: {e}")
-        flags = st.session_state.get("word_flags", [])
-        if flags:
-            blue = sum(x.get("color") == "blue" for x in flags)
-            orange = sum(x.get("color") == "orange" for x in flags)
-            st.info(f"🟧 {orange} risk/dikkat • 🟦 {blue} yeni/öğrenilmemiş hüküm bulundu.")
+                    with st.spinner("OLI sözleşmeyi analiz ediyor ve revize Word'ü hazırlıyor..."):
+                        # 1) Main legal analysis
+                        result = analyse_contract(text, negotiation_power, initial_note)
+                        st.session_state["oli_result"] = result
 
-        if st.button("✍️ Revizyon Metinlerini Hazırla", use_container_width=True):
-            if not selectable:
-                st.warning("En az bir bulguyu Word revizyonuna dahil et.")
-            else:
-                with st.spinner("Opus revizyon kalıpları sözleşmeye uyarlanıyor..."):
-                    drafts = build_revision_drafts(
-                        st.session_state["contract_text"],
-                        selectable,
-                        negotiation_power
-                    )
-                    st.session_state["revision_drafts"] = drafts.get("revisions", [])
+                        # 2) Extra-risk layer automatically
+                        try:
+                            extra_risks = analyse_extra_risks(text)
+                        except Exception:
+                            extra_risks = {"extra_findings":[]}
+                        st.session_state["extra_risks"] = extra_risks
 
-        drafts = st.session_state.get("revision_drafts", [])
-        edited=[]
-        if drafts:
-            edited = render_revision_preview(
-                drafts,
-                st.session_state.get("contract_text", "")
-            )
-            st.session_state["approved_revision_plan"] = [dict(x) for x in edited]
+                        # 3) Auto-select material findings
+                        findings = result.get("findings", [])
+                        selected = [
+                            f for f in findings
+                            if f.get("status") in ("RED","ORANGE","YELLOW")
+                            and f.get("status") != "GREEN"
+                        ]
 
-            if st.button("📄 📄 📄 Revize Word'ü Oluştur", type="primary", use_container_width=True):
-                plan = st.session_state.get("approved_revision_plan", [])
-                if not plan:
-                    st.warning("Word oluşturmak için en az bir revizyonu kabul et.")
-                else:
-                    try:
-                        with st.spinner("Onaylanan revizyonlar Word'e uygulanıyor..."):
-                            revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
-                                st.session_state["original_bytes"],
-                                plan,
-                                author="Av. Onur Güneş",
-                                flags=st.session_state.get("word_flags", [])
-                            )
+                        # 4) Build natural revisions automatically
+                        drafts_obj = build_revision_drafts(
+                            text,
+                            selected,
+                            negotiation_power
+                        )
+                        drafts = drafts_obj.get("revisions", [])
+                        st.session_state["revision_drafts"] = drafts
+
+                        # 5) Color flags automatically — no separate button
+                        try:
+                            flags = classify_word_flags(
+                                text,
+                                result,
+                                extra_risks
+                            ).get("flags", [])
+                        except Exception:
+                            flags = []
+                        st.session_state["word_flags"] = flags
+
+                        # 6) Apply directly to Word
+                        revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
+                            original_bytes,
+                            drafts,
+                            author="Av. Onur Güneş",
+                            flags=flags
+                        )
+
                         st.session_state["revised_docx"] = revised_bytes
                         st.session_state["applied_revisions"] = applied
                         st.session_state["skipped_revisions"] = skipped
                         st.session_state["placeholder_count"] = placeholder_count
                         st.session_state["flag_stats"] = flag_stats
-                        st.success(f"Revizyon tamamlandı. Revizyon tamamlandı. Word hazır. {len(applied)} revizyon uygulandı.")
-                    except Exception as e:
-                        st.error(f"Word oluşturulamadı: {e}")
 
-            if st.session_state.get("revised_docx"):
-                name = Path(st.session_state.get("uploaded_name","sozlesme.docx")).stem
-                today_tr = datetime.now(ZoneInfo("Europe/Istanbul")).strftime("%d.%m.%Y")
-                st.success(
-                    f"{len(st.session_state.get('applied_revisions',[]))} revizyon Word'e işlendi."
-                )
-                skipped = st.session_state.get("skipped_revisions", [])
-                if skipped:
-                    st.warning(f"{len(skipped)} revizyon eşleşme bulunamadığı için uygulanamadı.")
-                ph = st.session_state.get("placeholder_count",0)
-                if ph:
-                    st.info(f"🟨 {ph} doldurulması gereken alan sarı ile işaretlendi.")
-                fs = st.session_state.get("flag_stats", {})
-                if fs.get("orange") or fs.get("blue"):
-                    st.info(f"🟧 {fs.get('orange',0)} risk/dikkat • 🟦 {fs.get('blue',0)} yeni/öğrenilmemiş hüküm Word'de işaretlendi.")
-                st.download_button(
-                    "⬇️ Revize Word'ü İndir",
-                    data=st.session_state["revised_docx"],
-                    file_name=f"{name} - {today_tr} REVİZE.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    use_container_width=True
-                )
-    elif uploaded:
-        st.info("Word üzerinde revizyon özelliği şu an yalnız .docx dosyalarında aktif.")
+                    st.success("Revizyon tamamlandı.")
+                except Exception as e:
+                    st.error(f"Belge/analiz hatası: {e}")
 
+    except Exception as e:
+        st.error(f"Belge okunamadı: {e}")
+
+if st.session_state.get("revised_docx"):
+    applied = st.session_state.get("applied_revisions", [])
+    skipped = st.session_state.get("skipped_revisions", [])
+    ph = st.session_state.get("placeholder_count", 0)
+    fs = st.session_state.get("flag_stats", {})
+    result = st.session_state.get("oli_result", {})
+    findings = result.get("findings", [])
+
+    critical = sum(f.get("status") == "RED" for f in findings)
+    orange = fs.get("orange", 0)
+    blue = fs.get("blue", 0)
+
+    st.markdown(f"""
+    <div class="oli-result">
+      <strong>Revize Word hazır.</strong><br>
+      {len(applied)} değişiklik uygulandı · {critical} kritik bulgu · 🟨 {ph} boş alan · 🟧 {orange} risk işareti · 🟦 {blue} yeni/standart dışı hüküm
+    </div>
+    """, unsafe_allow_html=True)
+
+    if skipped:
+        st.warning(f"{len(skipped)} revizyon Word üzerinde eşleşme bulunamadığı için uygulanamadı.")
+
+    name = Path(st.session_state.get("uploaded_name","sozlesme.docx")).stem
+    today_tr = datetime.now(ZoneInfo("Europe/Istanbul")).strftime("%d.%m.%Y")
+    st.download_button(
+        "⬇️ REVİZE WORD'Ü İNDİR",
+        data=st.session_state["revised_docx"],
+        file_name=f"{name} - {today_tr} REVİZE.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        use_container_width=True,
+        type="primary"
+    )
+
+    # Optional details only; normal workflow does not require rereading.
+    with st.expander("Analiz özetini görmek istersem aç"):
+        st.write(result.get("executive_summary",""))
+        if result.get("top_negotiation_points"):
+            st.markdown("**Öne çıkan konular**")
+            for x in result.get("top_negotiation_points",[])[:6]:
+                st.write("• " + x)
+        if skipped:
+            st.markdown("**Uygulanamayan revizyonlar**")
+            for x in skipped:
+                st.write(f"• {x.get('rule_id','')} — {x.get('reason','Eşleşmedi')}")
 
 st.divider()
 st.header("Karşı Taraf Dönüşü")
@@ -919,4 +802,4 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 
 st.divider()
-st.caption("OLI • Sözleşmeler v0.5.7.2 Learning Reference Fix + Arabuluculuk v1.3.1 • Prototip.")
+st.caption("OLI • Sözleşmeler v0.5.8 One Click UX + Arabuluculuk v1.3.1 • Prototip.")

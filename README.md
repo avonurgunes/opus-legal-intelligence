@@ -1,9 +1,35 @@
-# OLI Sözleşmeler v0.5.7.2 — Learning Reference Fix
+# OLI Sözleşmeler v0.5.8 — One Click UX
 
-Bu sürüm yalnızca v0.5.7.1'de kalan eski Learning Engine referansını temizler.
+## Yeni ana akış
+Sözleşmeyi yükle → `OLI Analizini Çalıştır ve Word'e Aktar` → Word indir.
 
-Düzeltme:
-- `learning_prompt_block is not defined` hatası giderildi.
-- Learning Engine / Toplu Öğrenme / Nihai Revizyondan Öğrenme kapalı kalır.
-- Analiz artık yalnız Rule Library + Madde Bankası + dosyaya özgü ilk not üzerinden çalışır.
-- One Click Revision ve çalışan Word/Track Changes motoruna dokunulmamıştır.
+Tek tıkta otomatik:
+1. 30 kural analizi
+2. ek risk taraması
+3. revizyon taslakları
+4. sarı/turuncu/mavi Word işaretleri
+5. Track Changes
+6. revize Word üretimi
+
+## Kaldırılan karmaşıklık
+- Sarı / Turuncu / Mavi işaretleri hazırla butonu kaldırıldı.
+- Revizyon metinlerini hazırla butonu kaldırıldı.
+- Tek tek revizyon kabul/red ekranı normal akıştan kaldırıldı.
+- Önizleme zorunlu değil.
+- Kullanıcı aynı sözleşmeyi app içinde ikinci kez okumak zorunda değil.
+
+## Tasarım
+- Koyu/aşırı beyaz uçlar yerine sıcak açık gri çalışma zemini.
+- Kompakt 1080px alan.
+- Tek ana aksiyon.
+- Sonuç kartı yalnız sayısal özet ve Word indirme butonu gösterir.
+- Ayrıntılı analiz isteğe bağlı kapalı expander içinde.
+
+## Korunanlar
+- Rule Library
+- Madde Bankası
+- MICRO → PHRASE → BLOCK
+- Av. Onur Güneş Track Changes yazarı
+- Europe/Istanbul saat bilgisi
+- Karşı Taraf Dönüşü
+- Arabuluculuk
