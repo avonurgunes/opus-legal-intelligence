@@ -802,26 +802,6 @@ def render_mediation():
     c1.metric("Sicil", mediator["registry"])
     c2.write(f"**Adres:** {mediator['address']}")
 
-    st.subheader("Taraflar")
-    party_count = st.slider("Taraf sayısı", 1, 5, 2)
-    parties = []
-    for i in range(1, party_count+1):
-        with st.expander(f"Taraf {i}", expanded=(i <= 2)):
-            parties.append(_party_editor(i))
-
-    st.divider()
-    st.subheader("Dosya Bilgileri")
-    c1,c2 = st.columns(2)
-    file_no = c1.text_input("Dosya No")
-    kind = c2.selectbox(
-        "Uyuşmazlık Türü",
-        ["İşçilik Alacağı","Kira Tespit","Kiralananın Tahliyesi","Kira Tespit + Kiralananın Tahliyesi"]
-    )
-    d1,d2,d3 = st.columns(3)
-    opening_date = d1.date_input("Dosya açılış tarihi", value=None, format="DD.MM.YYYY")
-    agreement_date = d2.date_input("Anlaşma tarihi", value=None, format="DD.MM.YYYY")
-    final_date = d3.date_input("Son tutanak tarihi", value=None, format="DD.MM.YYYY")
-
     st.divider()
     st.subheader("İşten Çıkış / Ayrılış Bildirgesi")
     exit_doc = st.file_uploader("Belgeyi yükle; taraf bilgilerini taslağa önerebilir", type=["pdf","docx"], key="med_exit")
@@ -854,6 +834,27 @@ def render_mediation():
                     st.rerun()
         else:
             st.warning("Bu belgeden metin çıkarılamadı. V1'de metin tabanlı PDF/DOCX destekleniyor.")
+
+
+    st.subheader("Taraflar")
+    party_count = st.slider("Taraf sayısı", 1, 5, 2)
+    parties = []
+    for i in range(1, party_count+1):
+        with st.expander(f"Taraf {i}", expanded=(i <= 2)):
+            parties.append(_party_editor(i))
+
+    st.divider()
+    st.subheader("Dosya Bilgileri")
+    c1,c2 = st.columns(2)
+    file_no = c1.text_input("Dosya No")
+    kind = c2.selectbox(
+        "Uyuşmazlık Türü",
+        ["İşçilik Alacağı","Kira Tespit","Kiralananın Tahliyesi","Kira Tespit + Kiralananın Tahliyesi"]
+    )
+    d1,d2,d3 = st.columns(3)
+    opening_date = d1.date_input("Dosya açılış tarihi", value=None, format="DD.MM.YYYY")
+    agreement_date = d2.date_input("Anlaşma tarihi", value=None, format="DD.MM.YYYY")
+    final_date = d3.date_input("Son tutanak tarihi", value=None, format="DD.MM.YYYY")
 
     st.divider()
     st.subheader("Anlaşma Taslak Alanları")
