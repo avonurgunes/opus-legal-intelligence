@@ -465,7 +465,7 @@ def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author
     date_str = _word_timestamp()
 
     for item in revisions:
-        action = (item.get("action") or item.get("mode") or "REPLACE_PARAGRAPH").upper()
+        action = (item.get("action") or item.get("mode") or "MICRO").upper()
         # Normalize preview modes to engine actions.
         if action == "REPLACE":
             action = "REPLACE_PARAGRAPH"
@@ -502,13 +502,37 @@ def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author
             continue
 
         old_text = paragraph.text
-        requested = item.get("redline_mode", "AUTO")
-        redline_mode = choose_redline_mode(old_text, new_text, requested)
+
+        # MICRO/PHRASE payloads carry only the changed fragment.
+        # Build the final paragraph locally instead of replacing the whole paragraph
+        # with that fragment. This is the core "micro edit" guarantee.
+        if action in {"MICRO", "PHRASE"} and anchor:
+            idx = old_text.find(anchor)
+            if idx >= 0:
+                final_text = old_text[:idx] + new_text + old_text[idx + len(anchor):]
+            else:
+                # Fallback to normalized/case-insensitive literal location.
+                low_old, low_anchor = old_text.casefold(), anchor.casefold()
+                idx = low_old.find(low_anchor)
+                if idx >= 0:
+                    final_text = old_text[:idx] + new_text + old_text[idx + len(anchor):]
+                else:
+                    skipped.append({**item, "reason": "Mikro eşleşme paragraf içinde bulunamadı"})
+                    continue
+            redline_mode = action
+        else:
+            final_text = new_text
+            requested = item.get("redline_mode", "AUTO")
+            # Explicit paragraph replacement remains BLOCK; AUTO is only for legacy payloads.
+            if action == "REPLACE_PARAGRAPH":
+                redline_mode = "BLOCK"
+            else:
+                redline_mode = choose_redline_mode(old_text, final_text, requested)
 
         if redline_mode == "MICRO":
-            change_id = replace_paragraph_tracked(paragraph, new_text, change_id, author)
+            change_id = replace_paragraph_tracked(paragraph, final_text, change_id, author)
         elif redline_mode == "PHRASE":
-            change_id = replace_paragraph_phrase_tracked(paragraph, new_text, change_id, author)
+            change_id = replace_paragraph_phrase_tracked(paragraph, final_text, change_id, author)
         else:
             # BLOCK uses one delete + one insert for the complete paragraph.
             rPr = _body_run_properties(paragraph)

@@ -217,6 +217,15 @@ Ana akım TV dizisi oyuncu sözleşmesini yalnız verilen Opus kural setine gör
    "confidence":"HIGH|MEDIUM|LOW"
  }]
 }
+
+MICRO JSON ÖRNEĞİ:
+{"revisions":[{"rule_id":"OLI-TV-XXX","title":"Münhasırlık","action":"MICRO","anchor_text":"görev almayacaktır","replacement_text":"görev alabilir","reason":"Münhasırlık kaldırılıyor","confidence":"HIGH"}]}
+
+PHRASE JSON ÖRNEĞİ:
+{"revisions":[{"rule_id":"OLI-TV-XXX","title":"Onay","action":"PHRASE","anchor_text":"YAPIMCI'nın önceden yazılı onayı ile","replacement_text":"YAPIMCI'ya önceden yazılı bilgi verilmesi kaydıyla","reason":"Onay bilgilendirmeye çevriliyor","confidence":"HIGH"}]}
+
+NOT: MICRO/PHRASE çıktısında replacement_text TAM PARAGRAF OLAMAZ.
+}
 Her 30 kural için findings üret.
 """
 
@@ -290,7 +299,10 @@ KURALLAR:
 - Madde Bankası metnini gereksiz yere uzatma, yeni şartlar ekleme veya daha ayrıntılı hale getirme.
 - Mevcut hüküm kısmen uygunsa paragrafı baştan yazmak yerine mümkün olan en küçük kelime/cümlecik değişikliğiyle Madde Bankası standardını mevcut cümleye yedir.
 - Geçmiş Opus metnini körü körüne kopyalama; mevcut sözleşmeye uyarla.
-- Mevcut hüküm varsa action=REPLACE_PARAGRAPH ve anchor_text sözleşmeden birebir kısa bir parça olsun.
+- Mevcut hüküm varsa ÖNCE action=MICRO düşün. Yalnız birkaç kelime/cümlecik yetmiyorsa PHRASE kullan. REPLACE_PARAGRAPH yalnız mevcut paragrafın iskeleti korunarak güvenli sonuç elde edilemiyorsa kullanılabilir.
+- MICRO için anchor_text yalnız değişecek birebir kelime/ibare/cümlecik olsun; replacement_text yalnız onun yerine gelecek metin olsun.
+- PHRASE için anchor_text değişecek birebir cümlecik olsun; replacement_text yalnız o cümleciğin yeni hali olsun.
+- REPLACE_PARAGRAPH için anchor_text paragraftan ayırt edici bir parça, replacement_text ise tam yeni paragraf olabilir.
 - Koruyucu hüküm tamamen eksikse NOT_FOUND diye bırakma: mutlaka yeni hüküm üret. Sözleşmede konu bakımından en uygun mevcut maddeyi anchor seç ve APPEND_AFTER kullan. APPEND_END yalnız gerçekten uygun bölüm bulunamıyorsa son çaredir.
 - Eksik hükmün ekleneceği yeri konu bütünlüğüne göre seç: ücret/ödeme hükümleri ücret bölümüne; mali hak/telif hükümleri mali haklar bölümüne; fesih/cezai şart hükümleri ilgili fesih/ceza bölümüne; vergi/damga vergisi diğer hükümler/vergi bölümüne.
 - APPEND_AFTER kullanırken anchor_text mutlaka sözleşmede BİREBİR bulunan ve hedef bölümdeki son uygun paragraftan 25-100 karakterlik bir parça olmalı. Madde numarasını uydurma. Yeni metnin numaralandırması belirsizse numarasız koruyucu paragraf üret; Word'e yerleştirildikten sonra kullanıcı kontrol eder.
@@ -303,7 +315,7 @@ KURALLAR:
  "revisions":[{
    "rule_id":"...",
    "title":"...",
-   "action":"REPLACE_PARAGRAPH|APPEND_AFTER|APPEND_END",
+   "action":"MICRO|PHRASE|REPLACE_PARAGRAPH|APPEND_AFTER|APPEND_END",
    "anchor_text":"sözleşmeden birebir 15-120 karakter veya boş",
    "replacement_text":"Word'e işlenecek revize hüküm",
    "reason":"kısa açıklama",
@@ -609,6 +621,11 @@ if uploaded:
                         # 1) Main legal analysis
                         result = analyse_contract(text, negotiation_power, initial_note)
                         st.session_state["oli_result"] = result
+                        try:
+                            st.session_state["initial_review_note"] = build_initial_review_note(result)
+                        except Exception:
+                            st.session_state["initial_review_note"] = {"note_items": []}
+
 
                         # 2) Extra-risk layer automatically
                         try:
@@ -685,6 +702,16 @@ if st.session_state.get("revised_docx"):
     </div>
     """, unsafe_allow_html=True)
 
+    note_items = st.session_state.get("initial_review_note", {}).get("note_items", [])
+    if note_items:
+        st.markdown("#### Kısa Notlar")
+        for ni in note_items[:12]:
+            ref = (ni.get("reference") or "").strip()
+            title = (ni.get("title") or "").strip()
+            note = (ni.get("note") or "").strip()
+            lead = " — ".join(x for x in [ref, title] if x)
+            st.write(f"**{lead}**: {note}" if lead else note)
+
     if skipped:
         st.warning(f"{len(skipped)} revizyon Word üzerinde eşleşme bulunamadığı için uygulanamadı.")
 
@@ -747,4 +774,28 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 
 st.divider()
-st.caption("OLI • Sözleşmeler v0.6.0 Gold Workspace + Micro First + Arabuluculuk v1.3.1 • Prototip.")
+
+st.markdown("""
+<style>
+/* v0.6.1 final contrast override — intentionally LAST */
+html,body,[data-testid="stAppViewContainer"],.stApp{background:#F7F7F5!important;color:#17191C!important}
+[data-testid="stAppViewBlockContainer"] h1,
+[data-testid="stAppViewBlockContainer"] h2,
+[data-testid="stAppViewBlockContainer"] h3,
+[data-testid="stAppViewBlockContainer"] h4{color:#15181B!important;opacity:1!important}
+[data-testid="stAppViewBlockContainer"] p,
+[data-testid="stAppViewBlockContainer"] label,
+[data-testid="stAppViewBlockContainer"] span,
+[data-testid="stAppViewBlockContainer"] small,
+[data-testid="stAppViewBlockContainer"] [data-testid="stCaptionContainer"]{opacity:1!important}
+[data-testid="stAppViewBlockContainer"] label p{color:#3F464D!important}
+[data-testid="stAppViewBlockContainer"] [data-testid="stCaptionContainer"] p{color:#687078!important}
+[data-testid="stAppViewBlockContainer"] .stMarkdown p{color:#4D555D!important}
+[data-testid="stFileUploaderDropzone"] *{opacity:1!important;color:#59616A!important}
+[data-testid="stFileUploaderDropzone"] button *{color:#20252A!important}
+div[data-testid="stExpander"] summary *{opacity:1!important;color:#343A40!important}
+.oli-footer{color:#858B91!important;font-size:.78rem!important}
+</style>
+""",unsafe_allow_html=True)
+
+st.markdown("<div class=\"oli-footer\">OLI • Sözleşmeler v0.6.1 Contrast + Micro Engine + Notes + Arabuluculuk v1.3.1 • Prototip.</div>", unsafe_allow_html=True)
