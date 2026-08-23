@@ -24,236 +24,120 @@ st.set_page_config(
 st.markdown("""
 <style>
 :root { color-scheme: light; }
-
 html, body, [data-testid="stAppViewContainer"], .stApp {
-    background: #F6F7F9 !important;
-    color: #171A1F !important;
+    background:#F5F6F7 !important;
+    color:#1F2328 !important;
 }
-
 [data-testid="stHeader"] {
-    background: #0B1118 !important;
-    border-bottom: 1px solid #202A35 !important;
-    height: 72px !important;
+    background:#F5F6F7 !important;
+    border-bottom:1px solid #E3E6E8 !important;
 }
-
 [data-testid="stAppViewBlockContainer"] {
-    max-width: 1180px !important;
-    padding-top: 1.6rem !important;
-    padding-bottom: 3.5rem !important;
+    max-width: 980px !important;
+    padding-top: 1.15rem !important;
+    padding-bottom: 3rem !important;
 }
-
-/* Global typography / contrast */
-[data-testid="stAppViewBlockContainer"] h1,
-[data-testid="stAppViewBlockContainer"] h2,
-[data-testid="stAppViewBlockContainer"] h3,
-[data-testid="stAppViewBlockContainer"] h4 {
-    color: #111418 !important;
-    opacity: 1 !important;
-    letter-spacing: -0.025em !important;
+h1,h2,h3,h4 {
+    color:#111418 !important;
+    letter-spacing:-0.02em !important;
 }
-
-[data-testid="stAppViewBlockContainer"] p,
-[data-testid="stAppViewBlockContainer"] label,
-[data-testid="stAppViewBlockContainer"] span,
-[data-testid="stAppViewBlockContainer"] small {
-    opacity: 1 !important;
+p, label, [data-testid="stCaptionContainer"] {
+    color:#596069 !important;
 }
-
-[data-testid="stAppViewBlockContainer"] label p {
-    color: #2F3740 !important;
-    font-weight: 650 !important;
-}
-
-[data-testid="stCaptionContainer"] p {
-    color: #69727C !important;
-}
-
-/* OLI header/nav */
 .oli-brand {
-    color: #D6A13A !important;
-    font-size: 1.7rem !important;
-    line-height: 1 !important;
-    font-weight: 900 !important;
-    letter-spacing: .04em !important;
-    margin-top: .2rem !important;
+    font-size:1.35rem;
+    line-height:1;
+    font-weight:800;
+    letter-spacing:.02em;
+    color:#151719;
+    margin-top:.2rem;
 }
 .oli-brand-sub {
-    color: #8D97A2 !important;
-    font-size: .76rem !important;
-    margin-top: .22rem !important;
+    font-size:.72rem;
+    color:#7A8087;
+    margin-top:.18rem;
 }
-
 div[role="radiogroup"] {
-    justify-content: flex-end !important;
-    gap: .45rem !important;
+    justify-content:flex-end !important;
+    gap:.35rem !important;
 }
 div[role="radiogroup"] label {
-    background: #111923 !important;
-    border: 1px solid #26313D !important;
-    border-radius: 9px !important;
-    padding: .5rem .9rem !important;
-    margin-right: .1rem !important;
-}
-div[role="radiogroup"] label p {
-    color: #F2F3F4 !important;
-    font-weight: 700 !important;
+    background:#FFFFFF !important;
+    border:1px solid #DDE1E4 !important;
+    padding:.35rem .7rem !important;
+    border-radius:8px !important;
+    margin-right:.15rem !important;
 }
 div[role="radiogroup"] label:has(input:checked) {
-    border-color: #D6A13A !important;
-    box-shadow: inset 0 -3px 0 #D6A13A !important;
+    border-color:#A57B31 !important;
+    box-shadow:inset 0 0 0 1px #A57B31 !important;
 }
-
-/* Main white work surfaces */
-.oli-workspace,
-.oli-resultbar {
-    background: #FFFFFF !important;
-    border: 1px solid #DDE2E7 !important;
-    border-radius: 15px !important;
-    box-shadow: 0 5px 20px rgba(16,24,40,.055) !important;
-}
-
 .oli-workspace {
-    padding: 24px 26px !important;
-    margin-top: 20px !important;
-    margin-bottom: 14px !important;
+    background:#FFFFFF;
+    border:1px solid #E0E3E6;
+    border-radius:14px;
+    padding:20px 22px;
+    margin-top:18px;
+    box-shadow:0 1px 2px rgba(0,0,0,.035);
 }
-
 .oli-workspace-title {
-    color: #15181C !important;
-    font-size: 1.45rem !important;
-    font-weight: 850 !important;
-    border-left: 4px solid #D6A13A !important;
-    padding-left: 13px !important;
-    margin-bottom: 5px !important;
+    font-size:1.22rem;
+    font-weight:750;
+    color:#171A1D;
+    margin-bottom:3px;
 }
 .oli-workspace-sub {
-    color: #65707A !important;
-    font-size: .94rem !important;
-    margin-left: 17px !important;
+    font-size:.88rem;
+    color:#6A7178;
+    margin-bottom:12px;
 }
-
-.oli-resultbar {
-    padding: 16px 18px !important;
-    border-left: 4px solid #D6A13A !important;
-    color: #2D343B !important;
+.oli-resultbarbar {
+    background:#FFFFFF;
+    border:1px solid #DDE1E4;
+    border-left:4px solid #A57B31;
+    border-radius:10px;
+    padding:14px 16px;
+    margin:14px 0 10px;
+    color:#2C3136;
 }
-
-/* Form controls */
+.oli-resultbarbar strong { color:#151719; }
+div[data-testid="stFileUploaderDropzone"],
 div[data-testid="stTextInput"] input,
 div[data-testid="stTextArea"] textarea,
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-    background: #FFFFFF !important;
-    color: #1C2228 !important;
-    border: 1px solid #C9D0D7 !important;
-    border-radius: 9px !important;
+    background:#FFFFFF !important;
+    border-color:#DDE1E4 !important;
+    color:#1F2328 !important;
 }
-
-div[data-testid="stTextArea"] textarea::placeholder,
-div[data-testid="stTextInput"] input::placeholder {
-    color: #7A838C !important;
-    opacity: 1 !important;
-}
-
-/* Uploader */
-div[data-testid="stFileUploaderDropzone"] {
-    background: #FBFCFD !important;
-    border: 1px dashed #B8C1CA !important;
-    border-radius: 12px !important;
-    min-height: 92px !important;
-}
-div[data-testid="stFileUploaderDropzone"] * {
-    color: #4F5963 !important;
-    opacity: 1 !important;
-}
-div[data-testid="stFileUploaderDropzone"] button {
-    background: #FFFFFF !important;
-    color: #1F252B !important;
-    border: 1px solid #C7CED5 !important;
-}
-
-/* Buttons */
-.stButton > button,
-.stDownloadButton > button {
-    min-height: 46px !important;
-    border-radius: 9px !important;
-    font-weight: 760 !important;
-}
-
-.stButton > button[kind="primary"],
-.stDownloadButton > button[kind="primary"] {
-    background: linear-gradient(90deg,#B97E18,#DCA23A) !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    box-shadow: 0 3px 10px rgba(185,126,24,.18) !important;
-}
-
-.stButton > button:not([kind="primary"]) {
-    background: #FFFFFF !important;
-    color: #252B31 !important;
-    border: 1px solid #C8CFD6 !important;
-}
-
-/* Slider: gold instead of red */
-div[data-baseweb="slider"] div[role="slider"] {
-    background-color: #D6A13A !important;
-}
-div[data-baseweb="slider"] > div > div > div {
-    background-color: #D6A13A !important;
-}
-
-/* Expanders and lower page */
 div[data-testid="stExpander"] details {
-    background: #FFFFFF !important;
-    border: 1px solid #DDE2E7 !important;
-    border-radius: 11px !important;
+    background:#FFFFFF !important;
+    border:1px solid #E0E3E6 !important;
+    border-radius:10px !important;
 }
 div[data-testid="stExpander"] details summary {
-    background: #FAFBFC !important;
-    border-radius: 11px !important;
+    background:#FAFAFA !important;
+    border-radius:10px !important;
 }
-div[data-testid="stExpander"] details summary * {
-    color: #323A42 !important;
-    opacity: 1 !important;
+.stButton > button, .stDownloadButton > button {
+    min-height:44px !important;
+    border-radius:8px !important;
+    font-weight:650 !important;
 }
-
-/* Force lower page text readable */
-[data-testid="stAppViewBlockContainer"] .stMarkdown,
-[data-testid="stAppViewBlockContainer"] .stMarkdown * {
-    opacity: 1 !important;
+.stButton > button[kind="primary"],
+.stDownloadButton > button[kind="primary"] {
+    background:#9B742F !important;
+    color:#FFFFFF !important;
+    border-color:#9B742F !important;
 }
-[data-testid="stAppViewBlockContainer"] .stMarkdown p {
-    color: #4B545D !important;
+[data-testid="stMetric"] {
+    background:#FFFFFF !important;
+    border:1px solid #E0E3E6 !important;
+    border-radius:10px !important;
+    padding:10px 12px !important;
 }
-
-/* Section headings such as Counterparty Return */
-[data-testid="stAppViewBlockContainer"] h2 {
-    color: #171A1F !important;
-    font-weight: 800 !important;
-}
-[data-testid="stAppViewBlockContainer"] h2 + div p {
-    color: #66707A !important;
-}
-
-/* Footer */
-.oli-footer {
-    color: #858D96 !important;
-    font-size: .78rem !important;
-}
-
-hr {
-    border-color: #DCE1E6 !important;
-}
-
-/* Reduce awkward empty visual space */
-.block-container > div {
-    row-gap: .4rem !important;
-}
+hr { border-color:#E3E6E8 !important; }
 </style>
 """, unsafe_allow_html=True)
-
-
-
-
 
 RULES = json.loads(Path(__file__).with_name("rules.json").read_text(encoding="utf-8"))
 REVISION_LIBRARY = json.loads(
@@ -423,15 +307,6 @@ Ana akım TV dizisi oyuncu sözleşmesini yalnız verilen Opus kural setine gör
    "confidence":"HIGH|MEDIUM|LOW"
  }]
 }
-
-MICRO JSON ÖRNEĞİ:
-{"revisions":[{"rule_id":"OLI-TV-XXX","title":"Münhasırlık","action":"MICRO","anchor_text":"görev almayacaktır","replacement_text":"görev alabilir","reason":"Münhasırlık kaldırılıyor","confidence":"HIGH"}]}
-
-PHRASE JSON ÖRNEĞİ:
-{"revisions":[{"rule_id":"OLI-TV-XXX","title":"Onay","action":"PHRASE","anchor_text":"YAPIMCI'nın önceden yazılı onayı ile","replacement_text":"YAPIMCI'ya önceden yazılı bilgi verilmesi kaydıyla","reason":"Onay bilgilendirmeye çevriliyor","confidence":"HIGH"}]}
-
-NOT: MICRO/PHRASE çıktısında replacement_text TAM PARAGRAF OLAMAZ.
-}
 Her 30 kural için findings üret.
 """
 
@@ -481,16 +356,6 @@ def build_revision_drafts(contract_text, selected_findings, negotiation_power):
             bank_parts.append(json.dumps(bank_entry, ensure_ascii=False))
 
     system = """Sen OLI Revision Engine'sin.
-
-ZORUNLU DRAFTING PRENSİBİ — MICRO FIRST:
-1. Mevcut cümlenin terminolojisini, kelime sırasını ve iskeletini mümkün olduğunca koru.
-2. Hukuki sonucu yalnız gerekli kelime/ibare/sayı/istisnayı değiştirerek elde edebiliyorsan tüm cümleyi yeniden yazma.
-3. Örnek: 'Oyuncu dizi süresi boyunca başka bir projede görev almayacaktır.' → hedef serbestlik ise yalnız 'almayacaktır' kısmını 'alabilir' olarak değiştir.
-4. MICRO yetmezse PHRASE; PHRASE yetmezse ancak o zaman BLOCK/REPLACE_PARAGRAPH kullan.
-5. Stil güzelleştirmek veya kalıp metin kullanmak REPLACE_PARAGRAPH gerekçesi değildir.
-6. original_text mümkün olan en küçük güvenli eşleşme parçası; revised_text yalnız onun doğal karşılığı olmalıdır.
-7. REPLACE_PARAGRAPH son çaredir.
-
 Görevin sözleşmedeki seçilmiş bulgular için OPUS tarzında uygulanabilir revizyon metni üretmektir.
 
 ÖNCELİK:
@@ -505,10 +370,7 @@ KURALLAR:
 - Madde Bankası metnini gereksiz yere uzatma, yeni şartlar ekleme veya daha ayrıntılı hale getirme.
 - Mevcut hüküm kısmen uygunsa paragrafı baştan yazmak yerine mümkün olan en küçük kelime/cümlecik değişikliğiyle Madde Bankası standardını mevcut cümleye yedir.
 - Geçmiş Opus metnini körü körüne kopyalama; mevcut sözleşmeye uyarla.
-- Mevcut hüküm varsa ÖNCE action=MICRO düşün. Yalnız birkaç kelime/cümlecik yetmiyorsa PHRASE kullan. REPLACE_PARAGRAPH yalnız mevcut paragrafın iskeleti korunarak güvenli sonuç elde edilemiyorsa kullanılabilir.
-- MICRO için anchor_text yalnız değişecek birebir kelime/ibare/cümlecik olsun; replacement_text yalnız onun yerine gelecek metin olsun.
-- PHRASE için anchor_text değişecek birebir cümlecik olsun; replacement_text yalnız o cümleciğin yeni hali olsun.
-- REPLACE_PARAGRAPH için anchor_text paragraftan ayırt edici bir parça, replacement_text ise tam yeni paragraf olabilir.
+- Mevcut hüküm varsa action=REPLACE_PARAGRAPH ve anchor_text sözleşmeden birebir kısa bir parça olsun.
 - Koruyucu hüküm tamamen eksikse NOT_FOUND diye bırakma: mutlaka yeni hüküm üret. Sözleşmede konu bakımından en uygun mevcut maddeyi anchor seç ve APPEND_AFTER kullan. APPEND_END yalnız gerçekten uygun bölüm bulunamıyorsa son çaredir.
 - Eksik hükmün ekleneceği yeri konu bütünlüğüne göre seç: ücret/ödeme hükümleri ücret bölümüne; mali hak/telif hükümleri mali haklar bölümüne; fesih/cezai şart hükümleri ilgili fesih/ceza bölümüne; vergi/damga vergisi diğer hükümler/vergi bölümüne.
 - APPEND_AFTER kullanırken anchor_text mutlaka sözleşmede BİREBİR bulunan ve hedef bölümdeki son uygun paragraftan 25-100 karakterlik bir parça olmalı. Madde numarasını uydurma. Yeni metnin numaralandırması belirsizse numarasız koruyucu paragraf üret; Word'e yerleştirildikten sonra kullanıcı kontrol eder.
@@ -521,7 +383,7 @@ KURALLAR:
  "revisions":[{
    "rule_id":"...",
    "title":"...",
-   "action":"MICRO|PHRASE|REPLACE_PARAGRAPH|APPEND_AFTER|APPEND_END",
+   "action":"REPLACE_PARAGRAPH|APPEND_AFTER|APPEND_END",
    "anchor_text":"sözleşmeden birebir 15-120 karakter veya boş",
    "replacement_text":"Word'e işlenecek revize hüküm",
    "reason":"kısa açıklama",
@@ -754,22 +616,6 @@ def render_revision_preview(items, contract_text):
 
 
 
-
-def build_revision_recommendation_report(result, drafts):
-    findings={str(f.get("rule_id","")):f for f in (result or {}).get("findings",[])}
-    rows=[]
-    for d in drafts or []:
-        rid=str(d.get("rule_id","")); f=findings.get(rid,{})
-        rows.append({
-            "rule_id":rid,
-            "title":d.get("title") or f.get("title") or "Revizyon",
-            "reason":d.get("reason") or f.get("issue") or f.get("analysis") or "",
-            "action":(d.get("action") or d.get("mode") or "").upper(),
-            "original":(d.get("anchor_text") or d.get("original_text") or "").strip(),
-            "suggestion":(d.get("replacement_text") or d.get("revised_text") or "").strip(),
-        })
-    return rows
-
 # Compact top navigation
 nav1, nav2 = st.columns([1.2, 4.8])
 with nav1:
@@ -777,7 +623,7 @@ with nav1:
 with nav2:
     selected_module = st.radio(
         "Modül",
-        ["Sözleşmeler", "Arabuluculuk", "KVKK", "Dava Dosyaları"],
+        ["Sözleşmeler", "Arabuluculuk", "Madde Bankası"],
         horizontal=True,
         label_visibility="collapsed",
         key="oli_module_nav_v59"
@@ -786,25 +632,25 @@ st.divider()
 if selected_module == "Arabuluculuk":
     render_mediation()
     st.stop()
-elif selected_module == "KVKK":
-    st.header("KVKK")
-    st.info("Bu modül sonraki aşamada aktif edilecek.")
-    st.stop()
-elif selected_module == "Dava Dosyaları":
-    st.header("Dava Dosyaları")
-    st.info("Bu modül sonraki aşamada aktif edilecek.")
+elif selected_module == "Madde Bankası":
+    st.header("Madde Bankası")
+    st.caption("Opus'un kontrollü revizyon kalıpları ve drafting tercihleri.")
+    with st.expander("Aktif Madde Bankası", expanded=True):
+        for rid, item in REVISION_LIBRARY.items():
+            st.markdown(f"**{rid} — {item.get('title','')}**")
+            st.write(item.get("preferred_drafting",""))
     st.stop()
 
 st.markdown("""
 <div class="oli-workspace">
   <div class="oli-workspace-title">Sözleşme Revizyonu</div>
-  <div class="oli-workspace-sub">Belgeyi yükle. OLI ister revizyon notu ve öneri metinlerini çıkarsın, ister otomatik revize Word hazırlasın.</div>
+  <div class="oli-workspace-sub">Belgeyi yükle, OLI analiz etsin ve revize Word dosyasını hazırlasın.</div>
 </div>
 """, unsafe_allow_html=True)
 
 c1,c2,c3 = st.columns([1,1,1])
 with c1:
-    contract_type = st.selectbox("Sözleşme türü", ["Oyuncu Sözleşmesi", "Senarist Sözleşmesi", "Yönetmen Sözleşmesi"])
+    contract_type = st.selectbox("Sözleşme türü", ["Oyuncu Sözleşmesi"])
 with c2:
     project_type = st.selectbox("Proje türü", ["Ana Akım TV", "Dijital", "Sinema"])
 with c3:
@@ -814,7 +660,7 @@ with c3:
 
 initial_note = st.text_area(
     "İlk Not / Ajans Notu",
-    placeholder="Dosyaya özgü talimatı yaz. Örn. ücret tamam; münhasırlık kaldırılacak; bölüm garantisi 8 bölüm.",
+    placeholder="Varsa dosyaya özgü kısa not. Örn. ücret tamam, münhasırlık önemli.",
     height=72
 )
 
@@ -837,23 +683,12 @@ if uploaded:
         elif not uploaded.name.lower().endswith(".docx"):
             st.warning("Otomatik Word revizyonu için .docx yükle. PDF şu an yalnız metin analizi için okunabilir.")
         elif project_type == "Ana Akım TV":
-            action_col1, action_col2 = st.columns(2)
-            with action_col1:
-                notes_action = st.button("REVİZYON NOTU + ÖNERİLERİ HAZIRLA", use_container_width=True)
-            with action_col2:
-                word_action = st.button("OTOMATİK REVİZE WORD OLUŞTUR", type="primary", use_container_width=True)
-            run_action = notes_action or word_action
-            if run_action:
+            if st.button("OLI ANALİZİNİ ÇALIŞTIR VE WORD'E AKTAR", type="primary", use_container_width=True):
                 try:
                     with st.spinner("OLI sözleşmeyi analiz ediyor ve revize Word'ü hazırlıyor..."):
                         # 1) Main legal analysis
                         result = analyse_contract(text, negotiation_power, initial_note)
                         st.session_state["oli_result"] = result
-                        try:
-                            st.session_state["initial_review_note"] = build_initial_review_note(result)
-                        except Exception:
-                            st.session_state["initial_review_note"] = {"note_items": []}
-
 
                         # 2) Extra-risk layer automatically
                         try:
@@ -890,47 +725,26 @@ if uploaded:
                             flags = []
                         st.session_state["word_flags"] = flags
 
-                        # 6) Always prepare a human-readable revision report
-                        st.session_state["revision_report"] = build_revision_recommendation_report(result, drafts)
-                        st.session_state["last_contract_action"] = "word" if word_action else "notes"
+                        # 6) Apply directly to Word
+                        revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
+                            original_bytes,
+                            drafts,
+                            author="Av. Onur Güneş",
+                            flags=flags
+                        )
 
-                        # 7) Mutate Word only in automatic Word mode
-                        if word_action:
-                            revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
-                                original_bytes, drafts, author="Av. Onur Güneş", flags=flags
-                            )
-                            st.session_state["revised_docx"] = revised_bytes
-                            st.session_state["applied_revisions"] = applied
-                            st.session_state["skipped_revisions"] = skipped
-                            st.session_state["placeholder_count"] = placeholder_count
-                            st.session_state["flag_stats"] = flag_stats
-                        else:
-                            st.session_state["revised_docx"] = None
-                            st.session_state["applied_revisions"] = []
-                            st.session_state["skipped_revisions"] = []
-                            st.session_state["placeholder_count"] = 0
-                            st.session_state["flag_stats"] = {}
+                        st.session_state["revised_docx"] = revised_bytes
+                        st.session_state["applied_revisions"] = applied
+                        st.session_state["skipped_revisions"] = skipped
+                        st.session_state["placeholder_count"] = placeholder_count
+                        st.session_state["flag_stats"] = flag_stats
 
-                    st.success("Revizyon önerileri hazırlandı." if notes_action else "Revizyon tamamlandı ve Word hazırlandı.")
+                    st.success("Revizyon tamamlandı.")
                 except Exception as e:
                     st.error(f"Belge/analiz hatası: {e}")
 
     except Exception as e:
         st.error(f"Belge okunamadı: {e}")
-
-if st.session_state.get("last_contract_action") == "notes" and st.session_state.get("revision_report"):
-    report=st.session_state["revision_report"]
-    st.markdown('<div class="oli-resultbar"><strong>Revizyon Notu + Öneriler hazır.</strong><br>Word dosyasına değişiklik uygulanmadı.</div>',unsafe_allow_html=True)
-    for i,item in enumerate(report,1):
-        with st.expander(f"{i}. {item.get('rule_id','')} — {item.get('title','Revizyon')}",expanded=True):
-            if item.get("reason"):
-                st.markdown("**Neden revize edilmeli?**"); st.write(item["reason"])
-            if item.get("original"):
-                st.markdown("**Sözleşmedeki ifade / müdahale noktası**"); st.code(item["original"],language=None)
-            if item.get("suggestion"):
-                st.markdown("**Önerilen metin**"); st.code(item["suggestion"],language=None)
-            if item.get("action"):
-                st.caption(f"Önerilen müdahale tipi: {item['action']}")
 
 if st.session_state.get("revised_docx"):
     applied = st.session_state.get("applied_revisions", [])
@@ -950,16 +764,6 @@ if st.session_state.get("revised_docx"):
       {len(applied)} değişiklik uygulandı · {critical} kritik bulgu · 🟨 {ph} boş alan · 🟧 {orange} risk işareti · 🟦 {blue} yeni/standart dışı hüküm
     </div>
     """, unsafe_allow_html=True)
-
-    note_items = st.session_state.get("initial_review_note", {}).get("note_items", [])
-    if note_items:
-        st.markdown("#### OLI Kısa Notları")
-        for ni in note_items[:12]:
-            ref = (ni.get("reference") or "").strip()
-            title = (ni.get("title") or "").strip()
-            note = (ni.get("note") or "").strip()
-            lead = " — ".join(x for x in [ref, title] if x)
-            st.write(f"**{lead}**: {note}" if lead else note)
 
     if skipped:
         st.warning(f"{len(skipped)} revizyon Word üzerinde eşleşme bulunamadığı için uygulanamadı.")
@@ -988,13 +792,8 @@ if st.session_state.get("revised_docx"):
                 st.write(f"• {x.get('rule_id','')} — {x.get('reason','Eşleşmedi')}")
 
 st.divider()
-st.markdown("""
-<div class="oli-workspace">
-  <div class="oli-workspace-title">Karşı Taraf Dönüşü</div>
-  <div class="oli-workspace-sub">Bizim gönderdiğimiz revize Word ile karşı taraftan dönen Word'ü karşılaştırır ve ajans bilgilendirme notunu çıkarır.</div>
-</div>
-""", unsafe_allow_html=True)
-
+st.header("Karşı Taraf Dönüşü")
+st.caption("Bizim gönderdiğimiz revize Word ile karşı taraftan dönen Word'ü karşılaştırır ve ajans bilgilendirme notunu çıkarır.")
 returned_upload = st.file_uploader("Karşı taraftan dönen Word", type=["docx"], key="counterparty_return_upload")
 if returned_upload and st.session_state.get("revised_docx"):
     if st.button("🔄 Karşı Taraf Revizyonunu Karşılaştır", use_container_width=True):
@@ -1028,7 +827,4 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 
 st.divider()
-
-
-
-st.markdown("<div class=\"oli-footer\">OLI • v0.6.2.2 UI Finish • Sözleşmeler + Arabuluculuk + KVKK + Dava Dosyaları</div>", unsafe_allow_html=True)
+st.caption("OLI • Sözleşmeler v0.5.9 Professional Workspace + Arabuluculuk v1.3.1 • Prototip.")
