@@ -23,29 +23,235 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-:root{color-scheme:light}
-html,body,[data-testid="stAppViewContainer"],.stApp{background:#F7F7F5!important;color:#17191C!important}
-[data-testid="stHeader"]{background:#0B1118!important;border-bottom:1px solid #202833!important}
-[data-testid="stAppViewBlockContainer"]{max-width:1180px!important;padding-top:1.25rem!important;padding-bottom:3rem!important}
-h1,h2,h3,h4{color:#111418!important;letter-spacing:-.025em!important}
-p,label,[data-testid="stCaptionContainer"]{color:#5E6670!important}
-.oli-brand{font-size:1.45rem;font-weight:850;color:#D6A13A!important;letter-spacing:.03em;margin-top:.1rem}
-.oli-brand-sub{font-size:.72rem;color:#8A929B!important;margin-top:.15rem}
-div[role="radiogroup"]{justify-content:flex-end!important;gap:.35rem!important}
-div[role="radiogroup"] label{background:#121923!important;border:1px solid #26303B!important;padding:.42rem .78rem!important;border-radius:8px!important}
-div[role="radiogroup"] label p{color:#E8E8E5!important}
-div[role="radiogroup"] label:has(input:checked){border-color:#D39A2E!important;box-shadow:inset 0 -2px 0 #D39A2E!important}
-.oli-workspace{background:#FFF;border:1px solid #E2E4E7;border-radius:14px;padding:22px 24px;margin-top:18px;box-shadow:0 4px 18px rgba(17,24,39,.055)}
-.oli-workspace-title{font-size:1.35rem;font-weight:800;color:#121519;margin-bottom:4px;border-left:4px solid #D49A2A;padding-left:12px}
-.oli-workspace-sub{font-size:.9rem;color:#69717A;margin:5px 0 4px 16px}
-.oli-resultbar{background:#FFF;border:1px solid #E2E4E7;border-left:4px solid #D49A2A;border-radius:11px;padding:15px 17px;margin:14px 0 10px;color:#2B3137;box-shadow:0 2px 10px rgba(17,24,39,.035)}
-div[data-testid="stFileUploaderDropzone"],div[data-testid="stTextInput"] input,div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-baseweb="select"]>div{background:#FFF!important;border-color:#D8DDE2!important;color:#1F2328!important}
-div[data-testid="stExpander"] details{background:#FFF!important;border:1px solid #E2E4E7!important;border-radius:10px!important}
-.stButton>button,.stDownloadButton>button{min-height:46px!important;border-radius:8px!important;font-weight:750!important}
-.stButton>button[kind="primary"],.stDownloadButton>button[kind="primary"]{background:linear-gradient(90deg,#C68B22,#E1A735)!important;color:#FFF!important;border:0!important;box-shadow:0 3px 10px rgba(190,132,29,.20)!important}
-hr{border-color:#E3E6E8!important}
+:root { color-scheme: light; }
+
+html, body, [data-testid="stAppViewContainer"], .stApp {
+    background: #F6F7F9 !important;
+    color: #171A1F !important;
+}
+
+[data-testid="stHeader"] {
+    background: #0B1118 !important;
+    border-bottom: 1px solid #202A35 !important;
+    height: 72px !important;
+}
+
+[data-testid="stAppViewBlockContainer"] {
+    max-width: 1180px !important;
+    padding-top: 1.6rem !important;
+    padding-bottom: 3.5rem !important;
+}
+
+/* Global typography / contrast */
+[data-testid="stAppViewBlockContainer"] h1,
+[data-testid="stAppViewBlockContainer"] h2,
+[data-testid="stAppViewBlockContainer"] h3,
+[data-testid="stAppViewBlockContainer"] h4 {
+    color: #111418 !important;
+    opacity: 1 !important;
+    letter-spacing: -0.025em !important;
+}
+
+[data-testid="stAppViewBlockContainer"] p,
+[data-testid="stAppViewBlockContainer"] label,
+[data-testid="stAppViewBlockContainer"] span,
+[data-testid="stAppViewBlockContainer"] small {
+    opacity: 1 !important;
+}
+
+[data-testid="stAppViewBlockContainer"] label p {
+    color: #2F3740 !important;
+    font-weight: 650 !important;
+}
+
+[data-testid="stCaptionContainer"] p {
+    color: #69727C !important;
+}
+
+/* OLI header/nav */
+.oli-brand {
+    color: #D6A13A !important;
+    font-size: 1.7rem !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: .04em !important;
+    margin-top: .2rem !important;
+}
+.oli-brand-sub {
+    color: #8D97A2 !important;
+    font-size: .76rem !important;
+    margin-top: .22rem !important;
+}
+
+div[role="radiogroup"] {
+    justify-content: flex-end !important;
+    gap: .45rem !important;
+}
+div[role="radiogroup"] label {
+    background: #111923 !important;
+    border: 1px solid #26313D !important;
+    border-radius: 9px !important;
+    padding: .5rem .9rem !important;
+    margin-right: .1rem !important;
+}
+div[role="radiogroup"] label p {
+    color: #F2F3F4 !important;
+    font-weight: 700 !important;
+}
+div[role="radiogroup"] label:has(input:checked) {
+    border-color: #D6A13A !important;
+    box-shadow: inset 0 -3px 0 #D6A13A !important;
+}
+
+/* Main white work surfaces */
+.oli-workspace,
+.oli-resultbar {
+    background: #FFFFFF !important;
+    border: 1px solid #DDE2E7 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 5px 20px rgba(16,24,40,.055) !important;
+}
+
+.oli-workspace {
+    padding: 24px 26px !important;
+    margin-top: 20px !important;
+    margin-bottom: 14px !important;
+}
+
+.oli-workspace-title {
+    color: #15181C !important;
+    font-size: 1.45rem !important;
+    font-weight: 850 !important;
+    border-left: 4px solid #D6A13A !important;
+    padding-left: 13px !important;
+    margin-bottom: 5px !important;
+}
+.oli-workspace-sub {
+    color: #65707A !important;
+    font-size: .94rem !important;
+    margin-left: 17px !important;
+}
+
+.oli-resultbar {
+    padding: 16px 18px !important;
+    border-left: 4px solid #D6A13A !important;
+    color: #2D343B !important;
+}
+
+/* Form controls */
+div[data-testid="stTextInput"] input,
+div[data-testid="stTextArea"] textarea,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    background: #FFFFFF !important;
+    color: #1C2228 !important;
+    border: 1px solid #C9D0D7 !important;
+    border-radius: 9px !important;
+}
+
+div[data-testid="stTextArea"] textarea::placeholder,
+div[data-testid="stTextInput"] input::placeholder {
+    color: #7A838C !important;
+    opacity: 1 !important;
+}
+
+/* Uploader */
+div[data-testid="stFileUploaderDropzone"] {
+    background: #FBFCFD !important;
+    border: 1px dashed #B8C1CA !important;
+    border-radius: 12px !important;
+    min-height: 92px !important;
+}
+div[data-testid="stFileUploaderDropzone"] * {
+    color: #4F5963 !important;
+    opacity: 1 !important;
+}
+div[data-testid="stFileUploaderDropzone"] button {
+    background: #FFFFFF !important;
+    color: #1F252B !important;
+    border: 1px solid #C7CED5 !important;
+}
+
+/* Buttons */
+.stButton > button,
+.stDownloadButton > button {
+    min-height: 46px !important;
+    border-radius: 9px !important;
+    font-weight: 760 !important;
+}
+
+.stButton > button[kind="primary"],
+.stDownloadButton > button[kind="primary"] {
+    background: linear-gradient(90deg,#B97E18,#DCA23A) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: 0 3px 10px rgba(185,126,24,.18) !important;
+}
+
+.stButton > button:not([kind="primary"]) {
+    background: #FFFFFF !important;
+    color: #252B31 !important;
+    border: 1px solid #C8CFD6 !important;
+}
+
+/* Slider: gold instead of red */
+div[data-baseweb="slider"] div[role="slider"] {
+    background-color: #D6A13A !important;
+}
+div[data-baseweb="slider"] > div > div > div {
+    background-color: #D6A13A !important;
+}
+
+/* Expanders and lower page */
+div[data-testid="stExpander"] details {
+    background: #FFFFFF !important;
+    border: 1px solid #DDE2E7 !important;
+    border-radius: 11px !important;
+}
+div[data-testid="stExpander"] details summary {
+    background: #FAFBFC !important;
+    border-radius: 11px !important;
+}
+div[data-testid="stExpander"] details summary * {
+    color: #323A42 !important;
+    opacity: 1 !important;
+}
+
+/* Force lower page text readable */
+[data-testid="stAppViewBlockContainer"] .stMarkdown,
+[data-testid="stAppViewBlockContainer"] .stMarkdown * {
+    opacity: 1 !important;
+}
+[data-testid="stAppViewBlockContainer"] .stMarkdown p {
+    color: #4B545D !important;
+}
+
+/* Section headings such as Counterparty Return */
+[data-testid="stAppViewBlockContainer"] h2 {
+    color: #171A1F !important;
+    font-weight: 800 !important;
+}
+[data-testid="stAppViewBlockContainer"] h2 + div p {
+    color: #66707A !important;
+}
+
+/* Footer */
+.oli-footer {
+    color: #858D96 !important;
+    font-size: .78rem !important;
+}
+
+hr {
+    border-color: #DCE1E6 !important;
+}
+
+/* Reduce awkward empty visual space */
+.block-container > div {
+    row-gap: .4rem !important;
+}
 </style>
-""",unsafe_allow_html=True)
+""", unsafe_allow_html=True)
+
+
 
 
 
@@ -782,8 +988,13 @@ if st.session_state.get("revised_docx"):
                 st.write(f"• {x.get('rule_id','')} — {x.get('reason','Eşleşmedi')}")
 
 st.divider()
-st.header("Karşı Taraf Dönüşü")
-st.caption("Bizim gönderdiğimiz revize Word ile karşı taraftan dönen Word'ü karşılaştırır ve ajans bilgilendirme notunu çıkarır.")
+st.markdown("""
+<div class="oli-workspace">
+  <div class="oli-workspace-title">Karşı Taraf Dönüşü</div>
+  <div class="oli-workspace-sub">Bizim gönderdiğimiz revize Word ile karşı taraftan dönen Word'ü karşılaştırır ve ajans bilgilendirme notunu çıkarır.</div>
+</div>
+""", unsafe_allow_html=True)
+
 returned_upload = st.file_uploader("Karşı taraftan dönen Word", type=["docx"], key="counterparty_return_upload")
 if returned_upload and st.session_state.get("revised_docx"):
     if st.button("🔄 Karşı Taraf Revizyonunu Karşılaştır", use_container_width=True):
@@ -818,174 +1029,6 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 st.divider()
 
-st.markdown("""
-<style>
-/* v0.6.1 final contrast override — intentionally LAST */
-html,body,[data-testid="stAppViewContainer"],.stApp{background:#F7F7F5!important;color:#17191C!important}
-[data-testid="stAppViewBlockContainer"] h1,
-[data-testid="stAppViewBlockContainer"] h2,
-[data-testid="stAppViewBlockContainer"] h3,
-[data-testid="stAppViewBlockContainer"] h4{color:#15181B!important;opacity:1!important}
-[data-testid="stAppViewBlockContainer"] p,
-[data-testid="stAppViewBlockContainer"] label,
-[data-testid="stAppViewBlockContainer"] span,
-[data-testid="stAppViewBlockContainer"] small,
-[data-testid="stAppViewBlockContainer"] [data-testid="stCaptionContainer"]{opacity:1!important}
-[data-testid="stAppViewBlockContainer"] label p{color:#3F464D!important}
-[data-testid="stAppViewBlockContainer"] [data-testid="stCaptionContainer"] p{color:#687078!important}
-[data-testid="stAppViewBlockContainer"] .stMarkdown p{color:#4D555D!important}
-[data-testid="stFileUploaderDropzone"] *{opacity:1!important;color:#59616A!important}
-[data-testid="stFileUploaderDropzone"] button *{color:#20252A!important}
-div[data-testid="stExpander"] summary *{opacity:1!important;color:#343A40!important}
-.oli-footer{color:#858B91!important;font-size:.78rem!important}
-</style>
-""",unsafe_allow_html=True)
 
 
-st.markdown("""
-<style>
-/* OLI v0.6.2.1 — UI ONLY. This block intentionally changes presentation only. */
-:root{color-scheme:light}
-html,body,[data-testid="stAppViewContainer"],.stApp{
-    background:#F3F4F6!important;
-    color:#171A1F!important;
-}
-[data-testid="stHeader"]{
-    background:#0B1118!important;
-    border-bottom:1px solid #27313C!important;
-}
-[data-testid="stAppViewBlockContainer"]{
-    max-width:1160px!important;
-    padding-top:1.35rem!important;
-    padding-bottom:3.5rem!important;
-}
-
-/* typography / contrast */
-[data-testid="stAppViewBlockContainer"] h1,
-[data-testid="stAppViewBlockContainer"] h2,
-[data-testid="stAppViewBlockContainer"] h3{
-    color:#15181C!important;
-    opacity:1!important;
-    letter-spacing:-.025em!important;
-}
-[data-testid="stAppViewBlockContainer"] p,
-[data-testid="stAppViewBlockContainer"] label p,
-[data-testid="stAppViewBlockContainer"] [data-testid="stCaptionContainer"] p{
-    opacity:1!important;
-}
-[data-testid="stAppViewBlockContainer"] label p{color:#424A53!important;font-weight:600!important}
-[data-testid="stAppViewBlockContainer"] [data-testid="stCaptionContainer"] p{color:#68717B!important}
-
-/* brand / top navigation */
-.oli-brand{
-    color:#D6A13A!important;
-    font-size:1.55rem!important;
-    font-weight:850!important;
-    letter-spacing:.04em!important;
-}
-.oli-brand-sub{color:#9AA3AD!important}
-div[role="radiogroup"]{
-    justify-content:flex-end!important;
-    gap:.45rem!important;
-}
-div[role="radiogroup"] label{
-    background:#121923!important;
-    border:1px solid #293441!important;
-    border-radius:9px!important;
-    padding:.45rem .85rem!important;
-}
-div[role="radiogroup"] label p{color:#EEF0F2!important;font-weight:650!important}
-div[role="radiogroup"] label:has(input:checked){
-    border-color:#D6A13A!important;
-    box-shadow:inset 0 -3px 0 #D6A13A!important;
-}
-
-/* primary workspace */
-.oli-workspace{
-    background:#FFFFFF!important;
-    border:1px solid #DDE1E5!important;
-    border-radius:16px!important;
-    padding:24px 26px!important;
-    margin-top:20px!important;
-    box-shadow:0 5px 22px rgba(16,24,40,.055)!important;
-}
-.oli-workspace-title{
-    color:#15181C!important;
-    font-size:1.38rem!important;
-    font-weight:800!important;
-    border-left:4px solid #D6A13A!important;
-    padding-left:12px!important;
-}
-.oli-workspace-sub{color:#68717B!important;margin-left:16px!important}
-
-/* controls */
-div[data-testid="stTextInput"] input,
-div[data-testid="stTextArea"] textarea,
-div[data-testid="stSelectbox"] div[data-baseweb="select"]>div{
-    background:#FFFFFF!important;
-    color:#1E2329!important;
-    border:1px solid #CDD3D9!important;
-    border-radius:9px!important;
-}
-div[data-testid="stFileUploaderDropzone"]{
-    background:#FAFBFC!important;
-    border:1px dashed #BFC7CF!important;
-    border-radius:12px!important;
-}
-div[data-testid="stFileUploaderDropzone"] *{
-    opacity:1!important;
-    color:#505963!important;
-}
-
-/* buttons */
-.stButton>button,.stDownloadButton>button{
-    min-height:46px!important;
-    border-radius:9px!important;
-    font-weight:750!important;
-}
-.stButton>button[kind="primary"],
-.stDownloadButton>button[kind="primary"]{
-    background:linear-gradient(90deg,#B77B18,#D89D32)!important;
-    color:#FFFFFF!important;
-    border:0!important;
-    box-shadow:0 3px 10px rgba(183,123,24,.18)!important;
-}
-.stButton>button:not([kind="primary"]){
-    background:#FFFFFF!important;
-    color:#252B31!important;
-    border:1px solid #C8CED5!important;
-}
-
-/* result / notes / lower sections */
-.oli-resultbar{
-    background:#FFFFFF!important;
-    color:#2B3138!important;
-    border:1px solid #DDE1E5!important;
-    border-left:4px solid #D6A13A!important;
-    border-radius:11px!important;
-    box-shadow:0 2px 10px rgba(16,24,40,.035)!important;
-}
-div[data-testid="stExpander"] details{
-    background:#FFFFFF!important;
-    border:1px solid #DDE1E5!important;
-    border-radius:11px!important;
-}
-div[data-testid="stExpander"] details summary{
-    background:#F9FAFB!important;
-}
-div[data-testid="stExpander"] details summary *{
-    color:#343B43!important;
-    opacity:1!important;
-}
-hr{border-color:#DDE1E5!important}
-.oli-footer{color:#858D96!important}
-
-/* Keep lower page fully readable */
-[data-testid="stAppViewBlockContainer"] .stMarkdown,
-[data-testid="stAppViewBlockContainer"] .stMarkdown *{
-    opacity:1;
-}
-</style>
-""",unsafe_allow_html=True)
-
-st.markdown("<div class=\"oli-footer\">OLI • v0.6.2.1 UI Only • Sözleşmeler + Arabuluculuk + KVKK + Dava Dosyaları</div>", unsafe_allow_html=True)
+st.markdown("<div class=\"oli-footer\">OLI • v0.6.2.2 UI Finish • Sözleşmeler + Arabuluculuk + KVKK + Dava Dosyaları</div>", unsafe_allow_html=True)

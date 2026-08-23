@@ -1,27 +1,19 @@
-# OLI v0.6.2.1 — UI Only
+# OLI v0.6.2.2 — UI Finish
 
-Bu paket v0.6.2'nin işlevsel mantığını değiştirmez.
+Bu sürüm V6.2'nin çalışma mantığını değiştirmez.
 
-Değiştirilenler yalnızca:
-- CSS / renk / kontrast
-- üst navigasyon görünümü
-- çalışma kartları
-- form alanlarının görünümü
-- butonların görünümü
-- alt bölüm okunabilirliği
-- Streamlit theme config
-- sürüm etiketi
+Yalnızca:
+- tek ve çakışmasız stylesheet
+- siyah OLI üst navigasyon
+- yüksek kontrastlı metinler
+- altın aktif/aksiyon rengi
+- slider'ın altın olması
+- form alanlarının beyaz/okunaklı görünümü
+- Karşı Taraf Dönüşü başlığının beyaz çalışma kartına alınması
+- alt sayfa okunabilirliği
+- footer görünümü
+- Streamlit tema ayarları
 
-Değiştirilmeyenler:
-- analiz fonksiyonları
-- promptlar
-- Rule Library
-- MICRO / PHRASE / BLOCK motoru
-- Word üretimi
-- iki çalışma modu
-- İlk Not / Ajans Notu
-- OLI Kısa Notları
-- Karşı Taraf Dönüşü
-- Arabuluculuk
-- sözleşme türleri
-- ana modüller
+değiştirildi.
+
+Analiz, Word motoru, iki çalışma modu, notlar, sözleşme türleri, modüller ve Arabuluculuk mantığı aynen V6.2'dir.
