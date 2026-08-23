@@ -415,6 +415,38 @@ Kısa, ajansa aktarılabilir dil kullan. Yanıt yalnız JSON:
 
 
 
+
+def _norm_ref(ref):
+    return (ref or "").strip().rstrip(".").replace("MADDE ","").replace("Madde ","").strip()
+
+def extract_full_original_clause(contract_text, item):
+    text=contract_text or ""; ref=_norm_ref(item.get("reference") or item.get("rule_id") or "")
+    lines=text.splitlines()
+    if ref and re.fullmatch(r"\d+(?:\.\d+)*",ref):
+        pat=re.compile(rf"^\s*(?:MADDE\s+)?{re.escape(ref)}(?:[\.\-\):]|\s)",re.I)
+        start=next((i for i,x in enumerate(lines) if pat.search(x)),None)
+        if start is not None:
+            depth=ref.count("."); collected=[lines[start]]
+            nxt=re.compile(r"^\s*(?:MADDE\s+)?(\d+(?:\.\d+)*)(?:[\.\-\):]|\s)",re.I)
+            for line in lines[start+1:]:
+                m=nxt.search(line)
+                if m and m.group(1)!=ref and m.group(1).count(".")<=depth: break
+                collected.append(line)
+            full="\n".join(collected).strip()
+            if full: return full
+    target=(item.get("target_text") or item.get("anchor_text") or "").strip()
+    if target:
+        for line in lines:
+            if target in line or (len(target)>35 and target[:35] in line): return line.strip()
+    return target or "Orijinal madde bulunamadı."
+
+def build_full_revised_clause(original,item):
+    if (item.get("mode") or "REPLACE").upper()=="APPEND_AFTER":
+        return (original.rstrip()+"\n\n"+(item.get("append_text") or "").strip()).strip()
+    repl=(item.get("replacement_text") or "").strip(); target=(item.get("target_text") or "").strip()
+    if target and target in original: return original.replace(target,repl,1)
+    return repl or original
+
 def _preview_default_mode(item):
     req = (item.get("redline_mode") or "AUTO").upper()
     if item.get("mode") == "APPEND_AFTER":
@@ -426,60 +458,39 @@ def _preview_default_mode(item):
     return "🤖 Otomatik seç"
 
 
-def render_revision_preview(items):
+def render_revision_preview(items, contract_text):
     st.subheader("Revizyon Önizleme")
-    st.caption("Word henüz oluşturulmaz. Her müdahaleyi kabul et, reddet, metni düzenle ve Word'de nasıl uygulanacağını seç.")
-    edited = []
-    accepted = rejected = manually_edited = 0
-    mode_map = {
-        "🤖 Otomatik seç":"AUTO",
-        "🩹 Mikro değişiklik":"MICRO",
-        "📝 Cümle / blok değişikliği":"BLOCK",
-        "➕ Yeni hüküm":"AUTO",
-    }
-    for i, item in enumerate(items):
-        rid = item.get("rule_id") or f"REV-{i+1}"
-        title = item.get("title") or rid
-        with st.expander(f"{i+1}. {rid} — {title}", expanded=(i < 3)):
-            c1,c2 = st.columns([1,1])
-            decision = c1.radio(
-                "Karar", ["✅ Kabul","❌ Reddet"],
-                horizontal=True, key=f"preview_decision_{i}"
-            )
-            choices = ["🤖 Otomatik seç","🩹 Mikro değişiklik","📝 Cümle / blok değişikliği"]
-            if item.get("mode") == "APPEND_AFTER":
-                choices = ["➕ Yeni hüküm","🤖 Otomatik seç"]
-            default_label = _preview_default_mode(item)
-            idx = choices.index(default_label) if default_label in choices else 0
-            visual_mode = c2.selectbox("Word'de uygulanma biçimi", choices, index=idx, key=f"preview_mode_{i}")
-
-            st.markdown("**Mevcut / referans metin**")
-            st.code(item.get("target_text") or item.get("anchor_text") or "—", language=None)
-
-            field = "replacement_text" if item.get("mode") == "REPLACE" else "append_text"
-            original_proposal = item.get(field) or ""
-            proposed = st.text_area(
-                "OLI revizyonu — burada düzenleyebilirsin",
-                value=original_proposal,
-                height=130,
-                key=f"preview_text_{i}"
-            )
-            if item.get("reason"):
-                st.caption("Neden: " + item.get("reason"))
-
-            if decision == "❌ Reddet":
-                rejected += 1
-                continue
-            accepted += 1
-            new_item = dict(item)
-            new_item[field] = proposed
-            new_item["redline_mode"] = mode_map[visual_mode]
-            if proposed.strip() != original_proposal.strip():
-                manually_edited += 1
-                new_item["edited_by_user"] = True
-            edited.append(new_item)
-
-    st.info(f"☑ {accepted} kabul • ☒ {rejected} reddet • ✏️ {manually_edited} manuel düzenleme")
+    st.caption("Gerekçe → tam orijinal madde → tam revize madde. Word yalnız kabul ettiğin son metinlerden oluşturulur.")
+    edited=[]; accepted=rejected=manual=0
+    mm={"🤖 Otomatik seç":"AUTO","🩹 Mikro değişiklik":"MICRO","📝 Cümle / blok değişikliği":"BLOCK","➕ Yeni hüküm":"AUTO"}
+    for i,item in enumerate(items):
+        rid=item.get("reference") or item.get("rule_id") or f"REV-{i+1}"
+        title=item.get("title") or item.get("rule_title") or rid
+        original=extract_full_original_clause(contract_text,item)
+        proposed=build_full_revised_clause(original,item)
+        with st.expander(f"{i+1}. {rid} — {title}",expanded=(i<3)):
+            st.markdown("**Neden revize ediyorum?**")
+            st.info(item.get("reason") or item.get("problem") or "Revizyon gerekçesi belirtilmemiş.")
+            st.markdown("**ORİJİNAL MADDE**")
+            st.text_area("Orijinal",original,height=150,disabled=True,key=f"orig_{i}",label_visibility="collapsed")
+            st.markdown("**REVİZE MADDE**")
+            final=st.text_area("Revize",proposed,height=180,key=f"revised_{i}",label_visibility="collapsed")
+            c1,c2=st.columns(2)
+            decision=c1.radio("Karar",["✅ Kabul","❌ Reddet"],horizontal=True,key=f"decision_{i}")
+            choices=["🤖 Otomatik seç","🩹 Mikro değişiklik","📝 Cümle / blok değişikliği"]
+            if item.get("mode")=="APPEND_AFTER": choices=["➕ Yeni hüküm","🤖 Otomatik seç"]
+            default=_preview_default_mode(item); idx=choices.index(default) if default in choices else 0
+            vm=c2.selectbox("Word'de uygulanma biçimi",choices,index=idx,key=f"vmode_{i}")
+            if decision=="❌ Reddet": rejected+=1; continue
+            accepted+=1; ni=dict(item); ni["redline_mode"]=mm[vm]
+            ni["preview_original_clause"]=original; ni["preview_final_clause"]=final
+            if (item.get("mode") or "REPLACE").upper()=="APPEND_AFTER":
+                ni["append_text"]=final[len(original):].strip() if final.startswith(original) else final
+            else:
+                ni["target_text"]=original; ni["replacement_text"]=final
+            if final.strip()!=proposed.strip(): manual+=1; ni["edited_by_user"]=True
+            edited.append(ni)
+    st.info(f"☑ {accepted} kabul • ☒ {rejected} reddet • ✏️ {manual} manuel düzenleme")
     return edited
 
 st.markdown("""
@@ -707,7 +718,7 @@ if result:
                 try:
                     revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
                         st.session_state["original_bytes"],
-                        st.session_state.get("approved_revision_plan", edited),
+                        st.session_state.get("approved_revision_plan", []),
                         author="Av. Onur Güneş",
                         flags=st.session_state.get("word_flags", [])
                     )
@@ -813,4 +824,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5.1 Preview Patch + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.2 Full Clause Preview + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
