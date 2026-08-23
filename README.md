@@ -1,11 +1,13 @@
-# OLI Clean v0.2.1 — JSON Fix
+# OLI Clean v0.2.2 — Word Fix
 
-v0.2 fonksiyonları korunur.
+Dondurulan tasarım, analiz ve not mantığı korunmuştur.
 
-Düzeltme:
-- JSON code fence / açıklama / trailing comma temizliği.
-- Parse hâlâ başarısızsa yalnız JSON sözdizimini onaran tek repair çağrısı.
-- Repair çağrısında hukuki içeriği değiştirmeme talimatı.
-- Model promptunda geçerli JSON üretme kuralları sıkılaştırıldı.
-
-Tasarım, analiz mantığı, notlar ve Word çıktı sistemi değiştirilmedi.
+Değişiklikler:
+- “Ajansa gönderilecek öneri metni” adı → “Revize Önerileri”.
+- Word eşleştirme motoru yeniden kuruldu.
+- DOCX içindeki normal paragraflar ve tablo hücreleri taranır.
+- Önce excerpt, sonra gerçek madde numarası ile eşleşme aranır.
+- Revizyonlar Track Changes olarak `Av. Onur Güneş` yazarıyla işlenir.
+- Tüm dikkat noktalarında tek renk sarı kullanılır.
+- Sarı işaret paragrafın başındaki ilk görünür metin parçasına uygulanır; tüm paragraf boyanmaz.
+- Word üretiminden sonra kaç revizyon işlendiği ve kaç noktanın yalnız dikkat olarak kaldığı gösterilir.

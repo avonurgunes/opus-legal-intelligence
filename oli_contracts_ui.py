@@ -119,7 +119,7 @@ def render_contracts():
     st.subheader("İnceleme Sonrası")
     c1,c2=st.columns(2)
     with c1:
-        if st.button("AJANSA GÖNDERİLECEK ÖNERİ METNİNİ HAZIRLA",use_container_width=True):
+        if st.button("REVİZE ÖNERİLERİNİ HAZIRLA",use_container_width=True):
             lines=[]
             for x in revisions:
                 ref=x.get("reference","")
@@ -135,12 +135,12 @@ def render_contracts():
             if not raw or not name.lower().endswith(".docx"):
                 st.warning("Revize Word oluşturmak için kaynak belge DOCX olmalı.")
             else:
-                data,attention=create_revised_word(raw,revisions)
+                data,stats=create_revised_word(raw,revisions)
                 st.session_state["clean_revised_word"]=data
-                st.session_state["clean_word_attention"]=attention
+                st.session_state["clean_word_attention"]=stats
 
     if st.session_state.get("agency_revision_text"):
-        st.text_area("Ajansa gönderilecek revizyon notu",st.session_state["agency_revision_text"],height=260)
+        st.text_area("Revize Önerileri",st.session_state["agency_revision_text"],height=260)
 
     if st.session_state.get("clean_revised_word"):
         st.download_button(
@@ -150,5 +150,11 @@ def render_contracts():
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             use_container_width=True
         )
-        st.caption("Word değişiklik yazarı: Av. Onur Güneş. Dikkat gerektiren maddelerde yalnız maddenin/paragrafın ilk kelimesi açık sarı ile işaretlenir.")
+        stats=st.session_state.get("clean_word_attention",{})
+        st.caption(
+            f"Word değişiklik yazarı: Av. Onur Güneş • "
+            f"{stats.get('applied',0)} revizyon işlendi • "
+            f"{stats.get('attention',0)} yalnız dikkat işareti bıraktı. "
+            "Dikkat noktalarında maddenin/paragrafın başındaki ilk metin parçası sarı işaretlenir."
+        )
 
