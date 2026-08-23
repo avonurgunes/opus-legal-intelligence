@@ -841,4 +841,151 @@ div[data-testid="stExpander"] summary *{opacity:1!important;color:#343A40!import
 </style>
 """,unsafe_allow_html=True)
 
-st.markdown("<div class=\"oli-footer\">OLI • v0.6.2 Dual Mode • Sözleşmeler + Arabuluculuk + KVKK + Dava Dosyaları</div>", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+/* OLI v0.6.2.1 — UI ONLY. This block intentionally changes presentation only. */
+:root{color-scheme:light}
+html,body,[data-testid="stAppViewContainer"],.stApp{
+    background:#F3F4F6!important;
+    color:#171A1F!important;
+}
+[data-testid="stHeader"]{
+    background:#0B1118!important;
+    border-bottom:1px solid #27313C!important;
+}
+[data-testid="stAppViewBlockContainer"]{
+    max-width:1160px!important;
+    padding-top:1.35rem!important;
+    padding-bottom:3.5rem!important;
+}
+
+/* typography / contrast */
+[data-testid="stAppViewBlockContainer"] h1,
+[data-testid="stAppViewBlockContainer"] h2,
+[data-testid="stAppViewBlockContainer"] h3{
+    color:#15181C!important;
+    opacity:1!important;
+    letter-spacing:-.025em!important;
+}
+[data-testid="stAppViewBlockContainer"] p,
+[data-testid="stAppViewBlockContainer"] label p,
+[data-testid="stAppViewBlockContainer"] [data-testid="stCaptionContainer"] p{
+    opacity:1!important;
+}
+[data-testid="stAppViewBlockContainer"] label p{color:#424A53!important;font-weight:600!important}
+[data-testid="stAppViewBlockContainer"] [data-testid="stCaptionContainer"] p{color:#68717B!important}
+
+/* brand / top navigation */
+.oli-brand{
+    color:#D6A13A!important;
+    font-size:1.55rem!important;
+    font-weight:850!important;
+    letter-spacing:.04em!important;
+}
+.oli-brand-sub{color:#9AA3AD!important}
+div[role="radiogroup"]{
+    justify-content:flex-end!important;
+    gap:.45rem!important;
+}
+div[role="radiogroup"] label{
+    background:#121923!important;
+    border:1px solid #293441!important;
+    border-radius:9px!important;
+    padding:.45rem .85rem!important;
+}
+div[role="radiogroup"] label p{color:#EEF0F2!important;font-weight:650!important}
+div[role="radiogroup"] label:has(input:checked){
+    border-color:#D6A13A!important;
+    box-shadow:inset 0 -3px 0 #D6A13A!important;
+}
+
+/* primary workspace */
+.oli-workspace{
+    background:#FFFFFF!important;
+    border:1px solid #DDE1E5!important;
+    border-radius:16px!important;
+    padding:24px 26px!important;
+    margin-top:20px!important;
+    box-shadow:0 5px 22px rgba(16,24,40,.055)!important;
+}
+.oli-workspace-title{
+    color:#15181C!important;
+    font-size:1.38rem!important;
+    font-weight:800!important;
+    border-left:4px solid #D6A13A!important;
+    padding-left:12px!important;
+}
+.oli-workspace-sub{color:#68717B!important;margin-left:16px!important}
+
+/* controls */
+div[data-testid="stTextInput"] input,
+div[data-testid="stTextArea"] textarea,
+div[data-testid="stSelectbox"] div[data-baseweb="select"]>div{
+    background:#FFFFFF!important;
+    color:#1E2329!important;
+    border:1px solid #CDD3D9!important;
+    border-radius:9px!important;
+}
+div[data-testid="stFileUploaderDropzone"]{
+    background:#FAFBFC!important;
+    border:1px dashed #BFC7CF!important;
+    border-radius:12px!important;
+}
+div[data-testid="stFileUploaderDropzone"] *{
+    opacity:1!important;
+    color:#505963!important;
+}
+
+/* buttons */
+.stButton>button,.stDownloadButton>button{
+    min-height:46px!important;
+    border-radius:9px!important;
+    font-weight:750!important;
+}
+.stButton>button[kind="primary"],
+.stDownloadButton>button[kind="primary"]{
+    background:linear-gradient(90deg,#B77B18,#D89D32)!important;
+    color:#FFFFFF!important;
+    border:0!important;
+    box-shadow:0 3px 10px rgba(183,123,24,.18)!important;
+}
+.stButton>button:not([kind="primary"]){
+    background:#FFFFFF!important;
+    color:#252B31!important;
+    border:1px solid #C8CED5!important;
+}
+
+/* result / notes / lower sections */
+.oli-resultbar{
+    background:#FFFFFF!important;
+    color:#2B3138!important;
+    border:1px solid #DDE1E5!important;
+    border-left:4px solid #D6A13A!important;
+    border-radius:11px!important;
+    box-shadow:0 2px 10px rgba(16,24,40,.035)!important;
+}
+div[data-testid="stExpander"] details{
+    background:#FFFFFF!important;
+    border:1px solid #DDE1E5!important;
+    border-radius:11px!important;
+}
+div[data-testid="stExpander"] details summary{
+    background:#F9FAFB!important;
+}
+div[data-testid="stExpander"] details summary *{
+    color:#343B43!important;
+    opacity:1!important;
+}
+hr{border-color:#DDE1E5!important}
+.oli-footer{color:#858D96!important}
+
+/* Keep lower page fully readable */
+[data-testid="stAppViewBlockContainer"] .stMarkdown,
+[data-testid="stAppViewBlockContainer"] .stMarkdown *{
+    opacity:1;
+}
+</style>
+""",unsafe_allow_html=True)
+
+st.markdown("<div class=\"oli-footer\">OLI • v0.6.2.1 UI Only • Sözleşmeler + Arabuluculuk + KVKK + Dava Dosyaları</div>", unsafe_allow_html=True)
