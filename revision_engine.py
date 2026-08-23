@@ -253,6 +253,130 @@ def highlight_flags(doc, flags):
     return stats
 
 
+
+def _semantic_change_ratio(old_text: str, new_text: str) -> float:
+    old_tokens = re.findall(r"\w+|[^\w\s]", old_text or "", flags=re.UNICODE)
+    new_tokens = re.findall(r"\w+|[^\w\s]", new_text or "", flags=re.UNICODE)
+    if not old_tokens and not new_tokens:
+        return 0.0
+    sm = SequenceMatcher(None, old_tokens, new_tokens)
+    return 1.0 - sm.ratio()
+
+
+def choose_redline_mode(old_text: str, new_text: str, requested: str = "AUTO") -> str:
+    """
+    MICRO only when the edit is genuinely small.
+    BLOCK when sentence structure materially changes, preventing word-by-word redline confetti.
+    """
+    req = (requested or "AUTO").upper()
+    if req in {"MICRO", "BLOCK"}:
+        return req
+    ratio = _semantic_change_ratio(old_text, new_text)
+    old_words = len((old_text or "").split())
+    new_words = len((new_text or "").split())
+    # Small edits: <= ~22% token change and broadly similar length.
+    if ratio <= 0.22 and abs(old_words-new_words) <= max(4, int(max(old_words, new_words, 1)*0.18)):
+        return "MICRO"
+    return "BLOCK"
+
+
+def replace_paragraph_block(doc, paragraph, new_text, author, date_str):
+    """
+    Delete the old paragraph text as one tracked block and insert the new paragraph text as one tracked block.
+    Paragraph properties are preserved; inserted run copies the paragraph's first-run formatting.
+    """
+    p = paragraph._p
+    old_text = paragraph.text
+    # capture first visible run formatting before clearing
+    template_rpr = None
+    for rr in p.findall(qn("w:r")):
+        rpr = rr.find(qn("w:rPr"))
+        if rpr is not None:
+            template_rpr = deepcopy(rpr)
+            break
+
+    # remove existing visible content but preserve pPr
+    for child in list(p):
+        if child.tag != qn("w:pPr"):
+            p.remove(child)
+
+    del_el = OxmlElement("w:del")
+    del_el.set(qn("w:author"), author)
+    del_el.set(qn("w:date"), date_str)
+    del_el.set(qn("w:id"), str(next_change_id(doc)))
+    r_old = OxmlElement("w:r")
+    if template_rpr is not None:
+        r_old.append(deepcopy(template_rpr))
+    dt = OxmlElement("w:delText")
+    dt.set(qn("xml:space"), "preserve")
+    dt.text = old_text
+    r_old.append(dt)
+    del_el.append(r_old)
+    p.append(del_el)
+
+    ins_el = OxmlElement("w:ins")
+    ins_el.set(qn("w:author"), author)
+    ins_el.set(qn("w:date"), date_str)
+    ins_el.set(qn("w:id"), str(next_change_id(doc)))
+    r_new = OxmlElement("w:r")
+    if template_rpr is not None:
+        r_new.append(deepcopy(template_rpr))
+    t = OxmlElement("w:t")
+    t.set(qn("xml:space"), "preserve")
+    t.text = new_text
+    r_new.append(t)
+    ins_el.append(r_new)
+    p.append(ins_el)
+
+
+def apply_track_format_highlight(doc, paragraph, color: str, author: str, date_str: str):
+    """
+    Apply highlight AND record it as a tracked formatting change (w:rPrChange),
+    so Word can show/accept/reject it as formatting rather than permanent paint.
+    """
+    changed = 0
+    for run in paragraph.runs:
+        if not (run.text or "").strip():
+            continue
+        rPr = run._r.get_or_add_rPr()
+        # Snapshot prior formatting into rPrChange.
+        previous = deepcopy(rPr)
+        for old_change in previous.findall(qn("w:rPrChange")):
+            previous.remove(old_change)
+        # Current highlight.
+        old_hl = rPr.find(qn("w:highlight"))
+        if old_hl is not None:
+            rPr.remove(old_hl)
+        hl = OxmlElement("w:highlight")
+        hl.set(qn("w:val"), color)
+        rPr.append(hl)
+
+        change = OxmlElement("w:rPrChange")
+        change.set(qn("w:id"), str(next_change_id(doc)))
+        change.set(qn("w:author"), author)
+        change.set(qn("w:date"), date_str)
+        change.append(previous)
+        rPr.append(change)
+        changed += 1
+    return changed
+
+
+def highlight_flags_tracked(doc, flags, author, date_str):
+    stats = {"orange": 0, "blue": 0, "skipped": []}
+    for flag in flags or []:
+        color = (flag.get("color") or "").lower()
+        if color not in ("orange", "blue"):
+            continue
+        anchor_text = (flag.get("anchor_text") or "").strip()
+        p, score = find_best_paragraph(doc, anchor_text)
+        if p is None or score < 0.42:
+            stats["skipped"].append({**flag, "reason": f"Anchor bulunamadı ({score:.2f})"})
+            continue
+        word_color = "darkYellow" if color == "orange" else "cyan"
+        if apply_track_format_highlight(doc, p, word_color, author, date_str):
+            stats[color] += 1
+    return stats
+
 def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author: str = "Av. Onur Güneş", flags: list[dict] | None = None):
     doc=Document(BytesIO(original_bytes)); change_id=1000; applied=[]; skipped=[]
     for rev in revisions:
@@ -266,6 +390,6 @@ def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author
         else: change_id=replace_paragraph_tracked(paragraph,new_text,change_id,author)
         applied.append({**rev,"match_score":score})
     placeholder_count=highlight_placeholders(doc)
-    flag_stats=highlight_flags(doc, flags or [])
+    flag_stats=highlight_flags_tracked(doc, flags or [], author, date_str)
     bio=BytesIO(); doc.save(bio)
     return bio.getvalue(),applied,skipped,placeholder_count,flag_stats

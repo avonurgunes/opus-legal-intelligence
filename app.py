@@ -414,6 +414,74 @@ Kısa, ajansa aktarılabilir dil kullan. Yanıt yalnız JSON:
     return clean_json(resp.output_text)
 
 
+
+def _preview_default_mode(item):
+    req = (item.get("redline_mode") or "AUTO").upper()
+    if item.get("mode") == "APPEND_AFTER":
+        return "➕ Yeni hüküm"
+    if req == "MICRO":
+        return "🩹 Mikro değişiklik"
+    if req == "BLOCK":
+        return "📝 Cümle / blok değişikliği"
+    return "🤖 Otomatik seç"
+
+
+def render_revision_preview(items):
+    st.subheader("Revizyon Önizleme")
+    st.caption("Word henüz oluşturulmaz. Her müdahaleyi kabul et, reddet, metni düzenle ve Word'de nasıl uygulanacağını seç.")
+    edited = []
+    accepted = rejected = manually_edited = 0
+    mode_map = {
+        "🤖 Otomatik seç":"AUTO",
+        "🩹 Mikro değişiklik":"MICRO",
+        "📝 Cümle / blok değişikliği":"BLOCK",
+        "➕ Yeni hüküm":"AUTO",
+    }
+    for i, item in enumerate(items):
+        rid = item.get("rule_id") or f"REV-{i+1}"
+        title = item.get("title") or rid
+        with st.expander(f"{i+1}. {rid} — {title}", expanded=(i < 3)):
+            c1,c2 = st.columns([1,1])
+            decision = c1.radio(
+                "Karar", ["✅ Kabul","❌ Reddet"],
+                horizontal=True, key=f"preview_decision_{i}"
+            )
+            choices = ["🤖 Otomatik seç","🩹 Mikro değişiklik","📝 Cümle / blok değişikliği"]
+            if item.get("mode") == "APPEND_AFTER":
+                choices = ["➕ Yeni hüküm","🤖 Otomatik seç"]
+            default_label = _preview_default_mode(item)
+            idx = choices.index(default_label) if default_label in choices else 0
+            visual_mode = c2.selectbox("Word'de uygulanma biçimi", choices, index=idx, key=f"preview_mode_{i}")
+
+            st.markdown("**Mevcut / referans metin**")
+            st.code(item.get("target_text") or item.get("anchor_text") or "—", language=None)
+
+            field = "replacement_text" if item.get("mode") == "REPLACE" else "append_text"
+            original_proposal = item.get(field) or ""
+            proposed = st.text_area(
+                "OLI revizyonu — burada düzenleyebilirsin",
+                value=original_proposal,
+                height=130,
+                key=f"preview_text_{i}"
+            )
+            if item.get("reason"):
+                st.caption("Neden: " + item.get("reason"))
+
+            if decision == "❌ Reddet":
+                rejected += 1
+                continue
+            accepted += 1
+            new_item = dict(item)
+            new_item[field] = proposed
+            new_item["redline_mode"] = mode_map[visual_mode]
+            if proposed.strip() != original_proposal.strip():
+                manually_edited += 1
+                new_item["edited_by_user"] = True
+            edited.append(new_item)
+
+    st.info(f"☑ {accepted} kabul • ☒ {rejected} reddet • ✏️ {manually_edited} manuel düzenleme")
+    return edited
+
 st.markdown("""
 <div class="opus-hero">
   <div class="opus-kicker">OPUS • PRIVATE COUNSEL SYSTEM</div>
@@ -639,7 +707,7 @@ if result:
                 try:
                     revised_bytes, applied, skipped, placeholder_count, flag_stats = apply_revisions_to_docx(
                         st.session_state["original_bytes"],
-                        edited,
+                        st.session_state.get("approved_revision_plan", edited),
                         author="Av. Onur Güneş",
                         flags=st.session_state.get("word_flags", [])
                     )
@@ -745,4 +813,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5 Final Patch + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.1 Preview Patch + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
