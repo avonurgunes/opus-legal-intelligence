@@ -254,6 +254,74 @@ def highlight_flags(doc, flags):
 
 
 
+
+def next_change_id(doc) -> int:
+    """Return a free Word revision id by scanning tracked insert/delete/format changes."""
+    max_id = 999
+    for p in _all_paragraphs(doc):
+        for el in p._p.iter():
+            if el.tag in (qn("w:ins"), qn("w:del"), qn("w:rPrChange"), qn("w:pPrChange")):
+                raw = el.get(qn("w:id"))
+                try:
+                    max_id = max(max_id, int(raw))
+                except (TypeError, ValueError):
+                    pass
+    return max_id + 1
+
+
+def replace_paragraph_phrase_tracked(paragraph, new_text: str, change_id: int, author: str):
+    """
+    Natural hybrid redline:
+    preserve the longest common word/token prefix and suffix,
+    then replace the changed middle as ONE tracked block.
+    This keeps the source sentence structure instead of rewriting it word-by-word.
+    """
+    old_text = paragraph.text
+    old_t = _tokens(old_text)
+    new_t = _tokens(new_text)
+    rPr = _body_run_properties(paragraph)
+
+    # Longest common prefix.
+    left = 0
+    lim = min(len(old_t), len(new_t))
+    while left < lim and old_t[left] == new_t[left]:
+        left += 1
+
+    # Longest common suffix without crossing prefix.
+    right = 0
+    while (
+        right < len(old_t) - left
+        and right < len(new_t) - left
+        and old_t[len(old_t)-1-right] == new_t[len(new_t)-1-right]
+    ):
+        right += 1
+
+    old_mid = "".join(old_t[left:len(old_t)-right if right else len(old_t)])
+    new_mid = "".join(new_t[left:len(new_t)-right if right else len(new_t)])
+    prefix = "".join(new_t[:left])
+    suffix = "".join(new_t[len(new_t)-right:]) if right else ""
+
+    _clear_paragraph_content(paragraph)
+    p = paragraph._p
+    if prefix:
+        p.append(_plain_run(prefix, rPr))
+    if old_mid:
+        p.append(_tracked_run("w:del", old_mid, change_id, author, rPr))
+        change_id += 1
+    if new_mid:
+        p.append(_tracked_run("w:ins", new_mid, change_id, author, rPr))
+        change_id += 1
+    if suffix:
+        p.append(_plain_run(suffix, rPr))
+    return change_id
+
+
+def _changed_regions(old_text: str, new_text: str):
+    old_tokens, new_tokens = _tokens(old_text), _tokens(new_text)
+    sm = SequenceMatcher(None, old_tokens, new_tokens, autojunk=False)
+    return [op for op in sm.get_opcodes() if op[0] != "equal"]
+
+
 def _semantic_change_ratio(old_text: str, new_text: str) -> float:
     old_tokens = re.findall(r"\w+|[^\w\s]", old_text or "", flags=re.UNICODE)
     new_tokens = re.findall(r"\w+|[^\w\s]", new_text or "", flags=re.UNICODE)
@@ -265,18 +333,31 @@ def _semantic_change_ratio(old_text: str, new_text: str) -> float:
 
 def choose_redline_mode(old_text: str, new_text: str, requested: str = "AUTO") -> str:
     """
-    MICRO only when the edit is genuinely small.
-    BLOCK when sentence structure materially changes, preventing word-by-word redline confetti.
+    MICRO: tiny/local edit.
+    PHRASE: preserve source sentence, replace one natural changed phrase/cümlecik.
+    BLOCK: wholesale rewrite.
+    AUTO chooses the cleanest professional Word redline.
     """
     req = (requested or "AUTO").upper()
-    if req in {"MICRO", "BLOCK"}:
+    if req in {"MICRO", "PHRASE", "BLOCK"}:
         return req
+
     ratio = _semantic_change_ratio(old_text, new_text)
+    regions = _changed_regions(old_text, new_text)
     old_words = len((old_text or "").split())
     new_words = len((new_text or "").split())
-    # Small edits: <= ~22% token change and broadly similar length.
-    if ratio <= 0.22 and abs(old_words-new_words) <= max(4, int(max(old_words, new_words, 1)*0.18)):
-        return "MICRO"
+
+    # One very small changed region -> MICRO.
+    if len(regions) == 1:
+        op, i1, i2, j1, j2 = regions[0]
+        changed_size = max(i2-i1, j2-j1)
+        if changed_size <= 8 and ratio <= 0.28:
+            return "MICRO"
+
+    # Moderate structural change -> one phrase/cümlecik replacement.
+    if ratio <= 0.62 and abs(old_words-new_words) <= max(12, int(max(old_words, new_words, 1)*0.40)):
+        return "PHRASE"
+
     return "BLOCK"
 
 
@@ -378,19 +459,71 @@ def highlight_flags_tracked(doc, flags, author, date_str):
     return stats
 
 def apply_revisions_to_docx(original_bytes: bytes, revisions: list[dict], author: str = "Av. Onur Güneş", flags: list[dict] | None = None):
-    doc=Document(BytesIO(original_bytes)); change_id=1000; applied=[]; skipped=[]
-    date_str = datetime.now(ZoneInfo("Europe/Istanbul")).isoformat()
-    for rev in revisions:
-        action=(rev.get("action") or "REPLACE_PARAGRAPH").upper(); new_text=(rev.get("replacement_text") or "").strip(); anchor=(rev.get("anchor_text") or "").strip()
-        if not new_text: skipped.append({**rev,"reason":"Boş revizyon metni"}); continue
-        if action=="APPEND_END":
-            change_id=append_end_tracked(doc,new_text,change_id,author); applied.append({**rev,"match_score":1.0}); continue
-        paragraph,score=find_best_paragraph(doc,anchor)
-        if paragraph is None or score<0.42: skipped.append({**rev,"reason":f"Anchor bulunamadı (eşleşme {score:.2f})"}); continue
-        if action=="APPEND_AFTER": change_id=insert_after_tracked(paragraph,new_text,change_id,author)
-        else: change_id=replace_paragraph_tracked(paragraph,new_text,change_id,author)
-        applied.append({**rev,"match_score":score})
-    placeholder_count=highlight_placeholders(doc)
-    flag_stats=highlight_flags_tracked(doc, flags or [], author, date_str)
-    bio=BytesIO(); doc.save(bio)
-    return bio.getvalue(),applied,skipped,placeholder_count,flag_stats
+    doc = Document(BytesIO(original_bytes))
+    change_id = next_change_id(doc)
+    applied, skipped = [], []
+    date_str = _word_timestamp()
+
+    for item in revisions:
+        action = (item.get("action") or item.get("mode") or "REPLACE_PARAGRAPH").upper()
+        # Normalize preview modes to engine actions.
+        if action == "REPLACE":
+            action = "REPLACE_PARAGRAPH"
+
+        if action in {"APPEND_AFTER", "APPEND_END"}:
+            new_text = (item.get("append_text") or item.get("replacement_text") or "").strip()
+        else:
+            new_text = (item.get("replacement_text") or "").strip()
+
+        anchor = (
+            item.get("target_text")
+            or item.get("anchor_text")
+            or item.get("preview_original_clause")
+            or ""
+        ).strip()
+
+        if not new_text:
+            skipped.append({**item, "reason": "Boş revizyon metni"})
+            continue
+
+        if action == "APPEND_END":
+            change_id = append_end_tracked(doc, new_text, change_id, author)
+            applied.append({**item, "match_score": 1.0, "redline_mode": "APPEND"})
+            continue
+
+        paragraph, score = find_best_paragraph(doc, anchor)
+        if paragraph is None or score < 0.42:
+            skipped.append({**item, "reason": f"Anchor bulunamadı (eşleşme {score:.2f})"})
+            continue
+
+        if action == "APPEND_AFTER":
+            change_id = insert_after_tracked(paragraph, new_text, change_id, author)
+            applied.append({**item, "match_score": score, "redline_mode": "APPEND"})
+            continue
+
+        old_text = paragraph.text
+        requested = item.get("redline_mode", "AUTO")
+        redline_mode = choose_redline_mode(old_text, new_text, requested)
+
+        if redline_mode == "MICRO":
+            change_id = replace_paragraph_tracked(paragraph, new_text, change_id, author)
+        elif redline_mode == "PHRASE":
+            change_id = replace_paragraph_phrase_tracked(paragraph, new_text, change_id, author)
+        else:
+            # BLOCK uses one delete + one insert for the complete paragraph.
+            rPr = _body_run_properties(paragraph)
+            _clear_paragraph_content(paragraph)
+            paragraph._p.append(_tracked_run("w:del", old_text, change_id, author, rPr))
+            change_id += 1
+            paragraph._p.append(_tracked_run("w:ins", new_text, change_id, author, rPr))
+            change_id += 1
+
+        applied.append({**item, "match_score": score, "redline_mode": redline_mode})
+
+    placeholder_count = highlight_placeholders(doc)
+    flag_stats = highlight_flags_tracked(doc, flags or [], author, date_str)
+
+    bio = BytesIO()
+    doc.save(bio)
+    return bio.getvalue(), applied, skipped, placeholder_count, flag_stats
+

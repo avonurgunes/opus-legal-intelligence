@@ -453,8 +453,10 @@ def _preview_default_mode(item):
         return "➕ Yeni hüküm"
     if req == "MICRO":
         return "🩹 Mikro değişiklik"
+    if req == "PHRASE":
+        return "✂️ Cümlecik / doğal ekleme"
     if req == "BLOCK":
-        return "📝 Cümle / blok değişikliği"
+        return "📝 Tam blok değişikliği"
     return "🤖 Otomatik seç"
 
 
@@ -462,7 +464,7 @@ def render_revision_preview(items, contract_text):
     st.subheader("Revizyon Önizleme")
     st.caption("Gerekçe → tam orijinal madde → tam revize madde. Word yalnız kabul ettiğin son metinlerden oluşturulur.")
     edited=[]; accepted=rejected=manual=0
-    mm={"🤖 Otomatik seç":"AUTO","🩹 Mikro değişiklik":"MICRO","📝 Cümle / blok değişikliği":"BLOCK","➕ Yeni hüküm":"AUTO"}
+    mm={"🤖 Otomatik seç":"AUTO","🩹 Mikro değişiklik":"MICRO","✂️ Cümlecik / doğal ekleme":"PHRASE","📝 Tam blok değişikliği":"BLOCK","➕ Yeni hüküm":"AUTO"}
     for i,item in enumerate(items):
         rid=item.get("reference") or item.get("rule_id") or f"REV-{i+1}"
         title=item.get("title") or item.get("rule_title") or rid
@@ -477,7 +479,7 @@ def render_revision_preview(items, contract_text):
             final=st.text_area("Revize",proposed,height=180,key=f"revised_{i}",label_visibility="collapsed")
             c1,c2=st.columns(2)
             decision=c1.radio("Karar",["✅ Kabul","❌ Reddet"],horizontal=True,key=f"decision_{i}")
-            choices=["🤖 Otomatik seç","🩹 Mikro değişiklik","📝 Cümle / blok değişikliği"]
+            choices=["🤖 Otomatik seç","🩹 Mikro değişiklik","✂️ Cümlecik / doğal ekleme","📝 Tam blok değişikliği"]
             if item.get("mode")=="APPEND_AFTER": choices=["➕ Yeni hüküm","🤖 Otomatik seç"]
             default=_preview_default_mode(item); idx=choices.index(default) if default in choices else 0
             vm=c2.selectbox("Word'de uygulanma biçimi",choices,index=idx,key=f"vmode_{i}")
@@ -819,4 +821,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5.3 Preview/Word Fix + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.4 Hybrid Redline + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
