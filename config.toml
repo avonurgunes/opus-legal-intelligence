@@ -1,10 +1,9 @@
 [theme]
 base="light"
-primaryColor="#9B742F"
-backgroundColor="#F5F6F7"
+primaryColor="#D39A2E"
+backgroundColor="#F7F7F5"
 secondaryBackgroundColor="#FFFFFF"
-textColor="#1F2328"
+textColor="#17191C"
 font="sans serif"
-
 [browser]
 gatherUsageStats=false

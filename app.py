@@ -23,121 +23,31 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-:root { color-scheme: light; }
-html, body, [data-testid="stAppViewContainer"], .stApp {
-    background:#F5F6F7 !important;
-    color:#1F2328 !important;
-}
-[data-testid="stHeader"] {
-    background:#F5F6F7 !important;
-    border-bottom:1px solid #E3E6E8 !important;
-}
-[data-testid="stAppViewBlockContainer"] {
-    max-width: 980px !important;
-    padding-top: 1.15rem !important;
-    padding-bottom: 3rem !important;
-}
-h1,h2,h3,h4 {
-    color:#111418 !important;
-    letter-spacing:-0.02em !important;
-}
-p, label, [data-testid="stCaptionContainer"] {
-    color:#596069 !important;
-}
-.oli-brand {
-    font-size:1.35rem;
-    line-height:1;
-    font-weight:800;
-    letter-spacing:.02em;
-    color:#151719;
-    margin-top:.2rem;
-}
-.oli-brand-sub {
-    font-size:.72rem;
-    color:#7A8087;
-    margin-top:.18rem;
-}
-div[role="radiogroup"] {
-    justify-content:flex-end !important;
-    gap:.35rem !important;
-}
-div[role="radiogroup"] label {
-    background:#FFFFFF !important;
-    border:1px solid #DDE1E4 !important;
-    padding:.35rem .7rem !important;
-    border-radius:8px !important;
-    margin-right:.15rem !important;
-}
-div[role="radiogroup"] label:has(input:checked) {
-    border-color:#A57B31 !important;
-    box-shadow:inset 0 0 0 1px #A57B31 !important;
-}
-.oli-workspace {
-    background:#FFFFFF;
-    border:1px solid #E0E3E6;
-    border-radius:14px;
-    padding:20px 22px;
-    margin-top:18px;
-    box-shadow:0 1px 2px rgba(0,0,0,.035);
-}
-.oli-workspace-title {
-    font-size:1.22rem;
-    font-weight:750;
-    color:#171A1D;
-    margin-bottom:3px;
-}
-.oli-workspace-sub {
-    font-size:.88rem;
-    color:#6A7178;
-    margin-bottom:12px;
-}
-.oli-resultbarbar {
-    background:#FFFFFF;
-    border:1px solid #DDE1E4;
-    border-left:4px solid #A57B31;
-    border-radius:10px;
-    padding:14px 16px;
-    margin:14px 0 10px;
-    color:#2C3136;
-}
-.oli-resultbarbar strong { color:#151719; }
-div[data-testid="stFileUploaderDropzone"],
-div[data-testid="stTextInput"] input,
-div[data-testid="stTextArea"] textarea,
-div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-    background:#FFFFFF !important;
-    border-color:#DDE1E4 !important;
-    color:#1F2328 !important;
-}
-div[data-testid="stExpander"] details {
-    background:#FFFFFF !important;
-    border:1px solid #E0E3E6 !important;
-    border-radius:10px !important;
-}
-div[data-testid="stExpander"] details summary {
-    background:#FAFAFA !important;
-    border-radius:10px !important;
-}
-.stButton > button, .stDownloadButton > button {
-    min-height:44px !important;
-    border-radius:8px !important;
-    font-weight:650 !important;
-}
-.stButton > button[kind="primary"],
-.stDownloadButton > button[kind="primary"] {
-    background:#9B742F !important;
-    color:#FFFFFF !important;
-    border-color:#9B742F !important;
-}
-[data-testid="stMetric"] {
-    background:#FFFFFF !important;
-    border:1px solid #E0E3E6 !important;
-    border-radius:10px !important;
-    padding:10px 12px !important;
-}
-hr { border-color:#E3E6E8 !important; }
+:root{color-scheme:light}
+html,body,[data-testid="stAppViewContainer"],.stApp{background:#F7F7F5!important;color:#17191C!important}
+[data-testid="stHeader"]{background:#0B1118!important;border-bottom:1px solid #202833!important}
+[data-testid="stAppViewBlockContainer"]{max-width:1180px!important;padding-top:1.25rem!important;padding-bottom:3rem!important}
+h1,h2,h3,h4{color:#111418!important;letter-spacing:-.025em!important}
+p,label,[data-testid="stCaptionContainer"]{color:#5E6670!important}
+.oli-brand{font-size:1.45rem;font-weight:850;color:#D6A13A!important;letter-spacing:.03em;margin-top:.1rem}
+.oli-brand-sub{font-size:.72rem;color:#8A929B!important;margin-top:.15rem}
+div[role="radiogroup"]{justify-content:flex-end!important;gap:.35rem!important}
+div[role="radiogroup"] label{background:#121923!important;border:1px solid #26303B!important;padding:.42rem .78rem!important;border-radius:8px!important}
+div[role="radiogroup"] label p{color:#E8E8E5!important}
+div[role="radiogroup"] label:has(input:checked){border-color:#D39A2E!important;box-shadow:inset 0 -2px 0 #D39A2E!important}
+.oli-workspace{background:#FFF;border:1px solid #E2E4E7;border-radius:14px;padding:22px 24px;margin-top:18px;box-shadow:0 4px 18px rgba(17,24,39,.055)}
+.oli-workspace-title{font-size:1.35rem;font-weight:800;color:#121519;margin-bottom:4px;border-left:4px solid #D49A2A;padding-left:12px}
+.oli-workspace-sub{font-size:.9rem;color:#69717A;margin:5px 0 4px 16px}
+.oli-resultbar{background:#FFF;border:1px solid #E2E4E7;border-left:4px solid #D49A2A;border-radius:11px;padding:15px 17px;margin:14px 0 10px;color:#2B3137;box-shadow:0 2px 10px rgba(17,24,39,.035)}
+div[data-testid="stFileUploaderDropzone"],div[data-testid="stTextInput"] input,div[data-testid="stTextArea"] textarea,div[data-testid="stSelectbox"] div[data-baseweb="select"]>div{background:#FFF!important;border-color:#D8DDE2!important;color:#1F2328!important}
+div[data-testid="stExpander"] details{background:#FFF!important;border:1px solid #E2E4E7!important;border-radius:10px!important}
+.stButton>button,.stDownloadButton>button{min-height:46px!important;border-radius:8px!important;font-weight:750!important}
+.stButton>button[kind="primary"],.stDownloadButton>button[kind="primary"]{background:linear-gradient(90deg,#C68B22,#E1A735)!important;color:#FFF!important;border:0!important;box-shadow:0 3px 10px rgba(190,132,29,.20)!important}
+hr{border-color:#E3E6E8!important}
 </style>
-""", unsafe_allow_html=True)
+""",unsafe_allow_html=True)
+
+
 
 RULES = json.loads(Path(__file__).with_name("rules.json").read_text(encoding="utf-8"))
 REVISION_LIBRARY = json.loads(
@@ -356,6 +266,16 @@ def build_revision_drafts(contract_text, selected_findings, negotiation_power):
             bank_parts.append(json.dumps(bank_entry, ensure_ascii=False))
 
     system = """Sen OLI Revision Engine'sin.
+
+ZORUNLU DRAFTING PRENSİBİ — MICRO FIRST:
+1. Mevcut cümlenin terminolojisini, kelime sırasını ve iskeletini mümkün olduğunca koru.
+2. Hukuki sonucu yalnız gerekli kelime/ibare/sayı/istisnayı değiştirerek elde edebiliyorsan tüm cümleyi yeniden yazma.
+3. Örnek: 'Oyuncu dizi süresi boyunca başka bir projede görev almayacaktır.' → hedef serbestlik ise yalnız 'almayacaktır' kısmını 'alabilir' olarak değiştir.
+4. MICRO yetmezse PHRASE; PHRASE yetmezse ancak o zaman BLOCK/REPLACE_PARAGRAPH kullan.
+5. Stil güzelleştirmek veya kalıp metin kullanmak REPLACE_PARAGRAPH gerekçesi değildir.
+6. original_text mümkün olan en küçük güvenli eşleşme parçası; revised_text yalnız onun doğal karşılığı olmalıdır.
+7. REPLACE_PARAGRAPH son çaredir.
+
 Görevin sözleşmedeki seçilmiş bulgular için OPUS tarzında uygulanabilir revizyon metni üretmektir.
 
 ÖNCELİK:
@@ -659,8 +579,8 @@ with c3:
     )
 
 initial_note = st.text_area(
-    "İlk Not / Ajans Notu",
-    placeholder="Varsa dosyaya özgü kısa not. Örn. ücret tamam, münhasırlık önemli.",
+    "Kısa Not / Ajans Notu",
+    placeholder="Dosyaya özgü talimatı yaz. Örn. ücret tamam; münhasırlık kaldırılacak; bölüm garantisi 8 bölüm.",
     height=72
 )
 
@@ -827,4 +747,4 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 
 st.divider()
-st.caption("OLI • Sözleşmeler v0.5.9 Professional Workspace + Arabuluculuk v1.3.1 • Prototip.")
+st.caption("OLI • Sözleşmeler v0.6.0 Gold Workspace + Micro First + Arabuluculuk v1.3.1 • Prototip.")
