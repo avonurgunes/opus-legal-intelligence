@@ -1,12 +1,11 @@
-# OLI Clean v0.2
-v0.1.2 tasarım, analiz ve not sistemi korunmuştur.
+# OLI Clean v0.2.1 — JSON Fix
 
-Yeni yalnız iki inceleme-sonrası seçenek:
-1. Ajansa gönderilecek öneri metni.
-2. Revize Word oluştur.
+v0.2 fonksiyonları korunur.
 
-Word:
-- Track Changes author yalnız `Av. Onur Güneş`.
-- Tek dikkat rengi: açık sarı.
-- Boşluk / bilinmeyen / dikkat gerektiren madde için bütün paragraf değil yalnız ilk kelime sarı.
-- Değişiklikler Track Changes ile uygulanır.
+Düzeltme:
+- JSON code fence / açıklama / trailing comma temizliği.
+- Parse hâlâ başarısızsa yalnız JSON sözdizimini onaran tek repair çağrısı.
+- Repair çağrısında hukuki içeriği değiştirmeme talimatı.
+- Model promptunda geçerli JSON üretme kuralları sıkılaştırıldı.
+
+Tasarım, analiz mantığı, notlar ve Word çıktı sistemi değiştirilmedi.

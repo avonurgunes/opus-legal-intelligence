@@ -58,10 +58,48 @@ def load_actor_rules():
 
 
 def clean_json(text: str):
-    text=(text or "").strip()
-    text=re.sub(r"^```(?:json)?\s*","",text)
-    text=re.sub(r"\s*```$","",text)
-    return json.loads(text)
+    """Parse model JSON robustly; tolerate fences/prose and repair once if needed."""
+    raw=(text or "").strip()
+    raw=re.sub(r"^```(?:json)?\s*","",raw,flags=re.I)
+    raw=re.sub(r"\s*```$","",raw)
+    first=raw.find("{")
+    last=raw.rfind("}")
+    if first>=0 and last>first:
+        raw=raw[first:last+1]
+    raw=raw.replace("\u00a0"," ")
+    raw=re.sub(r",\s*([}\]])", r"\1", raw)
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        api_key=get_api_key()
+        if not api_key:
+            raise
+        client=OpenAI(api_key=api_key)
+        repair=client.responses.create(
+            model=get_model(),
+            input=[
+                {
+                    "role":"system",
+                    "content":(
+                        "Aşağıdaki metin hukuki analiz içeren bozuk JSON'dur. "
+                        "Yalnız JSON sözdizimini düzelt. Hiçbir hukuki içeriği, kelimeyi, "
+                        "madde numarasını veya değeri değiştirme/ekleme/silme. "
+                        "Yanıt yalnız geçerli JSON olsun."
+                    )
+                },
+                {"role":"user","content":raw}
+            ],
+        )
+        repaired=(repair.output_text or "").strip()
+        repaired=re.sub(r"^```(?:json)?\s*","",repaired,flags=re.I)
+        repaired=re.sub(r"\s*```$","",repaired)
+        f=repaired.find("{")
+        l=repaired.rfind("}")
+        if f>=0 and l>f:
+            repaired=repaired[f:l+1]
+        repaired=re.sub(r",\s*([}\]])", r"\1", repaired)
+        return json.loads(repaired)
 
 
 def _basic_focus(contract_type: str) -> str:
@@ -135,6 +173,13 @@ ZORUNLU İLKELER:
 10. Yalnız anlamlı müdahaleleri getir.
 
 YANIT YALNIZ GEÇERLİ JSON:
+ÇIKTI KURALLARI:
+- Markdown code fence kullanma.
+- JSON dışında tek kelime yazma.
+- Metin değerlerinin içindeki çift tırnakları \" ile escape et.
+- Metin değerlerinde gerçek satır sonu kullanma; gerekiyorsa \n kullan.
+- Trailing comma kullanma.
+
 {{
   "overall_risk":"Düşük|Orta|Yüksek|Çok Yüksek",
   "executive_summary":"en fazla 4 cümle",
