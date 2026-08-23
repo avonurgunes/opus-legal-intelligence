@@ -4,6 +4,7 @@ import streamlit as st
 
 from oli_contract_analysis import analyze_contract, extract_text, get_api_key
 from oli_contract_profiles import CONTRACT_TYPES, PROJECT_TYPES, NEGOTIATION_LEVELS, PROFILE_STATUS
+from oli_word_output import create_revised_word
 
 
 def _severity_icon(level):
@@ -67,6 +68,7 @@ def render_contracts():
                 )
             st.session_state["clean_contract_result"]=result
             st.session_state["clean_contract_name"]=uploaded.name
+            st.session_state["clean_contract_raw"]=raw
         except Exception as e:
             st.error(f"Analiz hatası: {e}")
 
@@ -113,4 +115,40 @@ def render_contracts():
             st.markdown("**Önerilen revizyon**")
             st.code(item.get("suggested_revision",""),language=None)
 
-    st.caption("Clean v0.1'de OLI Word dosyasına otomatik müdahale etmez. Önce analiz ve revizyon önerisi kalitesini sabitliyoruz.")
+    st.markdown("---")
+    st.subheader("İnceleme Sonrası")
+    c1,c2=st.columns(2)
+    with c1:
+        if st.button("AJANSA GÖNDERİLECEK ÖNERİ METNİNİ HAZIRLA",use_container_width=True):
+            lines=[]
+            for x in revisions:
+                ref=x.get("reference","")
+                title=x.get("title","")
+                problem=x.get("problem","")
+                suggestion=x.get("suggested_revision","")
+                lines.append(f"{ref} {title}: {problem} Önerimiz: {suggestion}".strip())
+            st.session_state["agency_revision_text"]="\n\n".join(lines)
+    with c2:
+        if st.button("REVİZE WORD OLUŞTUR",type="primary",use_container_width=True):
+            raw=st.session_state.get("clean_contract_raw")
+            name=st.session_state.get("clean_contract_name","")
+            if not raw or not name.lower().endswith(".docx"):
+                st.warning("Revize Word oluşturmak için kaynak belge DOCX olmalı.")
+            else:
+                data,attention=create_revised_word(raw,revisions)
+                st.session_state["clean_revised_word"]=data
+                st.session_state["clean_word_attention"]=attention
+
+    if st.session_state.get("agency_revision_text"):
+        st.text_area("Ajansa gönderilecek revizyon notu",st.session_state["agency_revision_text"],height=260)
+
+    if st.session_state.get("clean_revised_word"):
+        st.download_button(
+            "REVİZE WORD'Ü İNDİR",
+            data=st.session_state["clean_revised_word"],
+            file_name="OLI_REVIZE_"+st.session_state.get("clean_contract_name","sozlesme.docx"),
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            use_container_width=True
+        )
+        st.caption("Word değişiklik yazarı: Av. Onur Güneş. Dikkat gerektiren maddelerde yalnız maddenin/paragrafın ilk kelimesi açık sarı ile işaretlenir.")
+

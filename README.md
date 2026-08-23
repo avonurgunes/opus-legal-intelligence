@@ -1,19 +1,12 @@
-# OLI Clean v0.1.2 — No Package Conflict
+# OLI Clean v0.2
+v0.1.2 tasarım, analiz ve not sistemi korunmuştur.
 
-Bu sürüm Streamlit Cloud'daki `contracts.py` isim çakışmasını ortadan kaldırır.
+Yeni yalnız iki inceleme-sonrası seçenek:
+1. Ajansa gönderilecek öneri metni.
+2. Revize Word oluştur.
 
-Sorun:
-Repo'da eski sürümlerden kalan `contracts.py`, Python'ın `contracts/` paketini gölgeliyordu.
-Bu nedenle `from contracts.analysis ...` importu hata veriyordu.
-
-Çözüm:
-Sözleşme modülü artık benzersiz root-level dosya adları kullanır:
-- oli_contracts_ui.py
-- oli_contract_analysis.py
-- oli_contract_profiles.py
-- oli_actor_tv_rules.json
-
-`app.py` yalnız `oli_contracts_ui` üzerinden sözleşme ekranını çağırır.
-Eski `contracts.py` dosyası repo'da kalsa bile artık bu import zincirini bozamaz.
-
-Arabuluculuk korunmuştur.
+Word:
+- Track Changes author yalnız `Av. Onur Güneş`.
+- Tek dikkat rengi: açık sarı.
+- Boşluk / bilinmeyen / dikkat gerektiren madde için bütün paragraf değil yalnız ilk kelime sarı.
+- Değişiklikler Track Changes ile uygulanır.
