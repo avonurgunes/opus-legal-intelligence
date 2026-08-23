@@ -1,35 +1,33 @@
-# OLI Sözleşmeler v0.5.8 — One Click UX
+# OLI v0.5.9 — Professional Workspace
 
-## Yeni ana akış
-Sözleşmeyi yükle → `OLI Analizini Çalıştır ve Word'e Aktar` → Word indir.
+Tam UX sadeleştirmesi.
 
-Tek tıkta otomatik:
-1. 30 kural analizi
-2. ek risk taraması
-3. revizyon taslakları
-4. sarı/turuncu/mavi Word işaretleri
-5. Track Changes
-6. revize Word üretimi
+## Görsel değişiklikler
+- Dev OPUS LEGAL INTELLIGENCE hero kaldırıldı.
+- Büyük modül kartları kaldırıldı.
+- Krem üstüne krem / düşük kontrast görünüm kaldırıldı.
+- Açık nötr gri zemin + beyaz çalışma kartı + koyu metin.
+- Altın yalnız ana aksiyon vurgusu.
+- İçerik genişliği 980px.
+- Üstte kompakt navigasyon:
+  Sözleşmeler | Arabuluculuk | Madde Bankası
 
-## Kaldırılan karmaşıklık
-- Sarı / Turuncu / Mavi işaretleri hazırla butonu kaldırıldı.
-- Revizyon metinlerini hazırla butonu kaldırıldı.
-- Tek tek revizyon kabul/red ekranı normal akıştan kaldırıldı.
-- Önizleme zorunlu değil.
-- Kullanıcı aynı sözleşmeyi app içinde ikinci kez okumak zorunda değil.
+## Ana sözleşme akışı
+Sözleşme Revizyonu
+→ sözleşme türü / proje türü / pazarlık gücü
+→ İlk Not / Ajans Notu
+→ dosya yükleme
+→ OLI ANALİZİNİ ÇALIŞTIR VE WORD'E AKTAR
+→ kompakt sonuç özeti
+→ REVİZE WORD'Ü İNDİR
 
-## Tasarım
-- Koyu/aşırı beyaz uçlar yerine sıcak açık gri çalışma zemini.
-- Kompakt 1080px alan.
-- Tek ana aksiyon.
-- Sonuç kartı yalnız sayısal özet ve Word indirme butonu gösterir.
-- Ayrıntılı analiz isteğe bağlı kapalı expander içinde.
+Ayrıntılı analiz kapalı 'Analiz Özeti' bölümünde kalır.
 
 ## Korunanlar
+- Tek tık analiz + otomatik renkler + Word üretimi
 - Rule Library
 - Madde Bankası
-- MICRO → PHRASE → BLOCK
-- Av. Onur Güneş Track Changes yazarı
-- Europe/Istanbul saat bilgisi
+- MICRO / PHRASE / BLOCK
+- Word Track Changes
 - Karşı Taraf Dönüşü
 - Arabuluculuk

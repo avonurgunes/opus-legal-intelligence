@@ -25,78 +25,119 @@ st.markdown("""
 <style>
 :root { color-scheme: light; }
 html, body, [data-testid="stAppViewContainer"], .stApp {
-    background: #ECEBE7 !important;
-    color: #202124 !important;
+    background:#F5F6F7 !important;
+    color:#1F2328 !important;
 }
-[data-testid="stHeader"] { background: rgba(236,235,231,.96) !important; }
+[data-testid="stHeader"] {
+    background:#F5F6F7 !important;
+    border-bottom:1px solid #E3E6E8 !important;
+}
 [data-testid="stAppViewBlockContainer"] {
-    max-width: 1080px !important;
-    padding-top: 1.4rem !important;
+    max-width: 980px !important;
+    padding-top: 1.15rem !important;
+    padding-bottom: 3rem !important;
 }
-h1,h2,h3 { color:#171717 !important; letter-spacing:-.02em; }
-p,label,[data-testid="stCaptionContainer"] { color:#5D5A54 !important; }
-
-.oli-shell {
-    background:#F7F6F2;
-    border:1px solid #D8D5CE;
-    border-radius:16px;
-    padding:18px 20px;
-    box-shadow:0 1px 2px rgba(0,0,0,.04);
-    margin-bottom:14px;
+h1,h2,h3,h4 {
+    color:#111418 !important;
+    letter-spacing:-0.02em !important;
 }
-.oli-title {
-    display:flex; align-items:center; gap:10px;
-    font-size:1.18rem; font-weight:700; color:#202124;
+p, label, [data-testid="stCaptionContainer"] {
+    color:#596069 !important;
 }
-.oli-sub {
-    font-size:.9rem; color:#6A665F; margin-top:4px;
+.oli-brand {
+    font-size:1.35rem;
+    line-height:1;
+    font-weight:800;
+    letter-spacing:.02em;
+    color:#151719;
+    margin-top:.2rem;
 }
-.oli-result {
-    background:#F7F6F2;
-    border:1px solid #D8D5CE;
-    border-left:5px solid #9B7735;
+.oli-brand-sub {
+    font-size:.72rem;
+    color:#7A8087;
+    margin-top:.18rem;
+}
+div[role="radiogroup"] {
+    justify-content:flex-end !important;
+    gap:.35rem !important;
+}
+div[role="radiogroup"] label {
+    background:#FFFFFF !important;
+    border:1px solid #DDE1E4 !important;
+    padding:.35rem .7rem !important;
+    border-radius:8px !important;
+    margin-right:.15rem !important;
+}
+div[role="radiogroup"] label:has(input:checked) {
+    border-color:#A57B31 !important;
+    box-shadow:inset 0 0 0 1px #A57B31 !important;
+}
+.oli-workspace {
+    background:#FFFFFF;
+    border:1px solid #E0E3E6;
     border-radius:14px;
-    padding:17px 18px;
-    margin:14px 0;
+    padding:20px 22px;
+    margin-top:18px;
+    box-shadow:0 1px 2px rgba(0,0,0,.035);
 }
-.oli-result strong { color:#202124; }
-
-div[data-testid="stExpander"] details {
-    background:#F7F6F2 !important;
-    border:1px solid #D8D5CE !important;
-    border-radius:12px !important;
+.oli-workspace-title {
+    font-size:1.22rem;
+    font-weight:750;
+    color:#171A1D;
+    margin-bottom:3px;
 }
-div[data-testid="stExpander"] details summary {
-    background:#F2F0EA !important;
-    border-radius:12px !important;
+.oli-workspace-sub {
+    font-size:.88rem;
+    color:#6A7178;
+    margin-bottom:12px;
 }
+.oli-resultbarbar {
+    background:#FFFFFF;
+    border:1px solid #DDE1E4;
+    border-left:4px solid #A57B31;
+    border-radius:10px;
+    padding:14px 16px;
+    margin:14px 0 10px;
+    color:#2C3136;
+}
+.oli-resultbarbar strong { color:#151719; }
+div[data-testid="stFileUploaderDropzone"],
 div[data-testid="stTextInput"] input,
 div[data-testid="stTextArea"] textarea,
-div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-div[data-testid="stFileUploaderDropzone"] {
-    background:#FAF9F6 !important;
-    color:#202124 !important;
-    border-color:#D2CEC5 !important;
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    background:#FFFFFF !important;
+    border-color:#DDE1E4 !important;
+    color:#1F2328 !important;
+}
+div[data-testid="stExpander"] details {
+    background:#FFFFFF !important;
+    border:1px solid #E0E3E6 !important;
+    border-radius:10px !important;
+}
+div[data-testid="stExpander"] details summary {
+    background:#FAFAFA !important;
+    border-radius:10px !important;
 }
 .stButton > button, .stDownloadButton > button {
     min-height:44px !important;
-    border-radius:10px !important;
+    border-radius:8px !important;
     font-weight:650 !important;
 }
-.stButton > button[kind="primary"] {
-    background:#8B6A2D !important;
-    border-color:#8B6A2D !important;
-    color:white !important;
+.stButton > button[kind="primary"],
+.stDownloadButton > button[kind="primary"] {
+    background:#9B742F !important;
+    color:#FFFFFF !important;
+    border-color:#9B742F !important;
 }
+[data-testid="stMetric"] {
+    background:#FFFFFF !important;
+    border:1px solid #E0E3E6 !important;
+    border-radius:10px !important;
+    padding:10px 12px !important;
+}
+hr { border-color:#E3E6E8 !important; }
 </style>
 """, unsafe_allow_html=True)
-
-
-
-
-
-
-
 
 RULES = json.loads(Path(__file__).with_name("rules.json").read_text(encoding="utf-8"))
 REVISION_LIBRARY = json.loads(
@@ -572,54 +613,38 @@ def render_revision_preview(items, contract_text):
     st.info(f"☑ {accepted} kabul • ☒ {rejected} reddet • ✏️ {manual} manuel düzenleme")
     return edited
 
-st.markdown("""
-<div class="opus-hero">
-  <div class="opus-kicker">OPUS • PRIVATE COUNSEL SYSTEM</div>
-  <h1 style="margin:.2rem 0 .35rem 0">OPUS LEGAL INTELLIGENCE</h1>
-  <div style="color:#aaa59b">Contract intelligence • Negotiation strategy • Revision memory • Word redline</div>
-</div>
-""", unsafe_allow_html=True)
 
-selected_module = st.radio(
-    "Modül",
-    ["Sözleşmeler", "Arabuluculuk", "KVKK", "Dava Dosyaları"],
-    horizontal=True,
-    label_visibility="collapsed"
-)
 
-cols = st.columns(4)
-module_data = [
-    ("Sözleşmeler", "Analyse • Negotiate • Revise", selected_module == "Sözleşmeler"),
-    ("Arabuluculuk", "Prepare • Generate", selected_module == "Arabuluculuk"),
-    ("KVKK", "Privacy • Compliance", selected_module == "KVKK"),
-    ("Dava Dosyaları", "Litigation Workspace", selected_module == "Dava Dosyaları"),
-]
-for col, (title, sub, active) in zip(cols, module_data):
-    with col:
-        cls = "opus-module active" if active else "opus-module"
-        st.markdown(
-            f'<div class="{cls}"><div class="opus-module-title">{title}</div>'
-            f'<div class="opus-module-sub">{sub if active else "Yakında • " + sub}</div></div>',
-            unsafe_allow_html=True
-        )
 
+# Compact top navigation
+nav1, nav2 = st.columns([1.2, 4.8])
+with nav1:
+    st.markdown('<div class="oli-brand">OLI</div><div class="oli-brand-sub">Opus Legal Intelligence</div>', unsafe_allow_html=True)
+with nav2:
+    selected_module = st.radio(
+        "Modül",
+        ["Sözleşmeler", "Arabuluculuk", "Madde Bankası"],
+        horizontal=True,
+        label_visibility="collapsed",
+        key="oli_module_nav_v59"
+    )
 st.divider()
 if selected_module == "Arabuluculuk":
     render_mediation()
     st.stop()
-elif selected_module == "KVKK":
-    st.header("KVKK")
-    st.info("Bu modül sonraki aşamada aktif edilecek.")
-    st.stop()
-elif selected_module == "Dava Dosyaları":
-    st.header("Dava Dosyaları")
-    st.info("Bu modül sonraki aşamada aktif edilecek.")
+elif selected_module == "Madde Bankası":
+    st.header("Madde Bankası")
+    st.caption("Opus'un kontrollü revizyon kalıpları ve drafting tercihleri.")
+    with st.expander("Aktif Madde Bankası", expanded=True):
+        for rid, item in REVISION_LIBRARY.items():
+            st.markdown(f"**{rid} — {item.get('title','')}**")
+            st.write(item.get("preferred_drafting",""))
     st.stop()
 
 st.markdown("""
-<div class="oli-shell">
-  <div class="oli-title">⚡ OLI Sözleşme Revizyonu</div>
-  <div class="oli-sub">Sözleşmeyi yükle. OLI analiz eder, gerekli revizyonları uygular, risk ve boş alan işaretlerini Word'e işler ve revize dosyayı hazırlar.</div>
+<div class="oli-workspace">
+  <div class="oli-workspace-title">Sözleşme Revizyonu</div>
+  <div class="oli-workspace-sub">Belgeyi yükle, OLI analiz etsin ve revize Word dosyasını hazırlasın.</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -658,7 +683,7 @@ if uploaded:
         elif not uploaded.name.lower().endswith(".docx"):
             st.warning("Otomatik Word revizyonu için .docx yükle. PDF şu an yalnız metin analizi için okunabilir.")
         elif project_type == "Ana Akım TV":
-            if st.button("⚖️ OLI Analizini Çalıştır ve Word'e Aktar", type="primary", use_container_width=True):
+            if st.button("OLI ANALİZİNİ ÇALIŞTIR VE WORD'E AKTAR", type="primary", use_container_width=True):
                 try:
                     with st.spinner("OLI sözleşmeyi analiz ediyor ve revize Word'ü hazırlıyor..."):
                         # 1) Main legal analysis
@@ -734,7 +759,7 @@ if st.session_state.get("revised_docx"):
     blue = fs.get("blue", 0)
 
     st.markdown(f"""
-    <div class="oli-result">
+    <div class="oli-resultbar">
       <strong>Revize Word hazır.</strong><br>
       {len(applied)} değişiklik uygulandı · {critical} kritik bulgu · 🟨 {ph} boş alan · 🟧 {orange} risk işareti · 🟦 {blue} yeni/standart dışı hüküm
     </div>
@@ -746,7 +771,7 @@ if st.session_state.get("revised_docx"):
     name = Path(st.session_state.get("uploaded_name","sozlesme.docx")).stem
     today_tr = datetime.now(ZoneInfo("Europe/Istanbul")).strftime("%d.%m.%Y")
     st.download_button(
-        "⬇️ REVİZE WORD'Ü İNDİR",
+        "REVİZE WORD'Ü İNDİR",
         data=st.session_state["revised_docx"],
         file_name=f"{name} - {today_tr} REVİZE.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -755,7 +780,7 @@ if st.session_state.get("revised_docx"):
     )
 
     # Optional details only; normal workflow does not require rereading.
-    with st.expander("Analiz özetini görmek istersem aç"):
+    with st.expander("Analiz Özeti"):
         st.write(result.get("executive_summary",""))
         if result.get("top_negotiation_points"):
             st.markdown("**Öne çıkan konular**")
@@ -802,4 +827,4 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 
 st.divider()
-st.caption("OLI • Sözleşmeler v0.5.8 One Click UX + Arabuluculuk v1.3.1 • Prototip.")
+st.caption("OLI • Sözleşmeler v0.5.9 Professional Workspace + Arabuluculuk v1.3.1 • Prototip.")
