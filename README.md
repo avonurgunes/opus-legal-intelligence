@@ -1,27 +1,29 @@
-# OLI Sözleşmeler v0.5.4 — Hybrid Redline
+# OLI Sözleşmeler v0.5.5 — Learning Engine v1
 
-## Word bug
-`next_change_id is not defined` düzeltildi.
-Word revision id'leri artık belgedeki mevcut tracked changes taranarak güvenli şekilde üretilir.
+## Amaç
+Nihai revizyonlardan kontrollü biçimde öğrenmeye başlamak.
 
-## Yeni redline mantığı
-Dört uygulama seviyesi vardır:
-- AUTO
-- MICRO: birkaç kelimelik gerçek küçük değişiklik.
-- PHRASE: mevcut cümle yapısı korunur, değişen ifade/cümlecik tek blok silinir ve yenisi tek blok eklenir.
-- BLOCK: hüküm gerçekten baştan yazılıyorsa tam blok değişimi.
+## İki Word ile geçmiş öğrenme
+- İlk gelen sözleşme (.docx)
+- Av. Onur Güneş'in nihai/revize sözleşmesi (.docx)
+- Sistem değişen paragrafları ve yeni eklemeleri eşleştirir.
+- MICRO / PHRASE / BLOCK / NEW_CLAUSE drafting stili çıkarır.
+- Her fark önce Öğrenme Adayı olur.
+- Kullanıcı açıkça `✓ Öğren` demeden hiçbir kayıt kalıcı hafızaya girmez.
+- Dosyaya özgü tavizler `FILE_ONLY` seçilebilir ve yeni sözleşmelerde genel emsal olarak kullanılmaz.
 
-AUTO küçük değişiklikte MICRO, orta değişiklikte PHRASE, esaslı yeniden yazımda BLOCK seçer.
+## Yeni sözleşmede kullanım
+Onaylı geçmiş öğrenimler analiz/drafting promptuna bağlanır.
+Bunlar kalıp cümle olarak değil, drafting davranışı ve tercih örneği olarak kullanılır.
+Madde Bankası cümlesini körlemesine yapıştırmak yerine gelen sözleşmenin dili korunur.
 
-## Drafting ilkesi
-Madde Bankası kalıp cümle dayatmaz.
-OLI, gelen sözleşmenin mevcut terminolojisini ve cümle yapısını koruyarak mümkün olan en küçük doğal hukuki müdahaleyi yapar.
-Örn. "başka projede görev almayacaktır" → gerekiyorsa yalnız "görev alabilir" gibi lokal değişiklik.
+## Güven
+Aynı konu onaylı örneklerde tekrar ettikçe precedent_count ve confidence artar.
+Rule Library otomatik değiştirilmez.
 
-## Test
-Paketleme öncesinde:
-- app.py / revision_engine.py / mediation.py syntax kontrolü,
-- gerçek DOCX üzerinde MICRO/PHRASE,
-- mavi/turuncu tracked formatting,
-- oluşan DOCX'in tekrar açılabilmesi
-test edilir.
+## ÖNEMLİ — kalıcılık
+Bu v1 `learning_memory.json` kullanır. Lokal/GitHub çalışma kopyasında kalıcıdır; Streamlit Cloud runtime dosya sistemi deploy/restart sonrası kalıcılık garantisi vermez.
+Bu nedenle bu sürüm öğrenme davranışını ve onay akışını kurar; gerçek production kalıcılığı için sonraki adım harici persistent storage (örn. Supabase/Postgres) bağlamaktır.
+
+## Korunanlar
+v0.5.4 Hybrid Redline ve çalışan Word üretim motoru değiştirilmeden korunmuştur.

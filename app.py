@@ -12,6 +12,7 @@ from pypdf import PdfReader
 from openai import OpenAI
 
 from revision_engine import apply_revisions_to_docx
+from learning_engine import build_candidates, approve_candidates, load_memory, learning_prompt_block
 from mediation import render_mediation
 
 st.set_page_config(
@@ -197,6 +198,10 @@ PAZARLIK GÜCÜ: {negotiation_power}
 STRATEJİ: {POWER_GUIDANCE[negotiation_power]}
 DOSYAYA ÖZGÜ İLK NOT / AJANS NOTU: {initial_note or "Yok"}
 Bu not yalnız bu dosyanın analiz ve müzakere önceliklerini etkiler; Opus standardı değildir.
+
+ONAYLANMIŞ GEÇMİŞ DRAFTING ÖĞRENİMLERİ:
+{learning_prompt_block(contract_text)}
+Bunlar kalıp cümle değildir. Gelen sözleşmenin terminolojisini ve cümle yapısını koruyarak yalnız davranış/tercih örneği olarak kullan.
 
 RULE LIBRARY:
 {rules_text}
@@ -786,6 +791,59 @@ if returned_upload and st.session_state.get("revised_docx"):
         st.caption("Ajans geri bildirimi dosyaya özgüdür; Rule Library veya Madde Bankası'na otomatik eklenmez.")
 
 
+
+st.divider()
+st.header("Nihai Revizyondan Öğren — Learning Engine v1")
+st.caption("Geçmiş dosyalarda ilk gelen Word + senin nihai revize Word'ünü karşılaştırır. Hiçbir kayıt sen onaylamadan kalıcı öğrenme hafızasına girmez.")
+
+lc1,lc2=st.columns(2)
+learn_original=lc1.file_uploader("İlk gelen sözleşme (.docx)",type=["docx"],key="learn_original_v1")
+learn_final=lc2.file_uploader("Nihai / senin revize ettiğin sözleşme (.docx)",type=["docx"],key="learn_final_v1")
+
+if learn_original and learn_final and st.button("🧠 Öğrenme Adaylarını Çıkar",use_container_width=True):
+    try:
+        candidates=build_candidates(
+            learn_original.getvalue(),
+            learn_final.getvalue(),
+            source_name=learn_final.name
+        )
+        st.session_state["learning_candidates_v1"]=candidates
+    except Exception as e:
+        st.error(f"Öğrenme adayları çıkarılamadı: {e}")
+
+cands=st.session_state.get("learning_candidates_v1",[])
+if cands:
+    st.info(f"{len(cands)} değişiklik/adisyon öğrenme adayı bulundu. Yalnız onayladıkların kaydedilecek.")
+    decisions={}
+    for i,c in enumerate(cands):
+        with st.expander(f"{i+1}. {c.get('edit_style')} — {c.get('final_text','')[:90]}",expanded=(i<3)):
+            st.markdown("**ÖNCE**")
+            st.text_area("Önce",c.get("original_text") or "—",height=100,disabled=True,key=f"l_old_{i}",label_visibility="collapsed")
+            st.markdown("**NİHAİ TERCİH**")
+            st.text_area("Nihai",c.get("final_text") or "—",height=110,disabled=True,key=f"l_new_{i}",label_visibility="collapsed")
+            cc1,cc2,cc3=st.columns([1,1.4,1.2])
+            approve=cc1.checkbox("✓ Öğren",key=f"l_ok_{i}")
+            topic=cc2.text_input("Konu",value=c.get("topic","SINIFLANDIRILMADI"),key=f"l_topic_{i}")
+            scope=cc3.selectbox("Kapsam",["GENERAL","FILE_ONLY"],key=f"l_scope_{i}")
+            decisions[c["candidate_id"]]={"approve":approve,"topic":topic,"scope":scope}
+    if st.button("💾 Onaylananları Öğrenme Hafızasına Kaydet",type="primary",use_container_width=True):
+        try:
+            added,mem=approve_candidates(cands,decisions)
+            st.success(f"{added} öğrenme kaydı kaydedildi. Toplam onaylı kayıt: {sum(1 for r in mem['records'] if r.get('approved'))}")
+            st.session_state.pop("learning_candidates_v1",None)
+        except Exception as e:
+            st.error(f"Öğrenme hafızası kaydedilemedi: {e}")
+
+mem=load_memory()
+approved=[r for r in mem.get("records",[]) if r.get("approved")]
+with st.expander(f"📚 Öğrenme Hafızası ({len(approved)} onaylı kayıt)"):
+    if not approved:
+        st.caption("Henüz onaylı öğrenme kaydı yok.")
+    else:
+        for r in approved[-20:][::-1]:
+            st.write(f"**{r.get('topic')}** · {r.get('edit_style')} · güven {r.get('confidence')} · {r.get('precedent_count',1)} örnek")
+            st.caption((r.get("final_text") or "")[:300])
+
 st.divider()
 st.header("Nihai Revizyondan Öğren")
 st.caption("OLI çıktısını sen son kez revize ettikten sonra buraya yükle. Sistem farkları öğrenme adayı olarak çıkarır; hiçbir şeyi otomatik olarak Revision Library'ye eklemez.")
@@ -821,4 +879,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5.4 Hybrid Redline + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.5 Learning Engine v1 + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
