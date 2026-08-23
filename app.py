@@ -795,70 +795,135 @@ if returned_upload and st.session_state.get("revised_docx"):
 
 st.divider()
 st.header("🧠 Toplu Öğrenme")
-st.caption("Birden fazla ham ve revize Word yükle. OLI çiftleri eşleştirir, değişiklikleri kümeler ve senin onayladığın drafting davranışlarını topluca öğrenir.")
+st.caption("Birden fazla ham ve revize Word yükle. OLI çiftleri eşleştirir, sonra her çiftin içindeki gerçek revizyonları çıkarır ve kümeler.")
 
-bc1,bc2=st.columns(2)
-batch_raw=bc1.file_uploader("Ham sözleşmeler",type=["docx"],accept_multiple_files=True,key="batch_raw_v56")
-batch_rev=bc2.file_uploader("Senin revize ettiğin sözleşmeler",type=["docx"],accept_multiple_files=True,key="batch_rev_v56")
+bc1,bc2 = st.columns(2)
+batch_raw = bc1.file_uploader(
+    "Ham sözleşmeler",
+    type=["docx"],
+    accept_multiple_files=True,
+    key="batch_raw_v561"
+)
+batch_rev = bc2.file_uploader(
+    "Senin revize ettiğin sözleşmeler",
+    type=["docx"],
+    accept_multiple_files=True,
+    key="batch_rev_v561"
+)
 
-if batch_raw and batch_rev and st.button("🔗 Sözleşmeleri Eşleştir",use_container_width=True):
+if batch_raw and batch_rev and st.button("🔗 Sözleşmeleri Eşleştir", use_container_width=True):
     try:
-        pairs,ur,uv=match_batch_documents(
-            [(f.name,f.getvalue()) for f in batch_raw],
-            [(f.name,f.getvalue()) for f in batch_rev]
-        )
-        st.session_state["batch_pairs_v56"]=pairs
-        st.session_state["batch_unmatched_v56"]=(ur,uv)
+        raw_payload = [(f.name, bytes(f.getvalue())) for f in batch_raw]
+        rev_payload = [(f.name, bytes(f.getvalue())) for f in batch_rev]
+        pairs, ur, uv = match_batch_documents(raw_payload, rev_payload)
+
+        # Persist raw bytes safely across Streamlit reruns.
+        safe_pairs = []
+        for p in pairs:
+            safe_pairs.append({
+                "raw_name": p["raw_name"],
+                "raw_data": bytes(p["raw_data"]),
+                "revised_name": p["revised_name"],
+                "revised_data": bytes(p["revised_data"]),
+                "match_score": p["match_score"],
+                "status": p["status"],
+            })
+
+        st.session_state["batch_pairs_v561"] = safe_pairs
+        st.session_state["batch_unmatched_v561"] = (ur, uv)
+        st.session_state.pop("batch_candidates_v561", None)
+        st.session_state.pop("batch_clusters_v561", None)
+        st.success(f"{len(safe_pairs)} sözleşme çifti eşleştirildi.")
     except Exception as e:
         st.error(f"Eşleştirme yapılamadı: {e}")
 
-pairs=st.session_state.get("batch_pairs_v56",[])
+pairs = st.session_state.get("batch_pairs_v561", [])
 if pairs:
     st.subheader("Eşleşmeler")
-    confident=sum(p["status"]=="CONFIDENT" for p in pairs)
-    review=len(pairs)-confident
-    st.info(f"{len(pairs)} çift bulundu · {confident} güçlü eşleşme · {review} manuel kontrol")
+    confident = sum(p["status"] == "CONFIDENT" for p in pairs)
+    review = len(pairs) - confident
+    st.info(f"📁 {len(pairs)} sözleşme çifti eşleştirildi · {confident} güçlü eşleşme · {review} manuel kontrol")
+
     for i,p in enumerate(pairs):
-        icon="🟢" if p["status"]=="CONFIDENT" else "🟡"
+        icon = "🟢" if p["status"] == "CONFIDENT" else "🟡"
         st.write(f"{icon} **{p['raw_name']}** ↔ **{p['revised_name']}** · eşleşme {p['match_score']}")
-    ur,uv=st.session_state.get("batch_unmatched_v56",([],[]))
+
+    ur, uv = st.session_state.get("batch_unmatched_v561", ([], []))
     if ur or uv:
-        st.warning("Eşleşmeyen dosyalar: "+", ".join(ur+uv))
-    if st.button("🔬 Tüm Çiftlerden Öğrenme Özeti Çıkar",use_container_width=True):
+        st.warning("Eşleşmeyen dosyalar: " + ", ".join(ur + uv))
+
+    if st.button("🔬 Tüm Çiftlerden Öğrenme Özeti Çıkar", type="primary", use_container_width=True):
         try:
-            cs=batch_candidates(pairs)
-            clusters=cluster_candidates(cs)
-            st.session_state["batch_candidates_v56"]=cs
-            st.session_state["batch_clusters_v56"]=clusters
+            with st.spinner("Sözleşme çiftlerindeki gerçek revizyonlar çıkarılıyor..."):
+                cs = batch_candidates(pairs)
+                clusters = cluster_candidates(cs)
+
+            st.session_state["batch_candidates_v561"] = cs
+            st.session_state["batch_clusters_v561"] = clusters
+
+            styles = {}
+            for c in cs:
+                styles[c.get("edit_style","UNKNOWN")] = styles.get(c.get("edit_style","UNKNOWN"), 0) + 1
+
+            style_text = " · ".join(f"{k}: {v}" for k,v in styles.items())
+            st.success(f"✏️ {len(cs)} revizyon/öğrenme adayı bulundu. {style_text}")
         except Exception as e:
             st.error(f"Toplu öğrenme analizi yapılamadı: {e}")
 
-clusters=st.session_state.get("batch_clusters_v56",[])
-allc=st.session_state.get("batch_candidates_v56",[])
+clusters = st.session_state.get("batch_clusters_v561", [])
+allc = st.session_state.get("batch_candidates_v561", [])
+
+if allc:
+    styles = {}
+    for c in allc:
+        styles[c.get("edit_style","UNKNOWN")] = styles.get(c.get("edit_style","UNKNOWN"), 0) + 1
+    c1,c2,c3,c4 = st.columns(4)
+    c1.metric("Revizyon Adayı", len(allc))
+    c2.metric("MICRO", styles.get("MICRO",0))
+    c3.metric("PHRASE", styles.get("PHRASE",0))
+    c4.metric("BLOCK / YENİ", styles.get("BLOCK",0) + styles.get("NEW_CLAUSE",0))
+
 if clusters:
     st.subheader("Toplu Öğrenme Özeti")
-    st.caption(f"{len(allc)} tekil değişiklik, {len(clusters)} davranış kümesine ayrıldı. Küme onayı, içindeki örnekleri topluca öğrenir.")
-    cluster_decisions={}
+    st.caption(f"{len(allc)} tekil değişiklik, {len(clusters)} davranış kümesine ayrıldı. Tek tek yüzlerce fark yerine kümeleri onaylayabilirsin.")
+
+    cluster_decisions = {}
     for i,c in enumerate(clusters):
-        with st.expander(f"{c['topic']} — {c['edit_style']} · {c['count']} örnek · güven {c['confidence']}",expanded=(i<4)):
+        with st.expander(
+            f"{c['topic']} — {c['edit_style']} · {c['count']} örnek · güven {c['confidence']}",
+            expanded=(i < 4)
+        ):
             for ex in c["examples"][:3]:
                 st.markdown(f"**{ex.get('pair_raw_name','')} → {ex.get('pair_revised_name','')}**")
-                st.caption("Önce: "+(ex.get("original_text") or "—")[:350])
-                st.caption("Nihai: "+(ex.get("final_text") or "—")[:350])
-            cc1,cc2,cc3=st.columns([1,1.4,1])
-            ok=cc1.checkbox("✓ Kümeyi Öğren",key=f"bc_ok_{i}")
-            topic=cc2.text_input("Konu",value=c["topic"],key=f"bc_topic_{i}")
-            scope=cc3.selectbox("Kapsam",["GENERAL","FILE_ONLY"],key=f"bc_scope_{i}")
-            cluster_decisions[c["cluster_id"]]={"approve":ok,"topic":topic,"scope":scope}
-    if st.button("💾 Onaylanan Kümeleri Hafızaya Kaydet",type="primary",use_container_width=True):
-        decisions={}
+                st.caption("Önce: " + (ex.get("original_text") or "—")[:500])
+                st.caption("Nihai: " + (ex.get("final_text") or "—")[:500])
+
+            cc1,cc2,cc3 = st.columns([1,1.4,1])
+            ok = cc1.checkbox("✓ Kümeyi Öğren", key=f"bc_ok_561_{i}")
+            topic = cc2.text_input("Konu", value=c["topic"], key=f"bc_topic_561_{i}")
+            scope = cc3.selectbox("Kapsam", ["GENERAL","FILE_ONLY"], key=f"bc_scope_561_{i}")
+            cluster_decisions[c["cluster_id"]] = {
+                "approve": ok,
+                "topic": topic,
+                "scope": scope
+            }
+
+    if st.button("💾 Onaylanan Kümeleri Hafızaya Kaydet", type="primary", use_container_width=True):
+        decisions = {}
         for c in clusters:
-            d=cluster_decisions.get(c["cluster_id"],{})
+            d = cluster_decisions.get(c["cluster_id"], {})
             for cid in c["candidate_ids"]:
-                decisions[cid]={"approve":d.get("approve",False),"topic":d.get("topic",c["topic"]),"scope":d.get("scope","GENERAL")}
+                decisions[cid] = {
+                    "approve": d.get("approve", False),
+                    "topic": d.get("topic", c["topic"]),
+                    "scope": d.get("scope", "GENERAL")
+                }
         try:
-            added,mem=approve_candidates(allc,decisions)
-            st.success(f"{added} tekil emsal öğrenildi. Toplam onaylı kayıt: {sum(1 for r in mem['records'] if r.get('approved'))}")
+            added, mem = approve_candidates(allc, decisions)
+            st.success(
+                f"{added} tekil emsal öğrenildi. "
+                f"Toplam onaylı kayıt: {sum(1 for r in mem['records'] if r.get('approved'))}"
+            )
         except Exception as e:
             st.error(f"Toplu öğrenme kaydedilemedi: {e}")
 
@@ -949,4 +1014,4 @@ with st.expander("OLI Bilgi Tabanı"):
     st.write(f"**Revision Library:** {len(REVISION_LIBRARY.get('entries',[]))} doğrulanmış revizyon kalıbı")
     st.write(f"**Madde Bankası:** {len(CLAUSE_BANK.get('entries',[]))} hazır Opus cümlesi")
 
-st.caption("OLI • Sözleşmeler v0.5.6 Batch Learning + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")
+st.caption("OLI • Sözleşmeler v0.5.6.1 Batch Learning Fix + Arabuluculuk v1.3.1 • Prototip. Gerçek müvekkil belgeleri için erişim, veri güvenliği, saklama ve meslek sırrı mimarisi ayrıca tamamlanmalıdır.")

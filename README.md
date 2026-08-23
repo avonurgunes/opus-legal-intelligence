@@ -1,18 +1,18 @@
-# OLI Sözleşmeler v0.5.6 — Batch Learning
+# OLI Sözleşmeler v0.5.6.1 — Batch Learning Fix
 
-v0.5.5 Learning Engine üzerine Toplu Öğrenme eklenmiştir.
+## Düzeltmeler
+- "1 çift bulundu" ifadesi artık "1 sözleşme çifti eşleştirildi" olarak gösterilir.
+- Eşleştirme ile revizyon sayısı birbirinden ayrıldı.
+- Yüklenen DOCX byte'ları session_state içinde kalıcı kopyaya çevrilir; ikinci buton Streamlit rerun sonrasında dosyaları kaybetmez.
+- "Tüm Çiftlerden Öğrenme Özeti Çıkar" artık doğrudan session_state'teki eşleşmiş dosya çiftlerini işler.
+- Analiz sonrası toplam revizyon/öğrenme adayı sayısı gösterilir.
+- MICRO / PHRASE / BLOCK+YENİ dağılımı metrik olarak gösterilir.
+- Küme onay/kaydet akışı korunur.
 
-Akış:
-1. Birden fazla ham DOCX yükle.
-2. Birden fazla Av. Onur Güneş revizeli DOCX yükle.
-3. OLI dosya adı + içerik benzerliğiyle çiftleri eşleştirir.
-4. Güçlü eşleşmeler yeşil, kontrol gerektirenler sarı gösterilir.
-5. Tüm çiftlerden değişiklik adayları çıkarılır.
-6. Adaylar konu + drafting stili (MICRO/PHRASE/BLOCK/NEW_CLAUSE) bazında kümelenir.
-7. Kullanıcı tek tek yüzlerce değişiklik yerine kümeleri onaylayabilir.
-8. Yalnız açıkça onaylanan kümelerin tekil emsalleri Learning Memory'ye girer.
-9. FILE_ONLY kayıtlar genel drafting emsali olarak kullanılmaz.
-
-Not: v0.5.6 da learning_memory.json kullanır. Streamlit Cloud deploy/restart kalıcılığı garanti etmez. Production kalıcılığı için harici veritabanı sonraki adımdır.
-
-v0.5.4 Word/Hybrid Redline motoruna dokunulmamıştır.
+## Beklenen akış
+1. Ham + revize Word'leri yükle.
+2. Sözleşmeleri Eşleştir.
+3. "1 sözleşme çifti" vb. sonucu gör.
+4. Tüm Çiftlerden Öğrenme Özeti Çıkar.
+5. Örn. "34 revizyon/öğrenme adayı bulundu" sonucunu gör.
+6. Kümeleri onayla.
