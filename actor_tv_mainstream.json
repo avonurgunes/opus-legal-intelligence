@@ -1,0 +1,188 @@
+[
+  {
+    "id": "OLI-TV-001",
+    "title": "Münhasırlık",
+    "standard": "Aşırı münhasırlığı daralt; fiili çekim/seslendirme dönemi esas alınmalı.",
+    "priority": "Yüksek",
+    "negotiation_sensitive": true
+  },
+  {
+    "id": "OLI-TV-002",
+    "title": "Başka projelerde çalışma",
+    "standard": "Mutlak izin yerine ana projeyi aksatmama ve bildirim/görüş mekanizması.",
+    "priority": "Orta",
+    "negotiation_sensitive": true
+  },
+  {
+    "id": "OLI-TV-003",
+    "title": "Set koşulları",
+    "standard": "Yemek, oda/karavan, ulaşım, şehir dışı transfer, uçak, vize ve konaklama Yapımcı yükümlülüğünde olmalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-004",
+    "title": "Yeniden çekim",
+    "standard": "Tam bölüm/rol yeniden icra ediliyorsa ayrıca oyunculuk ücreti ödenmeli.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-005",
+    "title": "Fiziksel görünüm",
+    "standard": "Esaslı fiziksel değişiklikler oyuncu onayına bağlanmalı ve sağlık riski yaratmamalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-006",
+    "title": "Tanıtım / PR",
+    "standard": "Program uygunluğu aranmalı; şehir dışı seyahat ve masraflar Yapımcıya ait olmalı.",
+    "priority": "Orta"
+  },
+  {
+    "id": "OLI-TV-007",
+    "title": "Kişisel sosyal medya",
+    "standard": "Kişisel hesaptan zorunlu post/story/reels yükümlülüğü tercihen çıkarılmalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-008",
+    "title": "Kişisel / siyasi açıklamalar",
+    "standard": "Tercihen çıkar; kalacaksa ciddi biçimde daralt.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-009",
+    "title": "Jenerik / Billing",
+    "standard": "Oyuncuya göre 1., 2. sıra veya özel billing pozisyonu belirlenebilmeli.",
+    "priority": "Bağlamsal",
+    "negotiation_sensitive": true
+  },
+  {
+    "id": "OLI-TV-010",
+    "title": "Belirsiz sözleşme devamı",
+    "standard": "Yapımcının tek taraflı ve belirsiz süreli uzatma mekanizmasını kaldır veya sınırla.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-011",
+    "title": "Yeni sezon / devam",
+    "standard": "Otomatik devam yerine senaryo/rol ve ücret bakımından mutabakat aranmalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-012",
+    "title": "Bölüm ücretine hak kazanma",
+    "standard": "Ücret yalnızca yayınlanma şartına bağlanmamalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-013",
+    "title": "Mali hak devir belgesi",
+    "standard": "Devir belgesi ücret ödenmeden önce koşulsuz teslim edilmemeli; ödeme ile ilişkilendirilmeli.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-014",
+    "title": "Yeni sezon ücret artışı",
+    "standard": "Tek taraflı belirlenmemeli; ortak mutabakat aranmalı.",
+    "priority": "Orta"
+  },
+  {
+    "id": "OLI-TV-015",
+    "title": "İş kazası",
+    "standard": "Oyuncunun kusuru dışındaki set ve set ulaşımı kazalarında Yapımcı sorumluluğu düzenlenmeli.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-016",
+    "title": "Vekâletname",
+    "standard": "Sözleşmeye geniş/genel vekâletname niteliği kazandıran hükümler çıkarılmalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-017",
+    "title": "Oyuncu cezai şartı",
+    "standard": "Mümkün olduğunca düşür; örneğin 10 bölüm talebine yaklaşık 2 bölüm karşı teklif düşünülebilir.",
+    "priority": "Yüksek",
+    "negotiation_sensitive": true
+  },
+  {
+    "id": "OLI-TV-018",
+    "title": "Ajans sorumluluğu",
+    "standard": "Yalnız Ajansın kendi ihlalinden kaynaklanan fesihte ve o tarihe kadar aldığı bedelle sınırlı sorumluluk.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-019",
+    "title": "Yapımcı ödeme temerrüdü",
+    "standard": "İhtar, makul ödeme süresi, faiz/yaptırım ve gerektiğinde fesih mekanizması.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-020",
+    "title": "Sözleşme nüshası",
+    "standard": "Tek asıl nüshanın yalnız Yapımcıda kalması gibi tek taraflı yapı kabul edilmemeli.",
+    "priority": "Düşük"
+  },
+  {
+    "id": "OLI-TV-021",
+    "title": "Çalışma programı değişikliği",
+    "standard": "Makul ön bildirim ve oyuncunun mevcut mesleki programının dikkate alınması.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-022",
+    "title": "Yapımın askıya alınması",
+    "standard": "Oyuncuyu ücretsiz ve bağlı bırakan askı hükümlerini sebep, süre ve kapsam yönünden sınırla.",
+    "priority": "Yüksek",
+    "negotiation_sensitive": true
+  },
+  {
+    "id": "OLI-TV-023",
+    "title": "Yapım yarıda kalırsa",
+    "standard": "Oyuncunun gerçekleştirdiği çalışmanın karşılığı mutlaka ödenmeli.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-024",
+    "title": "Ürün yerleştirme",
+    "standard": "Pasif görünüm ile aktif kullanım ayrılmalı; aktif kullanım/senaryo entegrasyonu onay ve ek ücrete bağlı olmalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-025",
+    "title": "Üçüncü kişi reklamı",
+    "standard": "İsim/görüntü/sesin proje tanıtımı dışında marka reklamında kullanımı yazılı onay ve ek ücrete tabi.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-026",
+    "title": "Merchandising / yeni kullanım",
+    "standard": "Bağımsız ticari kullanım yazılı izin, ayrı anlaşma ve ücrete bağlı olmalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-027",
+    "title": "Meslek birliği telifleri",
+    "standard": "Meslek birliklerinden doğacak telifler Yapımcının geniş hak devrinin dışında tutulmalı.",
+    "priority": "Yüksek"
+  },
+  {
+    "id": "OLI-TV-028",
+    "title": "Ajans komisyonunun devamı",
+    "standard": "Temsil ilişkisi bitse dahi oyuncu bu projeden ücret aldıkça ilgili Ajansın proje komisyonu korunmalı.",
+    "priority": "Orta"
+  },
+  {
+    "id": "OLI-TV-029",
+    "title": "Ödeme vadesi",
+    "standard": "Kesin olmalı. Yayın+90 talebini mümkünse yayın+30 veya +45 seviyesine çek.",
+    "priority": "Yüksek",
+    "negotiation_sensitive": true
+  },
+  {
+    "id": "OLI-TV-030",
+    "title": "Yayınlanmayan bölüm",
+    "standard": "Oyuncu çekimini yaptıysa bölüm yayınlanmasa dahi ücret hakkı korunmalı.",
+    "priority": "Yüksek"
+  }
+]

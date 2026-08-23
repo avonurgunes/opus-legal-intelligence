@@ -1,33 +1,27 @@
-# OLI v0.5.9 — Professional Workspace
+# OLI Clean v0.1
 
-Tam UX sadeleştirmesi.
+Tam temiz başlangıç.
 
-## Görsel değişiklikler
-- Dev OPUS LEGAL INTELLIGENCE hero kaldırıldı.
-- Büyük modül kartları kaldırıldı.
-- Krem üstüne krem / düşük kontrast görünüm kaldırıldı.
-- Açık nötr gri zemin + beyaz çalışma kartı + koyu metin.
-- Altın yalnız ana aksiyon vurgusu.
-- İçerik genişliği 980px.
-- Üstte kompakt navigasyon:
-  Sözleşmeler | Arabuluculuk | Madde Bankası
+## Korunan
+- Arabuluculuk v1.3.1 `modules/mediation.py` olarak birebir korunmuştur.
 
-## Ana sözleşme akışı
-Sözleşme Revizyonu
-→ sözleşme türü / proje türü / pazarlık gücü
-→ İlk Not / Ajans Notu
-→ dosya yükleme
-→ OLI ANALİZİNİ ÇALIŞTIR VE WORD'E AKTAR
-→ kompakt sonuç özeti
-→ REVİZE WORD'Ü İNDİR
+## Sıfırdan yazılan Sözleşmeler v0.1
+İlk hedef yalnız:
+- sözleşme yükleme,
+- Oyuncu / Senarist / Yönetmen seçimi,
+- proje türü,
+- pazarlık gücü,
+- İlk Not / Ajans Notu,
+- sözleşmenin analizi,
+- OLI Kısa Notları,
+- Madde → Neden → Sözleşmedeki İfade → Revizyon Tipi → Önerilen Revizyon çıktısı.
 
-Ayrıntılı analiz kapalı 'Analiz Özeti' bölümünde kalır.
+Bu sürüm Word'e otomatik müdahale etmez.
+Önce analiz ve revizyon önerisi kalitesi sabitlenecektir.
 
-## Korunanlar
-- Tek tık analiz + otomatik renkler + Word üretimi
-- Rule Library
-- Madde Bankası
-- MICRO / PHRASE / BLOCK
-- Word Track Changes
-- Karşı Taraf Dönüşü
-- Arabuluculuk
+## Profil durumu
+- Oyuncu / Ana Akım TV: mevcut kontrollü 30 Opus kuralı kullanılır.
+- Diğer kombinasyonlar: genel entertainment/media sözleşme analizi; özel Rule Library sonradan eklenecektir.
+
+## Ana modüller
+Sözleşmeler | Arabuluculuk | KVKK | Dava Dosyaları
