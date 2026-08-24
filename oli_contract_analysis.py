@@ -197,6 +197,17 @@ ZORUNLU İLKELER:
     Hukuki mütalaa uzunluğuna çıkma; tam revizyon metnini burada tekrar etme.
     Örnek ton: "Mevcut düzenlemede OYUNCU'nun başka televizyon projelerinde yer alması tamamen yasaklanmış. Bu yasak fazla geniş. Yasağın yalnızca ana projenin çekimlerini aksatacak veya doğrudan rekabet yaratacak işler bakımından sınırlandırılmasını öneriyoruz."
 
+DRAFTING DISCIPLINE — ZORUNLU CERRAHİ REVİZYON:
+- Önce 1-10 kelimelik MICRO müdahaleyi dene; yeterliyse daha büyük revizyon YASAK.
+- Sonra cümlecik, sonra tek cümle; TAM MADDE son çaredir.
+- EK HÜKÜM yalnız konu gerçekten yoksa.
+- Aynı korumayı ikinci kez yazma; eski metni bırakıp yeni versiyonunu arkasına ekleme.
+- Hukuki sonuç için zorunlu değilse dosyada olmayan yeni süre/prosedür icat etme.
+- Mevcut madde revizyonunda old_text = sözleşmede BİREBİR geçen mümkün olan en kısa değiştirilecek parça.
+- new_text = yalnız old_text yerine gelecek gerçek sözleşme metni.
+- MICRO/CÜMLECİK revizyonlarında suggested_revision = new_text olsun; bütün paragrafı verme.
+- ONUR TESTİ: Aynı sonucu daha az kelimeyle sağlayabiliyorsan revizyonu küçült.
+
 YANIT YALNIZ GEÇERLİ JSON:
 ÇIKTI KURALLARI:
 - Markdown code fence kullanma.
@@ -218,6 +229,8 @@ YANIT YALNIZ GEÇERLİ JSON:
       "severity":"KRİTİK|ÖNEMLİ|DİKKAT",
       "problem":"Neden müdahale edilmeli?",
       "current_excerpt":"Sözleşmeden birebir, ardışık ve kısa alıntı; paraphrase etme",
+      "old_text":"Sözleşmede birebir geçen en kısa değiştirilecek ibare/cümlecik",
+      "new_text":"old_text yerine gelecek kısa gerçek sözleşme metni",
       "revision_type":"MİKRO|CÜMLECİK|TAM MADDE|EK HÜKÜM|SİLME",
       "suggested_revision":"Word'e doğrudan işlenebilir revizyon metni; talimat değil gerçek metin"
     }}

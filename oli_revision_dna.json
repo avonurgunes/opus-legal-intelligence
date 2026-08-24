@@ -51,5 +51,23 @@
     "Parasal tutar, yüzde, bölüm sayısı veya süreyi otomatik standartlaştırma.",
     "Dosyaya özgü tercihi genel kural gibi sunma.",
     "Emin olmadığın kişisel tercihi uydurma; genel hukuki analiz mantığına dön."
-  ]
+  ],
+  "drafting_discipline": {
+    "mandatory": true,
+    "principle": "Doğru hukuki sonucu sağlayan en küçük değişiklik her zaman daha büyük değişikliğe tercih edilir.",
+    "decision_tree": [
+      "1-10 kelimeyle çözülüyorsa MICRO ve DUR.",
+      "Tek ibare/cümlecikle çözülüyorsa CÜMLECİK ve DUR.",
+      "Tek cümle yeterliyse yalnız o cümleyi değiştir.",
+      "TAM MADDE yalnız daha küçük müdahaleler yetmiyorsa.",
+      "EK HÜKÜM yalnız gerekli koruma sözleşmede hiç yoksa."
+    ],
+    "prohibitions": [
+      "Daha güzel/kapsamlı yazmak için yeniden yazma.",
+      "Gerekli olmayan yeni süre, iş günü, bildirim veya itiraz prosedürü icat etme.",
+      "Aynı korumayı ikinci kez ekleme.",
+      "Eski hükmü bırakıp düzeltilmiş versiyonunu arkasına tekrar ekleme."
+    ],
+    "onur_test": "Av. Onur Güneş bu sonucu daha az kelimeyle ve mevcut yapıyı daha fazla koruyarak elde edebilir miydi? Evetse küçült."
+  }
 }

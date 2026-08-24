@@ -1,12 +1,13 @@
-# OLI Clean v0.3.1 — Word Compatibility
+# OLI Clean v0.3.2 — Surgical Revision
 
-v0.3 Revision DNA korunmuştur.
+v0.3.1 + Drafting Discipline v1.
 
-Düzeltme yalnız analiz çıktısının Word motoruyla uyumluluğudur:
-- reference = sözleşmedeki tek gerçek madde numarası
-- current_excerpt = sözleşmeden birebir ardışık kısa parça
-- mevcut madde revizyonları yanlışlıkla EK HÜKÜM olarak sınıflandırılmaz
-- suggested_revision = Word'e doğrudan uygulanacak gerçek metin
-- mikro/cümlecik revizyonlarında mevcut cümle yapısı korunur
+Değişiklik:
+- Micro-first zorunlu karar ağacı.
+- Analiz çıktısına old_text/new_text cerrahi patch alanları.
+- Word motoru önce old_text → new_text eşleşmesini kullanır.
+- Mevcut tracked-change yazarı Av. Onur Güneş korunur.
+- UI, arabuluculuk ve diğer modüller değiştirilmemiştir.
 
-Arayüz, Word motoru, sarı dikkat sistemi, arabuluculuk ve Revision DNA dosyası değiştirilmemiştir.
+Not: Mevcut Word motorunun track-change mekanizması korunmuştur; bu sürüm özellikle
+modelin bütün paragraf yerine kısa değiştirme parçası üretmesini ve Word'e bunu iletmesini hedefler.

@@ -139,8 +139,8 @@ def create_revised_word(raw, revisions):
             attention+=1
             continue
 
-        suggestion=_norm(rev.get("suggested_revision",""))
-        excerpt=_norm(rev.get("current_excerpt",""))
+        suggestion=_norm(rev.get("new_text","") or rev.get("suggested_revision",""))
+        excerpt=_norm(rev.get("old_text","") or rev.get("current_excerpt",""))
         rtype=(rev.get("revision_type") or "").upper()
 
         # Every OLI attention point gets ONE yellow marker only.
