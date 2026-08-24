@@ -1,0 +1,55 @@
+{
+  "version": "1.0",
+  "name": "Av. Onur Güneş Revision DNA",
+  "core_principle": "Mevcut sözleşme dilini ve cümle yapısını mümkün olduğunca koru. Müvekkil aleyhine hukuki sonucu gidermek için gereken en küçük etkili müdahaleyi yap.",
+  "intervention_order": [
+    "kelime/ibare değiştir",
+    "aşırı ibareyi çıkar",
+    "istisna ekle",
+    "objektif kriter ekle",
+    "makul ön bildirim ekle",
+    "onay/mutabakat/görüş mekanizması ekle",
+    "süre-kapsam-bedel-sorumluluk sınırı getir",
+    "yalnız sorunlu kısmı yeniden kur",
+    "zorunluysa tüm hükmü yeniden yaz",
+    "koruma hiç yoksa yeni hüküm öner"
+  ],
+  "rules": [
+    "Tam paragrafı yeniden yazmadan önce aynı hukuki sonucun daha az kelime değiştirerek elde edilip edilemeyeceğini kontrol et; evetse mikro revizyonu seç.",
+    "Mutlak ifadeleri otomatik silme; makul süre, kusur, fiili çekim dönemi, program uygunluğu, istisna veya somut kapsam ile daralt.",
+    "Başka projede çalışma yasağını mümkünse kaldır/daralt; ana projenin makul süreyle bildirilen yükümlülüklerini aksatmama ve koordinasyon esasını koru.",
+    "YAPIMCI'nın tek taraflı yetkisini konuya göre ön bildirim, görüş, mutabakat veya OYUNCU/AJANS onayıyla dengele; doğal yaratıcı/organizasyon alanını gereksiz yere kilitleme.",
+    "Sorumluluğu mümkün olduğunca kusur + illiyet + belgelendirilen zarar ile sınırla; uygun hallerde hastalık, kaza, mücbir sebep ve kusursuzluğu istisna tut.",
+    "Olağan teknik tekrar ile esaslı yeniden ifayı ayır; olağan kapsamı aşan ek işte ayrıca ücret değerlendir.",
+    "Pasif ürün yerleştirme ile aktif reklam/marka entegrasyonu/bağımsız ticari kullanımı ayır; bağlama göre onay ve ayrıca ücret öner.",
+    "Aşırı cezai şartı otomatik silme; somut ve ölçülebilir limite indir; örnek rakamları evrensel kural sayma.",
+    "Çalışma süresi, haftalık gün, ulaşım, konaklama, karavan/özel alan, sigorta, tedavi gideri, jenerik gibi eksik temel korumaları ayrıca kontrol et."
+  ],
+  "examples": [
+    {
+      "pattern": "Mesleki özgürlük",
+      "before": "OYUNCU başka bir televizyon dizisinde hiçbir surette görev ve rol almayacaktır.",
+      "after": "OYUNCU'nun Dizi dışındaki projelerde yer alması, önceden makul süre önce bildirilen prova, çekim ve seslendirme yükümlülüklerini aksatmamak ve çekim programı ile makul koordinasyon sağlamak kaydıyla serbesttir."
+    },
+    {
+      "pattern": "Sorumluluk",
+      "before": "OYUNCU her türlü zararı karşılar.",
+      "after": "Kasten ve kusurlu davranışla sebep olunan belgelendirilen zararlarla sınırla; uygun hallerde hastalık, kaza ve mücbir sebebi istisna et."
+    },
+    {
+      "pattern": "Yeniden çekim",
+      "before": "Her türlü yeniden çekim ek bedelsizdir.",
+      "after": "Küçük teknik tekrarları ana ücret kapsamında bırak; esaslı yeniden ifada ayrıca ücret öngör."
+    },
+    {
+      "pattern": "Kişisel alan",
+      "before": "Fiziki görünüm değişiklikleri YAPIMCI tarafından belirlenir.",
+      "after": "Esaslı kişisel müdahaleyi OYUNCU/AJANS'ın önceden yazılı onayına bağla."
+    }
+  ],
+  "guardrails": [
+    "Parasal tutar, yüzde, bölüm sayısı veya süreyi otomatik standartlaştırma.",
+    "Dosyaya özgü tercihi genel kural gibi sunma.",
+    "Emin olmadığın kişisel tercihi uydurma; genel hukuki analiz mantığına dön."
+  ]
+}

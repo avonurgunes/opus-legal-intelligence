@@ -57,6 +57,10 @@ def load_actor_rules():
     return json.loads((ROOT/"oli_actor_tv_rules.json").read_text(encoding="utf-8"))
 
 
+def load_revision_dna():
+    path=ROOT/"oli_revision_dna.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
 def clean_json(text: str):
     """Parse model JSON robustly; tolerate fences/prose and repair once if needed."""
     raw=(text or "").strip()
@@ -127,6 +131,8 @@ def analyze_contract(
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY tanımlı değil.")
 
+    revision_dna=load_revision_dna()
+
     rules=[]
     profile_note=""
     if contract_type=="Oyuncu Sözleşmesi" and project_type=="Ana Akım TV":
@@ -159,6 +165,12 @@ DOSYAYA ÖZGÜ İLK NOT / AJANS NOTU: {initial_note or "Yok"}
 
 KONTROLLÜ KURALLAR:
 {rules_text}
+
+REVİZYON DNA — AV. ONUR GÜNEŞ ÇALIŞMA BİÇİMİ:
+{json.dumps(revision_dna, ensure_ascii=False)}
+
+REVİZYON KARAR TESTİ:
+Her suggested_revision üretmeden önce içsel olarak şunu kontrol et: "Bu hukuki sonucu mevcut cümlenin yapısını koruyarak daha az kelime değiştirerek elde edebilir miyim?" Cevap evetse mikro müdahaleyi kullan. Tam hüküm yeniden yazımı son çaredir. Koruma hiç yoksa EK HÜKÜM önerebilirsin. DNA örneklerindeki rakamları/dosyaya özgü ayrıntıları otomatik kopyalama.
 
 ZORUNLU İLKELER:
 1. Sözleşmede olmayan bir madde numarası veya olgu uydurma.
