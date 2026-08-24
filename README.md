@@ -1,4 +1,12 @@
-# OLI Clean v0.3 — Revision DNA v1
-Çalışan v0.2.4 baz alınmıştır.
-Yalnız sözleşme analiz/revizyon motoruna Revision DNA v1 eklenmiştir.
-Arayüz, Word motoru, sarı dikkat sistemi, profiller ve arabuluculuk değiştirilmemiştir.
+# OLI Clean v0.3.1 — Word Compatibility
+
+v0.3 Revision DNA korunmuştur.
+
+Düzeltme yalnız analiz çıktısının Word motoruyla uyumluluğudur:
+- reference = sözleşmedeki tek gerçek madde numarası
+- current_excerpt = sözleşmeden birebir ardışık kısa parça
+- mevcut madde revizyonları yanlışlıkla EK HÜKÜM olarak sınıflandırılmaz
+- suggested_revision = Word'e doğrudan uygulanacak gerçek metin
+- mikro/cümlecik revizyonlarında mevcut cümle yapısı korunur
+
+Arayüz, Word motoru, sarı dikkat sistemi, arabuluculuk ve Revision DNA dosyası değiştirilmemiştir.

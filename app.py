@@ -98,4 +98,4 @@ else:
     st.markdown('<div class="work-card"><div class="eyebrow">DAVA DOSYALARI</div><h1>Dava Dosyaları</h1><p>Bu modül sonraki aşamada geliştirilecek.</p></div>',unsafe_allow_html=True)
 
 st.markdown("---")
-st.caption("OLI Clean v0.3 • Sözleşmeler sıfırdan • Arabuluculuk v1.3.1 korunmuştur.")
+st.caption("OLI Clean v0.3.1 • Sözleşmeler sıfırdan • Arabuluculuk v1.3.1 korunmuştur.")

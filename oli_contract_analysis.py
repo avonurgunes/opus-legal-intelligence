@@ -183,7 +183,14 @@ ZORUNLU İLKELER:
 8. Kullanıcı Word'e revizyonu kendisi işleyecek. Öneri kısa, net, kopyalanabilir ve sözleşme diline uyumlu olsun.
 9. Aynı hukuki sorunu tekrar eden birden fazla bulguya bölme.
 10. Yalnız anlamlı müdahaleleri getir.
-11. short_notes alanı ajansa ilk gönderilecek kısa pazarlık notudur. Her not 2-3 kısa cümle olsun ve mutlaka şu üç unsuru içersin:
+11. WORD UYUMLULUK KURALI:
+    - Mevcut bir sözleşme maddesi revize ediliyorsa `reference` alanına sözleşmede gerçekten geçen TEK madde numarasını yaz (örn. "4.11"). "4.11/4.12", "Madde 4", "ilgili madde", başlık veya açıklama yazma.
+    - `current_excerpt` alanı sözleşmeden BİREBİR ve ARDIŞIK alınmış kısa bir parçadır; özetleme, sadeleştirme veya yeniden yazma. Mümkünse 8-35 kelime arasında olsun.
+    - Mevcut hüküm üzerinde değişiklik yapılıyorsa `revision_type` yalnız MİKRO, CÜMLECİK, TAM MADDE veya SİLME olabilir. `EK HÜKÜM` yalnız sözleşmede gerçekten hiç bulunmayan yeni bir koruma için kullanılabilir.
+    - `suggested_revision`, mevcut hükmün yerine Word'e işlenebilecek gerçek revizyon metni olmalıdır; "daraltılmalı", "eklenmeli", "önerilir" gibi talimat cümlesi yazma.
+    - MİKRO/CÜMLECİK tercihinde mümkünse current_excerpt içindeki cümle yapısını koru ve yalnız gereken kelime/ibareleri değiştir.
+    - Aynı mevcut maddeyi yanlışlıkla EK HÜKÜM olarak sınıflandırma.
+12. short_notes alanı ajansa ilk gönderilecek kısa pazarlık notudur. Her not 2-3 kısa cümle olsun ve mutlaka şu üç unsuru içersin:
     (a) mevcut maddede ne düzenlendiği,
     (b) bunun neden sorunlu / fazla geniş / eksik olduğu,
     (c) nasıl değiştirilmesini istediğimiz.
@@ -210,9 +217,9 @@ YANIT YALNIZ GEÇERLİ JSON:
       "title":"Münhasırlık",
       "severity":"KRİTİK|ÖNEMLİ|DİKKAT",
       "problem":"Neden müdahale edilmeli?",
-      "current_excerpt":"Sözleşmeden kısa birebir alıntı/parça",
+      "current_excerpt":"Sözleşmeden birebir, ardışık ve kısa alıntı; paraphrase etme",
       "revision_type":"MİKRO|CÜMLECİK|TAM MADDE|EK HÜKÜM|SİLME",
-      "suggested_revision":"Word'e işlenebilecek kısa ve doğal revizyon metni"
+      "suggested_revision":"Word'e doğrudan işlenebilir revizyon metni; talimat değil gerçek metin"
     }}
   ]
 }}
